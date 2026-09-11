@@ -3,4 +3,9 @@
   Referrer-Policy: strict-origin-when-cross-origin
 
 /index.html
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: no-cache
+
+/
+  Content-Type: text/html; charset=utf-8
   Cache-Control: no-cache
