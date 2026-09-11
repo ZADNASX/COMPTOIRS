@@ -374,6 +374,10 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
   .app{display:none!important}
   #impression{display:block!important}
   body{background:#fff}
+  /* Le navigateur n imprime pas les fonds par defaut. Nos totaux sont en
+     texte blanc sur bandeau plein : sans cette declaration, le fond saute,
+     le texte blanc reste, et le montant devient invisible sur le papier. */
+  .feuille,.feuille *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   /* min-height reste a 297mm : sans cela la feuille epouse son contenu et le pied
      de page, qui est en position absolue, remonte au milieu de la page */
   .feuille{box-shadow:none;margin:0;width:auto;min-height:297mm;padding:16mm 18mm 26mm}
