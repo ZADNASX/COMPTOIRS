@@ -384,7 +384,15 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
   .rail nav{flex-direction:row}
   .rail nav button{white-space:nowrap;padding:7px 11px}
   .rail nav .pastille{display:none}
-  .rail footer{display:none}
+  /* Le pied du rail portait autrefois de la décoration ; il porte maintenant
+     le seul moyen de changer de comptoir. On le garde donc sur téléphone,
+     réduit à la pastille de synchronisation et au bouton. */
+  .rail footer{display:flex;flex-direction:row;align-items:center;gap:10px;
+    margin:0;padding:0;flex:none}
+  .rail footer .compte,.rail footer #etat-tva{display:none}
+  .rail footer .etat > span{display:none}
+  #changer-comptoir{white-space:nowrap;padding:7px 11px!important;font-size:12px!important;
+    border:1px solid var(--ligne-forte);border-radius:8px}
   main{padding:18px 16px 60px}
 }
 </style>
