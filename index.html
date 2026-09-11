@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;800&family=Poppins:wght@600;700&display=swap">
 <style>
 :root{
   /* charte ZADNA.SOL.X : encre #0A0A0A, indigo #3B5BFF, teal #00C2A8, orange #FF5B3D, jaune #FFC93C.
@@ -175,111 +175,162 @@ table.lignes input{padding:7px 8px}
 .scene{background:var(--surface2);border:1px solid var(--ligne);border-radius:var(--r);padding:14px;overflow:hidden}
 .scene .porte{transform-origin:top left}
 
-.feuille{width:210mm;min-height:297mm;background:#fff;color:#0A0A0A;padding:16mm 18mm 26mm;position:relative;
+.feuille.zadna{width:210mm;min-height:297mm;background:#fff;color:#0A0A0A;padding:16mm 18mm 26mm;position:relative;
   font-family:var(--titre);font-size:10.5pt;line-height:1.5;box-shadow:0 2px 14px rgba(0,0,0,.12)}
 
 /* en-tete : le nom a gauche, les coordonnees a droite */
-.feuille .tete{display:flex;align-items:flex-start;justify-content:space-between;gap:12mm}
-.feuille .coord{text-align:right;font-family:var(--mono);font-size:7.6pt;line-height:1.9;color:#6B6B6B;padding-top:1mm}
-.feuille .regle{margin-top:4mm}
-.feuille .regle i{display:block}
-.feuille .regle .a{height:.7mm;background:#3B5BFF}
-.feuille .regle .b{height:.35mm;background:#00C2A8;margin-top:.35mm}
+.feuille.zadna .tete{display:flex;align-items:flex-start;justify-content:space-between;gap:12mm}
+.feuille.zadna .coord{text-align:right;font-family:var(--mono);font-size:7.6pt;line-height:1.9;color:#6B6B6B;padding-top:1mm}
+.feuille.zadna .regle{margin-top:4mm}
+.feuille.zadna .regle i{display:block}
+.feuille.zadna .regle .a{height:.7mm;background:#3B5BFF}
+.feuille.zadna .regle .b{height:.35mm;background:#00C2A8;margin-top:.35mm}
 
 /* bandeau date / reference */
-.feuille .repere{display:flex;justify-content:space-between;gap:8mm;margin-top:6mm;
+.feuille.zadna .repere{display:flex;justify-content:space-between;gap:8mm;margin-top:6mm;
   font-family:var(--mono);font-size:8pt;letter-spacing:.12em;text-transform:uppercase;color:#8A8A8A}
-.feuille .repere b{color:#0A0A0A;font-weight:500;letter-spacing:.06em}
+.feuille.zadna .repere b{color:#0A0A0A;font-weight:500;letter-spacing:.06em}
 
 /* titre du document a gauche, destinataire a droite */
-.feuille .ouverture{display:flex;justify-content:space-between;gap:10mm;margin-top:6mm;align-items:flex-start}
-.feuille .ouverture .objet{flex:1;min-width:0}
-.feuille h2.type{font-size:19pt;font-weight:700;margin:0 0 3mm;letter-spacing:-.015em;line-height:1}
-.feuille h2.type small{display:block;font-family:var(--mono);font-size:7.2pt;font-weight:400;
+.feuille.zadna .ouverture{display:flex;justify-content:space-between;gap:10mm;margin-top:6mm;align-items:flex-start}
+.feuille.zadna .ouverture .objet{flex:1;min-width:0}
+.feuille.zadna h2.type{font-size:19pt;font-weight:700;margin:0 0 3mm;letter-spacing:-.015em;line-height:1}
+.feuille.zadna h2.type small{display:block;font-family:var(--mono);font-size:7.2pt;font-weight:400;
   letter-spacing:.2em;color:#3B5BFF;margin-bottom:2mm}
-.feuille .objet p{margin:0;font-size:9pt;color:#6B6B6B;line-height:1.75}
-.feuille .objet p b{color:#0A0A0A;font-weight:600}
-.feuille .destinataire{width:72mm;flex:none;border-left:.6mm solid #3B5BFF;padding:1mm 0 1mm 4mm;
+.feuille.zadna .objet p{margin:0;font-size:9pt;color:#6B6B6B;line-height:1.75}
+.feuille.zadna .objet p b{color:#0A0A0A;font-weight:600}
+.feuille.zadna .destinataire{width:72mm;flex:none;border-left:.6mm solid #3B5BFF;padding:1mm 0 1mm 4mm;
   font-size:9pt;line-height:1.65}
-.feuille .destinataire strong{display:block;font-family:var(--mono);color:#8A8A8A;font-size:7.2pt;
+.feuille.zadna .destinataire strong{display:block;font-family:var(--mono);color:#8A8A8A;font-size:7.2pt;
   letter-spacing:.18em;text-transform:uppercase;margin-bottom:2mm;font-weight:500}
-.feuille .destinataire .qui{font-weight:600;font-size:10pt;line-height:1.35;margin-bottom:1mm}
+.feuille.zadna .destinataire .qui{font-weight:600;font-size:10pt;line-height:1.35;margin-bottom:1mm}
 
 /* tableau : filets fins plutot qu un bandeau plein */
-.feuille table.art{width:100%;border-collapse:collapse;margin-top:7mm;font-size:9.5pt}
-.feuille table.art th{font-family:var(--mono);font-size:7.2pt;font-weight:500;text-align:left;color:#8A8A8A;
+.feuille.zadna table.art{width:100%;border-collapse:collapse;margin-top:7mm;font-size:9.5pt}
+.feuille.zadna table.art th{font-family:var(--mono);font-size:7.2pt;font-weight:500;text-align:left;color:#8A8A8A;
   letter-spacing:.16em;text-transform:uppercase;padding:0 2.6mm 2mm;border-bottom:.5mm solid #0A0A0A}
-.feuille table.art th.d{text-align:right}
-.feuille table.art td{border-bottom:.25mm solid #E4E4E4;padding:2.1mm 2.6mm;vertical-align:top}
-.feuille table.art td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-family:var(--mono)}
-.feuille table.art td:first-child{color:#8A8A8A;font-family:var(--mono);font-size:8.5pt}
+.feuille.zadna table.art th.d{text-align:right}
+.feuille.zadna table.art td{border-bottom:.25mm solid #E4E4E4;padding:2.1mm 2.6mm;vertical-align:top}
+.feuille.zadna table.art td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-family:var(--mono)}
+.feuille.zadna table.art td:first-child{color:#8A8A8A;font-family:var(--mono);font-size:8.5pt}
 
 /* totaux : le detail a droite, puis une barre pleine largeur */
-.feuille .totaux{margin-top:5mm;display:flex;justify-content:flex-end}
-.feuille .totaux table{border-collapse:collapse;min-width:80mm}
-.feuille .totaux td{padding:1.5mm 3mm;font-size:9.5pt;color:#6B6B6B}
-.feuille .totaux td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;
+.feuille.zadna .totaux{margin-top:5mm;display:flex;justify-content:flex-end}
+.feuille.zadna .totaux table{border-collapse:collapse;min-width:80mm}
+.feuille.zadna .totaux td{padding:1.5mm 3mm;font-size:9.5pt;color:#6B6B6B}
+.feuille.zadna .totaux td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;
   color:#0A0A0A;font-family:var(--mono)}
-.feuille .barre-net{display:flex;justify-content:space-between;align-items:baseline;gap:8mm;
+.feuille.zadna .barre-net{display:flex;justify-content:space-between;align-items:baseline;gap:8mm;
   margin-top:3mm;background:#0A0A0A;color:#fff;padding:3.2mm 4mm}
-.feuille .barre-net .lib{font-family:var(--mono);font-size:8pt;letter-spacing:.2em;text-transform:uppercase}
-.feuille .barre-net .val{font-size:15pt;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
-.feuille .barre-net .val i{font-style:normal;font-size:8.5pt;font-weight:500;color:#8CA0FF;margin-left:2.5mm}
+.feuille.zadna .barre-net .lib{font-family:var(--mono);font-size:8pt;letter-spacing:.2em;text-transform:uppercase}
+.feuille.zadna .barre-net .val{font-size:15pt;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.feuille.zadna .barre-net .val i{font-style:normal;font-size:8.5pt;font-weight:500;color:#8CA0FF;margin-left:2.5mm}
 
 /* recu : la quittance remplace le tableau d articles */
-.feuille .quittance{margin-top:7mm;border-top:.25mm solid #E4E4E4}
-.feuille .quittance dl{display:grid;grid-template-columns:46mm 1fr;margin:0}
-.feuille .quittance dt{font-family:var(--mono);font-size:7.2pt;letter-spacing:.16em;text-transform:uppercase;
+.feuille.zadna .quittance{margin-top:7mm;border-top:.25mm solid #E4E4E4}
+.feuille.zadna .quittance dl{display:grid;grid-template-columns:46mm 1fr;margin:0}
+.feuille.zadna .quittance dt{font-family:var(--mono);font-size:7.2pt;letter-spacing:.16em;text-transform:uppercase;
   color:#8A8A8A;padding:2.5mm 0;border-bottom:.25mm solid #E4E4E4}
-.feuille .quittance dd{margin:0;font-size:10pt;padding:2.5mm 0;border-bottom:.25mm solid #E4E4E4}
-.feuille .quittance dd b{font-weight:600}
-.feuille .quittance .du{color:#D6401F;font-weight:600;font-family:var(--mono)}
+.feuille.zadna .quittance dd{margin:0;font-size:10pt;padding:2.5mm 0;border-bottom:.25mm solid #E4E4E4}
+.feuille.zadna .quittance dd b{font-weight:600}
+.feuille.zadna .quittance .du{color:#D6401F;font-weight:600;font-family:var(--mono)}
 
 /* bon de livraison : la colonne que le client remplit a la reception */
-.feuille table.art td.remplir{background:#F4F6FF;border-bottom:.25mm solid #B9C4F2}
-.feuille .recu-par{font-size:9pt;line-height:2.5}
-.feuille .recu-par i{display:inline-block;border-bottom:.25mm dotted #8A8A8A;min-width:36mm;font-style:normal}
-.feuille .paraphes .compact b{margin-bottom:5mm}
+.feuille.zadna table.art td.remplir{background:#F4F6FF;border-bottom:.25mm solid #B9C4F2}
+.feuille.zadna .recu-par{font-size:9pt;line-height:2.5}
+.feuille.zadna .recu-par i{display:inline-block;border-bottom:.25mm dotted #8A8A8A;min-width:36mm;font-style:normal}
+.feuille.zadna .paraphes .compact b{margin-bottom:5mm}
 
-.feuille .lettres{margin-top:5mm;font-size:9.5pt;border-left:.6mm solid #00C2A8;padding-left:4mm}
-.feuille .notes{margin-top:4mm;font-size:8.5pt;color:#6B6B6B;white-space:pre-wrap}
+.feuille.zadna .lettres{margin-top:5mm;font-size:9.5pt;border-left:.6mm solid #00C2A8;padding-left:4mm}
+.feuille.zadna .notes{margin-top:4mm;font-size:8.5pt;color:#6B6B6B;white-space:pre-wrap}
 
 /* bande de certification e-MECeF : ce qui fait la facture normalisee */
-.feuille .certif{margin-top:6mm;border:.3mm solid #B9C4F2;background:#F7F9FF;
+.feuille.zadna .certif{margin-top:6mm;border:.3mm solid #B9C4F2;background:#F7F9FF;
   display:flex;gap:4mm;align-items:center;padding:3mm 3.5mm}
-.feuille .certif .qr{flex:none;width:21mm;height:21mm;background:#fff}
-.feuille .certif .qr img{width:100%;height:100%;display:block;image-rendering:pixelated}
-.feuille .certif .corps{flex:1;min-width:0}
-.feuille .certif .titre{font-family:var(--mono);font-size:6.6pt;letter-spacing:.18em;
+.feuille.zadna .certif .qr{flex:none;width:21mm;height:21mm;background:#fff}
+.feuille.zadna .certif .qr img{width:100%;height:100%;display:block;image-rendering:pixelated}
+.feuille.zadna .certif .corps{flex:1;min-width:0}
+.feuille.zadna .certif .titre{font-family:var(--mono);font-size:6.6pt;letter-spacing:.18em;
   text-transform:uppercase;color:#3B5BFF;margin-bottom:1.6mm}
-.feuille .certif dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:1mm 4mm;
+.feuille.zadna .certif dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:1mm 4mm;
   font-family:var(--mono);font-size:7.4pt;line-height:1.35}
-.feuille .certif dt{color:#8A8A8A;letter-spacing:.09em;text-transform:uppercase;font-size:6.4pt;
+.feuille.zadna .certif dt{color:#8A8A8A;letter-spacing:.09em;text-transform:uppercase;font-size:6.4pt;
   align-self:center;white-space:nowrap}
-.feuille .certif dd{margin:0;font-weight:500;word-break:break-all;font-variant-numeric:tabular-nums}
+.feuille.zadna .certif dd{margin:0;font-weight:500;word-break:break-all;font-variant-numeric:tabular-nums}
 
 /* paraphes : le client a gauche, ZADNA et son cachet a droite */
-.feuille .paraphes{display:flex;justify-content:flex-end;gap:12mm;margin-top:10mm;font-size:9pt;color:#6B6B6B}
+.feuille.zadna .paraphes{display:flex;justify-content:flex-end;gap:12mm;margin-top:10mm;font-size:9pt;color:#6B6B6B}
 /* le bloc du client, quand il existe, repousse la signature à droite */
-.feuille .paraphes > div:not(.sig-d){margin-right:auto}
-.feuille .paraphes > div{width:70mm}
-.feuille .paraphes b{display:block;color:#0A0A0A;font-family:var(--mono);font-size:7.6pt;font-weight:500;
+.feuille.zadna .paraphes > div:not(.sig-d){margin-right:auto}
+.feuille.zadna .paraphes > div{width:70mm}
+.feuille.zadna .paraphes b{display:block;color:#0A0A0A;font-family:var(--mono);font-size:7.6pt;font-weight:500;
   letter-spacing:.16em;text-transform:uppercase;margin-bottom:16mm}
-.feuille .sig-d{position:relative;text-align:right;min-height:34mm}
-.feuille .sig-d .qui{color:#0A0A0A;font-weight:600}
-.feuille .cachet{position:absolute;left:0;top:2mm;width:32mm;height:32mm;transform:rotate(-6deg);
+.feuille.zadna .sig-d{position:relative;text-align:right;min-height:34mm}
+.feuille.zadna .sig-d .qui{color:#0A0A0A;font-weight:600}
+.feuille.zadna .cachet{position:absolute;left:0;top:2mm;width:32mm;height:32mm;transform:rotate(-6deg);
   opacity:.9;pointer-events:none}
 
 /* pied : double filet inverse, puis les mentions sur trois colonnes */
-.feuille .pied{position:absolute;left:18mm;right:18mm;bottom:11mm}
-.feuille .pied .regle{margin-top:0}
-.feuille .pied .regle .a{height:.35mm;background:#00C2A8}
-.feuille .pied .regle .b{height:.7mm;background:#3B5BFF;margin-top:.35mm}
-.feuille .pied .mentions{display:flex;justify-content:space-between;align-items:center;gap:6mm;margin-top:2.5mm;
+.feuille.zadna .pied{position:absolute;left:18mm;right:18mm;bottom:11mm}
+.feuille.zadna .pied .regle{margin-top:0}
+.feuille.zadna .pied .regle .a{height:.35mm;background:#00C2A8}
+.feuille.zadna .pied .regle .b{height:.7mm;background:#3B5BFF;margin-top:.35mm}
+.feuille.zadna .pied .mentions{display:flex;justify-content:space-between;align-items:center;gap:6mm;margin-top:2.5mm;
   font-family:var(--mono);font-size:6.6pt;letter-spacing:.03em;color:#8A8A8A;line-height:1.75}
-.feuille .pied .mentions b{color:#0A0A0A;font-weight:600}
-.feuille .pied .mentions .droite{text-align:right}
-.feuille .pied .sceau-pale{font-family:var(--titre);font-size:12pt;font-weight:700;color:#0A0A0A;opacity:.09;flex:none}
+.feuille.zadna .pied .mentions b{color:#0A0A0A;font-weight:600}
+.feuille.zadna .pied .mentions .droite{text-align:right}
+.feuille.zadna .pied .sceau-pale{font-family:var(--titre);font-size:12pt;font-weight:700;color:#0A0A0A;opacity:.09;flex:none}
+
+/* ---------- la feuille NASSRA ----------
+   Maquette d'origine de NASSRA, reprise telle quelle et cloisonnée sous
+   .feuille.nassra : sans ce cloisonnement, ses règles et celles de ZADNA
+   se marcheraient dessus, les deux partageant les mêmes noms de classes. */
+.feuille.nassra{width:210mm;min-height:297mm;background:#fff;color:#241A14;padding:16mm 18mm 26mm;position:relative;
+  font-family:"Public Sans",sans-serif;font-size:10.5pt;line-height:1.5;box-shadow:0 2px 14px rgba(0,0,0,.12)}
+.feuille.nassra .marque-bloc{display:flex;align-items:flex-start;justify-content:space-between;gap:14mm}
+.feuille.nassra .filet{height:1mm;display:flex;margin-top:5mm}
+.feuille.nassra .filet i{display:block;height:100%}
+.feuille.nassra .filet .a{flex:1;background:#5A2E1E}
+.feuille.nassra .filet .b{width:30mm;background:#C98A3C}
+.feuille.nassra .meta{text-align:right;font-size:9pt;color:#6F6157;line-height:1.6;white-space:nowrap}
+.feuille.nassra .meta b{font-family:Poppins,sans-serif;font-size:12pt;color:#5A2E1E;letter-spacing:.02em}
+.feuille.nassra .parties{display:flex;gap:8mm;margin-top:6mm;align-items:flex-start}
+.feuille.nassra .parties .gauche{flex:1;font-size:9pt;color:#6F6157;line-height:1.65}
+.feuille.nassra .parties .boite{width:78mm;background:#F2E9DA;padding:4mm;font-size:9pt;line-height:1.6}
+.feuille.nassra .parties strong{display:block;color:#5A2E1E;font-size:8.5pt;letter-spacing:.07em;text-transform:uppercase;margin-bottom:2mm}
+.feuille.nassra table.art{width:100%;border-collapse:collapse;margin-top:7mm;font-size:9.5pt}
+.feuille.nassra table.art th{background:#5A2E1E;color:#fff;font-size:8.5pt;font-weight:600;text-align:left;padding:2.4mm 2.6mm;letter-spacing:.03em}
+.feuille.nassra table.art th.d{text-align:right}
+.feuille.nassra table.art td{border-bottom:.3mm solid #E5DACA;padding:2.4mm 2.6mm;vertical-align:top}
+.feuille.nassra table.art td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.feuille.nassra .totaux{margin-top:6mm;display:flex;justify-content:flex-end}
+.feuille.nassra .totaux table{border-collapse:collapse;min-width:88mm}
+.feuille.nassra .totaux td{padding:2.2mm 3mm;border-bottom:.3mm solid #E5DACA;font-size:9.5pt}
+.feuille.nassra .totaux td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.feuille.nassra .totaux tr.net td{background:#5A2E1E;color:#fff;font-weight:700;font-family:Poppins,sans-serif;border:0}
+.feuille.nassra .lettres{margin-top:5mm;font-size:9.5pt}
+.feuille.nassra .notes{margin-top:4mm;font-size:8.5pt;color:#6F6157;white-space:pre-wrap}
+/* bande de certification e-MECeF */
+.feuille.nassra .certif{margin-top:6mm;border:.3mm solid #CDBCA5;background:#FAF6EF;
+  display:flex;gap:4mm;align-items:center;padding:3mm 3.5mm}
+.feuille.nassra .certif .qr{flex:none;width:21mm;height:21mm;background:#fff}
+.feuille.nassra .certif .qr img{width:100%;height:100%;display:block;image-rendering:pixelated}
+.feuille.nassra .certif .corps{flex:1;min-width:0}
+.feuille.nassra .certif .titre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:6.6pt;
+  letter-spacing:.18em;text-transform:uppercase;color:#5A2E1E;margin-bottom:1.6mm}
+.feuille.nassra .certif dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:1mm 4mm;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:7.4pt;line-height:1.35}
+.feuille.nassra .certif dt{color:#9C8C7E;letter-spacing:.09em;text-transform:uppercase;font-size:6.4pt;
+  align-self:center;white-space:nowrap}
+.feuille.nassra .certif dd{margin:0;font-weight:500;word-break:break-all;font-variant-numeric:tabular-nums}
+.feuille.nassra .paraphes{display:flex;justify-content:space-between;gap:10mm;margin-top:12mm;font-size:9pt;color:#6F6157}
+.feuille.nassra .paraphes b{display:block;color:#241A14;margin-bottom:14mm;font-size:9pt}
+.feuille.nassra .sig-g{position:relative;flex:1}
+.feuille.nassra .cachet{position:absolute;left:1mm;top:0;width:33mm;height:33mm;transform:rotate(-9deg);opacity:.92;pointer-events:none}
+.feuille.nassra .paraphes .droite{text-align:right}
+.feuille.nassra .pied{position:absolute;left:18mm;right:18mm;bottom:10mm;border-top:.3mm solid #E5DACA;padding-top:2.5mm;
+  text-align:center;font-size:7.5pt;color:#6F6157;line-height:1.6}
+.feuille.nassra .pied b{color:#5A2E1E}
 
 /* ---------- typographie ZADNA : les labels techniques passent en mono ---------- */
 .sceau .sous,.bloc h2,.carte h3,.liste th,.champ label,.chiffre .lib,.chiffre .val,.puce,.ref,
@@ -977,6 +1028,13 @@ function vueReglages(){
     '<button class="btn principal" id="enr-reglages">Enregistrer</button></div>' +
     '<div class="carte"><h3>Identité</h3><div class="grille">' +
       ch("nom","Nom commercial") + ch("activite","Baseline") + ch("forme","Forme juridique et capital") +
+      '<div class="champ"><label for="r-maquette">Maquette des documents</label>' +
+      '<select id="r-maquette" data-reglage="maquette">' +
+      [["","Selon la charte du comptoir"],["zadna","ZADNA — en-tête à gauche, signature à droite"],
+       ["nassra","NASSRA — logo à gauche, signature à gauche"]].map(function(m){
+        return '<option value="' + m[0] + '"' + ((r.maquette||"") === m[0] ? " selected" : "") +
+          ">" + m[1] + "</option>";
+      }).join("") + "</select></div>" +
       ch("rccm","RCCM") + ch("ifu","IFU") +
       ch("tel","Téléphone") + ch("email","E-mail") + "</div>" +
       '<div style="margin-top:12px">' + ch("adresse","Adresse") + "</div></div>" +
@@ -1196,7 +1254,158 @@ function cachetSVG(r){
     '<text x="210" y="274" text-anchor="middle" font-family="' + P + '" font-size="15" letter-spacing="4" fill="' + B + '">S.A.R.L</text></svg>';
 }
 
-/* ---------- la feuille ---------- */
+/* ---------- la feuille NASSRA ----------
+   Reprise de son application dédiée. Les deux maquettes cohabitent :
+   le CSS les cloisonne, cet aiguillage choisit laquelle imprimer. */
+function cachetNassra(r){
+  var B = "#1B3A8F", P = "Poppins,sans-serif";
+  return '<svg class="cachet" viewBox="0 0 420 420" aria-hidden="true">' +
+    '<defs><path id="cch" d="M 47,210 A 163,163 0 0 1 373,210" fill="none"/>' +
+    '<path id="ccb" d="M 38,210 A 172,172 0 0 0 382,210" fill="none"/></defs>' +
+    '<g fill="none" stroke="' + B + '"><circle cx="210" cy="210" r="203" stroke-width="9"/>' +
+    '<circle cx="210" cy="210" r="186" stroke-width="4"/></g>' +
+    '<text font-family="' + P + '" font-size="29" font-weight="700" letter-spacing="3" fill="' + B + '">' +
+    '<textPath href="#cch" startOffset="50%" text-anchor="middle">ETABLISSEMENT NASSRA</textPath></text>' +
+    '<text font-family="' + P + '" font-size="19" font-weight="600" letter-spacing="2" fill="' + B + '">' +
+    '<textPath href="#ccb" startOffset="50%" text-anchor="middle">COTONOU · REPUBLIQUE DU BENIN</textPath></text>' +
+    '<g transform="translate(210,104) scale(0.5) translate(-60,-6)">' +
+    '<path d="M22 74 V44 a38 38 0 0 1 76 0 v30 h-13 V44 a25 25 0 0 0 -50 0 v30 z" fill="' + B + '"/>' +
+    '<rect x="22" y="80" width="76" height="7" rx="3.5" fill="' + B + '"/></g>' +
+    '<g font-family="' + P + '" font-size="18" fill="' + B + '" text-anchor="middle">' +
+    '<text x="210" y="190">RCCM : ' + echap(r.rccm) + "</text>" +
+    '<text x="210" y="216">IFU : ' + echap(r.ifu) + "</text>" +
+    '<text x="210" y="242">Tel. : ' + echap(r.tel) + "</text></g>" +
+    '<rect x="150" y="258" width="120" height="3" fill="' + B + '"/></svg>';
+}
+
+function bandeCertif(d){
+  if(!estCertifiable(d)) return "";
+  var c = d.cert || {};
+  if(!c.code && !c.nim && !c.qr) return "";
+  var img = qrDataURL(c.qr, 240), elts = [];
+  if(c.nim) elts.push(["NIM", echap(c.nim)]);
+  if(c.code) elts.push(["Code MECeF", echap(c.code)]);
+  if(c.compteurs) elts.push(["Compteurs", echap(c.compteurs)]);
+  if(c.date) elts.push(["Certifiée le", echap(c.date)]);
+  return '<div class="certif">' +
+    (img ? '<div class="qr"><img src="' + img + '" alt="QR de vérification e-MECeF"></div>' : "") +
+    '<div class="corps"><div class="titre">Facture normalisée · ' +
+    echap(d.typeMecef || "FV") + ' · e-MECeF</div><dl>' +
+    elts.map(function(x){ return "<dt>" + x[0] + "</dt><dd>" + x[1] + "</dd>"; }).join("") +
+    "</dl></div></div>";
+}
+
+function feuilleNassra(d){
+  var T = TYPES[d.type], r = reglages(), cli = d.client || {};
+  var net = netAPayer(d), brut = totalLignes(d), reste = resteDu(d);
+  var certifiable = estCertifiable(d);
+  var cert = d.cert || {};
+  var grpDefaut = r.groupeDefaut || "E";
+
+  var gauche = [];
+  gauche.push("<strong>" + (d.objet ? "Objet" : "Références") + "</strong>");
+  if(d.objet) gauche.push(echap(d.objet));
+  if(d.source) gauche.push((T.avoir ? "Avoir sur la facture " : "Établi d'après ") + echap(d.source));
+  if(T.validite) gauche.push("Validité de l'offre : " + echap(r.validite));
+  if(T.reglement && d.echeance) gauche.push("Échéance : " + dateFr(d.echeance));
+  if(!d.objet && !d.source && !T.validite && !d.echeance) gauche.push("…");
+
+  var colGr = certifiable ? '<th class="d" style="width:11mm">Gr.</th>' : "";
+  var cols = T.prix
+    ? '<th style="width:8mm">N°</th><th>Désignation</th><th class="d" style="width:16mm">Qté</th>' +
+      '<th class="d" style="width:26mm">P.U.</th><th class="d" style="width:30mm">Montant</th>' + colGr
+    : '<th style="width:8mm">N°</th><th>Désignation</th><th class="d" style="width:26mm">Qté commandée</th>' +
+      '<th class="d" style="width:26mm">Qté livrée</th>';
+
+  var utiles = (d.lignes||[]).filter(function(l){
+    return String(l.d||"").trim() || Number(l.q) || Number(l.pu);
+  });
+  if(!utiles.length) utiles = [{d:"…", q:"", pu:0}];
+  var corps = utiles.map(function(l,i){
+    return "<tr><td>" + (i+1) + "</td><td>" + echap(l.d) + '</td><td class="d">' + echap(l.q) + "</td>" +
+      (T.prix ? '<td class="d">' + nombre(l.pu) + '</td><td class="d">' + nombre((Number(l.q)||0)*(Number(l.pu)||0)) + "</td>"
+              : '<td class="d"></td>') +
+      (certifiable ? '<td class="d">' + echap(l.g || grpDefaut) + "</td>" : "") + "</tr>";
+  }).join("");
+
+  var totaux = "";
+  if(T.prix){
+    var tx = tauxTva(d);
+    totaux = '<div class="totaux"><table>' +
+      (Number(d.remise) ? '<tr><td>Sous-total</td><td class="d">' + nombre(brut) + "</td></tr>" +
+        '<tr><td>Remise</td><td class="d">− ' + nombre(d.remise) + "</td></tr>" : "") +
+      (tx ? '<tr><td>Montant HT</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>" +
+            '<tr><td>TVA ' + tx + ' %</td><td class="d">' + nombre(montantTVA(d)) + "</td></tr>"
+          : (tauxAib(d) ? '<tr><td>Montant HT</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>" : "")) +
+      (tauxAib(d) ? '<tr><td>AIB ' + tauxAib(d) + ' %</td><td class="d">' + nombre(montantAIB(d)) + "</td></tr>" : "") +
+      '<tr class="net"><td>' + (T.avoir ? "MONTANT DE L'AVOIR" : T.recu ? "MONTANT REÇU" : "NET À PAYER" + (tx ? " TTC" : "")) + ' (F CFA)</td><td class="d">' +
+      nombre(T.recu ? (Number(d.regle) || net) : net) + "</td></tr>" +
+      (T.reglement && !T.recu && Number(d.regle) > 0 ?
+        '<tr><td>Déjà réglé</td><td class="d">' + nombre(d.regle) + "</td></tr>" +
+        '<tr><td><b>Reste dû</b></td><td class="d"><b>' + nombre(reste) + "</b></td></tr>" : "") +
+      "</table></div>";
+  }
+
+  var somme = T.recu ? (Number(d.regle) || net) : net;
+  var intro = T.avoir ? "Arrêté le présent avoir à la somme de : "
+    : T.recu ? "Reçu la somme de : "
+    : (d.type === "devis" ? "Arrêté le présent devis à la somme de : "
+    : "Arrêtée la présente " + (d.type === "proforma" ? "facture pro forma" : "facture") + " à la somme de : ");
+  var mots = enLettres(somme);
+  /* million et milliard sont des noms : ils appellent « de » quand le compte tombe rond */
+  var liaison = /milli(on|ard)s?$/.test(mots) ? " de francs CFA" : " francs CFA";
+  var lettres = T.prix ? '<div class="lettres">' + intro + mots + liaison +
+    (d.tva ? " toutes taxes comprises" : "") + ".</div>" : "";
+
+  var moyens = [r.banque && ("banque " + r.banque), r.compte && ("compte " + r.compte),
+                r.momo && ("Mobile Money " + r.momo)].filter(Boolean).map(echap).join("  ·  ");
+  var encaissement = (d.type === "facture" || d.type === "recu") && moyens
+    ? '<div class="notes">Règlement : ' + moyens + "</div>" : "";
+
+  return '<div class="feuille nassra"><div class="marque-bloc">' +
+    '<svg viewBox="0 0 300 110" width="185" height="68" role="img" aria-label="' + echap(r.nom) + '">' +
+    '<path d="M22 74 V44 a38 38 0 0 1 76 0 v30 h-13 V44 a25 25 0 0 0 -50 0 v30 z" fill="#5A2E1E"/>' +
+    '<rect x="22" y="80" width="76" height="7" rx="3.5" fill="#C98A3C"/>' +
+    '<text x="118" y="58" font-family="Poppins,sans-serif" font-size="27" font-weight="700" letter-spacing="4" fill="#5A2E1E">' + echap(r.nom) + "</text>" +
+    '<text x="120" y="76" font-family="Poppins,sans-serif" font-size="7.5" letter-spacing="1.3" fill="#8A7F73">' + echap(r.activite) + "</text></svg>" +
+    '<div class="meta"><b>' + T.label.toUpperCase() + "</b><br>N° " + echap(d.numero) +
+    "<br>Cotonou, le " + dateFr(d.date) + "</div></div>" +
+    '<div class="filet"><i class="a"></i><i class="b"></i></div>' +
+    '<div class="parties"><div class="gauche">' + gauche.join("<br>") + "</div>" +
+    '<div class="boite"><strong>' + (d.type === "recu" ? "Reçu de" : d.type === "bl" ? "Livré à" : "Client") + "</strong>" +
+    echap(cli.nom || "…") + "<br>" + echap(cli.adresse || "…") + "<br>IFU : " + echap(cli.ifu || "…") +
+    "  ·  Tél. : " + echap(cli.tel || "…") + "</div></div>" +
+    '<table class="art"><thead><tr>' + cols + "</tr></thead><tbody>" + corps + "</tbody></table>" +
+    totaux + lettres + encaissement +
+    (d.notes ? '<div class="notes">' + echap(d.notes) + "</div>" : "") +
+    (T.prix ? '<div class="notes">' +
+      (d.tva ? "Montants exprimés en francs CFA. Taxe sur la valeur ajoutée au taux de " + tauxTva(d) + " %."
+             : echap(r.mention)) + "</div>" : "") +
+    (d.type === "bl" ? '<div class="notes">Le client reconnaît avoir reçu les articles ci-dessus en bon état et en bonne quantité.</div>' : "") +
+    bandeCertif(d) +
+    '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? cachetNassra(r) : "") +
+    "<b>Pour " + echap(r.nom) + "</b>" + echap(r.signataire) + "<br>" + echap(r.fonction) + "</div>" +
+    /* Seule la livraison se fait contresigner par le client. */
+    (d.type === "bl"
+      ? '<div class="droite"><b>Cachet et signature du client</b>Date, signature, cachet</div>'
+      : "") + "</div>" +
+    '<div class="pied"><b>' + echap(r.nom) + "</b> — Entreprise individuelle<br>RCCM : " + echap(r.rccm) +
+    "  ·  IFU : " + echap(r.ifu) + "  ·  Tél. : " + echap(r.tel) + "  ·  " + echap(r.email) + "<br>" +
+    echap(r.adresse) + "</div></div>";
+}
+
+/* Le choix de maquette est un réglage, pas une propriété du code : un
+   nouveau comptoir peut donc adopter l'une ou l'autre sans qu'on y touche.
+   À défaut de réglage, la charte ouverte décide. */
+function maquetteCourante(){
+  var m = reglages().maquette;
+  if(m === "nassra" || m === "zadna") return m;
+  return charteCourante === "nassra" ? "nassra" : "zadna";
+}
+function feuilleHTML(d){
+  return maquetteCourante() === "nassra" ? feuilleNassra(d) : feuilleZadna(d);
+}
+/* ---------- la feuille ZADNA ---------- */
 function marqueSVG(r){
   return '<svg viewBox="0 0 340 110" width="206" height="67" role="img" aria-label="' + echap(r.nom) + '">' +
     '<g transform="translate(4,14) scale(0.7)">' +
@@ -1212,7 +1421,7 @@ function marqueSVG(r){
     echap(r.activite) + "</text></svg>";
 }
 
-function feuilleHTML(d){
+function feuilleZadna(d){
   var T = TYPES[d.type], r = reglages(), cli = d.client || {};
   var net = netAPayer(d), brut = totalLignes(d), reste = resteDu(d);
   var tx = T.prix ? tauxTva(d) : 0;
@@ -1372,7 +1581,7 @@ function feuilleHTML(d){
     '<span class="sceau-pale">&lt;ZSX/&gt;</span>' +
     '<span class="droite">' + echap(r.tel) + "<br>" + echap(r.email) + "</span></div></div>";
 
-  return '<div class="feuille">' + tete + repere + ouverture +
+  return '<div class="feuille zadna">' + tete + repere + ouverture +
     (T.recu ? "" : '<table class="art"><thead><tr>' + cols + "</tr></thead><tbody>" + corps + "</tbody></table>") +
     totaux + lettres + quittance + encaissement +
     (d.notes ? '<div class="notes">' + echap(d.notes) + "</div>" : "") +
