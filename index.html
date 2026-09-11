@@ -998,7 +998,7 @@ function vueCatalogue(){
   }).join("");
   var fams = famillesConnues();
   return '<div class="entete-vue"><div><h1>Catalogue</h1>' +
-    '<p class="sous-titre">Vos articles, et les fourchettes du Répertoire des Prix de Référence de l\'État</p></div>' +
+    '<p class="sous-titre">Vos articles, et les fourchettes TTC du Répertoire des Prix de Référence de l\'État</p></div>' +
     '<button class="btn principal" data-form-neuf="articles">+ Nouvel article</button></div>' +
     panneauFormulaire() +
     '<div class="filtres">' +
@@ -1014,7 +1014,7 @@ function vueCatalogue(){
     (trop ? " · 150 affichés" : "") + "</span></div>" +
     '<div class="bloc">' + (arts.length ?
       '<table class="liste"><thead><tr><th>Désignation</th><th>Unité</th><th class="num">Mon prix</th>' +
-      '<th class="num">Répertoire de l\'État</th><th></th></tr></thead><tbody>' + corps + "</tbody></table>" :
+      '<th class="num">Répertoire (TTC)</th><th></th></tr></thead><tbody>' + corps + "</tbody></table>" :
       '<div class="vide"><p>Aucun article ne correspond.</p><button class="btn principal" data-form-neuf="articles">Ajouter un article</button></div>') +
     "</div>";
 }
@@ -1612,11 +1612,19 @@ function majRPR(){
   brouillon.lignes.forEach(function(l,i){
     var a = refArticle(l.d);
     if(!a) return;
+    /* Les bornes du Répertoire sont TTC. Sous TPS, le prix facturé est déjà
+       le prix payé : on compare directement. Au réel, c'est le P.U. majoré
+       de la TVA que l'acheteur public débourse — c'est lui qu'il faut
+       confronter au plafond, sinon on se croit conforme à tort. */
     var pu = Number(l.pu) || 0;
-    var trop = pu > a.bs;
+    var tx = tauxTva(brouillon);
+    var paye = Math.round(pu * (1 + tx / 100));
+    var trop = paye > a.bs;
+    var plafondHT = tx ? Math.round(a.bs / (1 + tx / 100)) : a.bs;
     lignes.push('<div class="rpr' + (trop ? " depasse" : "") + '"><b>Ligne ' + (i+1) + "</b> " +
-      echap(a.d) + " — répertoire de l'État : " + nombre(a.bi) + " à " + nombre(a.bs) + " F CFA" +
-      (trop ? " · votre prix dépasse le plafond de " + nombre(pu - a.bs) + " F CFA" : "") + "</div>");
+      echap(a.d) + " — répertoire de l'État : " + nombre(a.bi) + " à " + nombre(a.bs) + " F CFA TTC" +
+      (tx ? " · soit " + nombre(plafondHT) + " F CFA HT au plus" : "") +
+      (trop ? " · votre prix dépasse le plafond de " + nombre(paye - a.bs) + " F CFA" : "") + "</div>");
   });
   zone.innerHTML = lignes.length
     ? '<div class="rpr-bloc">' + lignes.join("") + "</div>"
