@@ -1,0 +1,1870 @@
+<title>Comptoir</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  /* charte ZADNA.SOL.X : encre #0A0A0A, indigo #3B5BFF, teal #00C2A8, orange #FF5B3D, jaune #FFC93C.
+     Les noms de variables restent ceux du gabarit NASSRA : marque = indigo, ocre = teal,
+     vert = succes, brique = alerte (orange), bleu = attente (jaune). */
+  --titre:"Space Grotesk",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --papier:#F3F2F2; --surface:#FFFFFF; --surface2:#EFF1F8;
+  --ligne:#E4E4E4; --ligne-forte:#C7C7C7;
+  --encre:#0A0A0A; --doux:#6B6B6B; --tres-doux:#8A8A8A;
+  --marque:#24369E; --ocre:#00C2A8; --ivoire:#E8EDFF;
+  --vert:#007A69; --vert-fond:#D9F5F0;
+  --brique:#D6401F; --brique-fond:#FDEAE5;
+  --bleu:#8A6200; --bleu-fond:#FFF3D4;
+  --ombre:0 1px 2px rgba(10,10,10,.06), 0 8px 24px -12px rgba(10,10,10,.22);
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --papier:#0A0A0A; --surface:#151515; --surface2:#1D1F26;
+    --ligne:#2A2A2A; --ligne-forte:#3D3D3D;
+    --encre:#F3F2F2; --doux:#A8A8A8; --tres-doux:#8A8A8A;
+    --marque:#8CA0FF; --ocre:#00C2A8; --ivoire:#181F3D;
+    --vert:#3FDCC4; --vert-fond:#0E2A26;
+    --brique:#FF8264; --brique-fond:#2E1611;
+    --bleu:#FFC93C; --bleu-fond:#2E2410;
+    --ombre:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.75);
+  }
+}
+:root[data-theme="dark"]{
+  --papier:#0A0A0A; --surface:#151515; --surface2:#1D1F26;
+  --ligne:#2A2A2A; --ligne-forte:#3D3D3D;
+  --encre:#F3F2F2; --doux:#A8A8A8; --tres-doux:#8A8A8A;
+  --marque:#8CA0FF; --ocre:#00C2A8; --ivoire:#181F3D;
+  --vert:#3FDCC4; --vert-fond:#0E2A26;
+  --brique:#FF8264; --brique-fond:#2E1611;
+  --bleu:#FFC93C; --bleu-fond:#2E2410;
+  --ombre:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.75);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--papier);color:var(--encre);
+  font-family:var(--titre);font-size:14px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ocre);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.app{display:grid;grid-template-columns:212px 1fr;min-height:100vh}
+.rail{background:var(--surface);border-right:1px solid var(--ligne);padding:18px 12px;display:flex;flex-direction:column;gap:22px}
+.sceau{display:flex;align-items:center;gap:10px;padding:0 4px}
+.sceau .nom{font-family:var(--titre);font-weight:700;letter-spacing:.06em;color:var(--marque);font-size:15px;line-height:1}
+.sceau .sous{font-size:9px;letter-spacing:.14em;color:var(--tres-doux);text-transform:uppercase;margin-top:3px}
+nav{display:flex;flex-direction:column;gap:2px}
+nav button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:0;
+  padding:9px 10px;border-radius:8px;color:var(--doux);cursor:pointer;font-weight:500}
+nav button:hover{background:var(--surface2);color:var(--encre)}
+nav button[aria-current="page"]{background:var(--ivoire);color:var(--marque);font-weight:600}
+nav .pastille{margin-left:auto;font-size:11px;color:var(--tres-doux);font-variant-numeric:tabular-nums}
+.rail footer{margin-top:auto;font-size:11px;color:var(--tres-doux);padding:0 4px;display:flex;flex-direction:column;gap:6px}
+.etat{display:inline-flex;align-items:center;gap:6px}
+.etat i{width:6px;height:6px;border-radius:50%;background:var(--vert);display:block;flex:none}
+.etat.local i{background:var(--ocre)}
+
+main{padding:26px 30px 60px;max-width:1180px;margin-inline:auto;width:100%;min-width:0}
+.bloc{min-width:0}
+.liste{table-layout:auto}
+.entete-vue{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+h1{font-family:var(--titre);font-size:23px;font-weight:700;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sous-titre{color:var(--doux);margin:4px 0 0;font-size:13px}
+
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--ligne-forte);background:var(--surface);
+  padding:8px 13px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;color:var(--encre)}
+.btn:hover{border-color:var(--ocre)}
+.btn.principal{background:var(--marque);border-color:var(--marque);color:var(--surface)}
+.btn.principal:hover{filter:brightness(1.1)}
+.btn.discret{border-color:transparent;background:transparent;color:var(--doux);font-weight:500}
+.btn.discret:hover{background:var(--surface2);color:var(--encre)}
+.btn.danger{color:var(--brique);border-color:transparent;background:transparent}
+.btn.danger:hover{background:var(--brique-fond)}
+.btn.attente{background:var(--brique);border-color:var(--brique);color:var(--surface)}
+.champ{display:flex;flex-direction:column;gap:5px}
+.champ label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tres-doux);font-weight:600}
+input,select,textarea{background:var(--surface);border:1px solid var(--ligne);border-radius:8px;padding:8px 10px;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--ocre);outline:none}
+textarea{resize:vertical;min-height:64px}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+
+.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:26px}
+.chiffre{background:var(--surface);border:1px solid var(--ligne);border-radius:var(--r);padding:15px 16px}
+.chiffre .lib{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--tres-doux);font-weight:600}
+.chiffre .val{font-family:var(--titre);font-size:25px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.chiffre .det{font-size:12px;color:var(--doux);margin-top:2px}
+.chiffre.alerte{border-left:3px solid var(--brique)}
+.chiffre.alerte .val{color:var(--brique)}
+.chiffre.bien .val{color:var(--vert)}
+
+.bloc{background:var(--surface);border:1px solid var(--ligne);border-radius:var(--r);overflow:hidden}
+.bloc + .bloc{margin-top:18px}
+.bloc h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--doux);margin:0;
+  padding:9px 10px 9px 16px;border-bottom:1px solid var(--ligne);font-weight:700;
+  display:flex;justify-content:space-between;align-items:center;gap:10px}
+.liste{width:100%;border-collapse:collapse}
+.liste th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--tres-doux);text-align:left;
+  padding:9px 16px;border-bottom:1px solid var(--ligne);font-weight:600}
+.liste td{padding:11px 16px;border-bottom:1px solid var(--ligne)}
+.liste tr:last-child td{border-bottom:0}
+.liste tbody tr{cursor:pointer}
+.liste tbody tr:hover{background:var(--surface2)}
+.liste .num{font-variant-numeric:tabular-nums;text-align:right}
+.ref{font-family:var(--titre);font-weight:600;font-size:12.5px;letter-spacing:.02em}
+.vide{padding:34px 18px;text-align:center;color:var(--doux)}
+.vide p{margin:0 0 12px}
+
+.puce{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;
+  background:var(--surface2);color:var(--doux);white-space:nowrap}
+.puce.paye{background:var(--vert-fond);color:var(--vert)}
+.puce.impaye{background:var(--brique-fond);color:var(--brique)}
+.puce.partiel{background:var(--bleu-fond);color:var(--bleu)}
+.puce.type{background:var(--ivoire);color:var(--marque)}
+
+.filtres{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filtres input[type="search"]{max-width:260px}
+.filtres select{width:auto}
+
+.editeur{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,520px);gap:22px;align-items:start}
+@media (max-width:1080px){.editeur{grid-template-columns:1fr}.cadre-apercu{position:static}}
+.carte{background:var(--surface);border:1px solid var(--ligne);border-radius:var(--r);padding:16px}
+.carte + .carte{margin-top:14px}
+.carte h3{margin:0 0 12px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--tres-doux);font-weight:700}
+.grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px}
+table.lignes{width:100%;border-collapse:collapse}
+table.lignes th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tres-doux);
+  text-align:left;padding:0 6px 6px;font-weight:600}
+table.lignes td{padding:3px}
+table.lignes input{padding:7px 8px}
+.somme{display:flex;justify-content:flex-end;padding:12px 4px 0}
+.somme dl{margin:0;display:grid;grid-template-columns:auto 130px;gap:6px 18px;text-align:right;align-items:center}
+.somme dt{color:var(--doux)}
+.somme dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.somme .total{font-family:var(--titre);font-size:17px;color:var(--marque)}
+.bascule{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font:inherit;text-transform:none;
+  letter-spacing:0;color:var(--encre);font-weight:600;padding:3px 9px 3px 7px;border-radius:99px;
+  border:1px solid var(--ligne-forte);background:var(--surface)}
+.bascule:hover{border-color:var(--ocre)}
+.bascule input{width:15px;height:15px;margin:0;accent-color:var(--marque);cursor:pointer}
+.bascule:has(input:checked){background:var(--ivoire);border-color:var(--marque);color:var(--marque)}
+.rpr-bloc{margin-top:10px;display:flex;flex-direction:column;gap:4px}
+.rpr{font-size:12px;color:var(--doux);background:var(--surface2);border-left:3px solid var(--ligne-forte);
+  padding:6px 10px;border-radius:0 6px 6px 0}
+.rpr b{color:var(--encre)}
+.rpr.depasse{background:var(--brique-fond);border-left-color:var(--brique);color:var(--brique)}
+.rpr.depasse b{color:var(--brique)}
+.barre-actions{position:sticky;bottom:0;background:var(--papier);border-top:1px solid var(--ligne);
+  padding:12px 0;display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+
+.cadre-apercu{position:sticky;top:22px}
+.cadre-apercu .barre{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.cadre-apercu .barre > span:first-child{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tres-doux);font-weight:600}
+#bascule-apercu{display:none}
+.scene{background:var(--surface2);border:1px solid var(--ligne);border-radius:var(--r);padding:14px;overflow:hidden}
+.scene .porte{transform-origin:top left}
+
+.feuille{width:210mm;min-height:297mm;background:#fff;color:#0A0A0A;padding:16mm 18mm 26mm;position:relative;
+  font-family:var(--titre);font-size:10.5pt;line-height:1.5;box-shadow:0 2px 14px rgba(0,0,0,.12)}
+
+/* en-tete : le nom a gauche, les coordonnees a droite */
+.feuille .tete{display:flex;align-items:flex-start;justify-content:space-between;gap:12mm}
+.feuille .coord{text-align:right;font-family:var(--mono);font-size:7.6pt;line-height:1.9;color:#6B6B6B;padding-top:1mm}
+.feuille .regle{margin-top:4mm}
+.feuille .regle i{display:block}
+.feuille .regle .a{height:.7mm;background:#3B5BFF}
+.feuille .regle .b{height:.35mm;background:#00C2A8;margin-top:.35mm}
+
+/* bandeau date / reference */
+.feuille .repere{display:flex;justify-content:space-between;gap:8mm;margin-top:6mm;
+  font-family:var(--mono);font-size:8pt;letter-spacing:.12em;text-transform:uppercase;color:#8A8A8A}
+.feuille .repere b{color:#0A0A0A;font-weight:500;letter-spacing:.06em}
+
+/* titre du document a gauche, destinataire a droite */
+.feuille .ouverture{display:flex;justify-content:space-between;gap:10mm;margin-top:6mm;align-items:flex-start}
+.feuille .ouverture .objet{flex:1;min-width:0}
+.feuille h2.type{font-size:19pt;font-weight:700;margin:0 0 3mm;letter-spacing:-.015em;line-height:1}
+.feuille h2.type small{display:block;font-family:var(--mono);font-size:7.2pt;font-weight:400;
+  letter-spacing:.2em;color:#3B5BFF;margin-bottom:2mm}
+.feuille .objet p{margin:0;font-size:9pt;color:#6B6B6B;line-height:1.75}
+.feuille .objet p b{color:#0A0A0A;font-weight:600}
+.feuille .destinataire{width:72mm;flex:none;border-left:.6mm solid #3B5BFF;padding:1mm 0 1mm 4mm;
+  font-size:9pt;line-height:1.65}
+.feuille .destinataire strong{display:block;font-family:var(--mono);color:#8A8A8A;font-size:7.2pt;
+  letter-spacing:.18em;text-transform:uppercase;margin-bottom:2mm;font-weight:500}
+.feuille .destinataire .qui{font-weight:600;font-size:10pt;line-height:1.35;margin-bottom:1mm}
+
+/* tableau : filets fins plutot qu un bandeau plein */
+.feuille table.art{width:100%;border-collapse:collapse;margin-top:7mm;font-size:9.5pt}
+.feuille table.art th{font-family:var(--mono);font-size:7.2pt;font-weight:500;text-align:left;color:#8A8A8A;
+  letter-spacing:.16em;text-transform:uppercase;padding:0 2.6mm 2mm;border-bottom:.5mm solid #0A0A0A}
+.feuille table.art th.d{text-align:right}
+.feuille table.art td{border-bottom:.25mm solid #E4E4E4;padding:2.1mm 2.6mm;vertical-align:top}
+.feuille table.art td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-family:var(--mono)}
+.feuille table.art td:first-child{color:#8A8A8A;font-family:var(--mono);font-size:8.5pt}
+
+/* totaux : le detail a droite, puis une barre pleine largeur */
+.feuille .totaux{margin-top:5mm;display:flex;justify-content:flex-end}
+.feuille .totaux table{border-collapse:collapse;min-width:80mm}
+.feuille .totaux td{padding:1.5mm 3mm;font-size:9.5pt;color:#6B6B6B}
+.feuille .totaux td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;
+  color:#0A0A0A;font-family:var(--mono)}
+.feuille .barre-net{display:flex;justify-content:space-between;align-items:baseline;gap:8mm;
+  margin-top:3mm;background:#0A0A0A;color:#fff;padding:3.2mm 4mm}
+.feuille .barre-net .lib{font-family:var(--mono);font-size:8pt;letter-spacing:.2em;text-transform:uppercase}
+.feuille .barre-net .val{font-size:15pt;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.feuille .barre-net .val i{font-style:normal;font-size:8.5pt;font-weight:500;color:#8CA0FF;margin-left:2.5mm}
+
+/* recu : la quittance remplace le tableau d articles */
+.feuille .quittance{margin-top:7mm;border-top:.25mm solid #E4E4E4}
+.feuille .quittance dl{display:grid;grid-template-columns:46mm 1fr;margin:0}
+.feuille .quittance dt{font-family:var(--mono);font-size:7.2pt;letter-spacing:.16em;text-transform:uppercase;
+  color:#8A8A8A;padding:2.5mm 0;border-bottom:.25mm solid #E4E4E4}
+.feuille .quittance dd{margin:0;font-size:10pt;padding:2.5mm 0;border-bottom:.25mm solid #E4E4E4}
+.feuille .quittance dd b{font-weight:600}
+.feuille .quittance .du{color:#D6401F;font-weight:600;font-family:var(--mono)}
+
+/* bon de livraison : la colonne que le client remplit a la reception */
+.feuille table.art td.remplir{background:#F4F6FF;border-bottom:.25mm solid #B9C4F2}
+.feuille .recu-par{font-size:9pt;line-height:2.5}
+.feuille .recu-par i{display:inline-block;border-bottom:.25mm dotted #8A8A8A;min-width:36mm;font-style:normal}
+.feuille .paraphes .compact b{margin-bottom:5mm}
+
+.feuille .lettres{margin-top:5mm;font-size:9.5pt;border-left:.6mm solid #00C2A8;padding-left:4mm}
+.feuille .notes{margin-top:4mm;font-size:8.5pt;color:#6B6B6B;white-space:pre-wrap}
+
+/* bande de certification e-MECeF : ce qui fait la facture normalisee */
+.feuille .certif{margin-top:6mm;border:.3mm solid #B9C4F2;background:#F7F9FF;
+  display:flex;gap:4mm;align-items:center;padding:3mm 3.5mm}
+.feuille .certif .qr{flex:none;width:21mm;height:21mm;background:#fff}
+.feuille .certif .qr img{width:100%;height:100%;display:block;image-rendering:pixelated}
+.feuille .certif .corps{flex:1;min-width:0}
+.feuille .certif .titre{font-family:var(--mono);font-size:6.6pt;letter-spacing:.18em;
+  text-transform:uppercase;color:#3B5BFF;margin-bottom:1.6mm}
+.feuille .certif dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:1mm 4mm;
+  font-family:var(--mono);font-size:7.4pt;line-height:1.35}
+.feuille .certif dt{color:#8A8A8A;letter-spacing:.09em;text-transform:uppercase;font-size:6.4pt;
+  align-self:center;white-space:nowrap}
+.feuille .certif dd{margin:0;font-weight:500;word-break:break-all;font-variant-numeric:tabular-nums}
+
+/* paraphes : le client a gauche, ZADNA et son cachet a droite */
+.feuille .paraphes{display:flex;justify-content:flex-end;gap:12mm;margin-top:10mm;font-size:9pt;color:#6B6B6B}
+/* le bloc du client, quand il existe, repousse la signature à droite */
+.feuille .paraphes > div:not(.sig-d){margin-right:auto}
+.feuille .paraphes > div{width:70mm}
+.feuille .paraphes b{display:block;color:#0A0A0A;font-family:var(--mono);font-size:7.6pt;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;margin-bottom:16mm}
+.feuille .sig-d{position:relative;text-align:right;min-height:34mm}
+.feuille .sig-d .qui{color:#0A0A0A;font-weight:600}
+.feuille .cachet{position:absolute;left:0;top:2mm;width:32mm;height:32mm;transform:rotate(-6deg);
+  opacity:.9;pointer-events:none}
+
+/* pied : double filet inverse, puis les mentions sur trois colonnes */
+.feuille .pied{position:absolute;left:18mm;right:18mm;bottom:11mm}
+.feuille .pied .regle{margin-top:0}
+.feuille .pied .regle .a{height:.35mm;background:#00C2A8}
+.feuille .pied .regle .b{height:.7mm;background:#3B5BFF;margin-top:.35mm}
+.feuille .pied .mentions{display:flex;justify-content:space-between;align-items:center;gap:6mm;margin-top:2.5mm;
+  font-family:var(--mono);font-size:6.6pt;letter-spacing:.03em;color:#8A8A8A;line-height:1.75}
+.feuille .pied .mentions b{color:#0A0A0A;font-weight:600}
+.feuille .pied .mentions .droite{text-align:right}
+.feuille .pied .sceau-pale{font-family:var(--titre);font-size:12pt;font-weight:700;color:#0A0A0A;opacity:.09;flex:none}
+
+/* ---------- typographie ZADNA : les labels techniques passent en mono ---------- */
+.sceau .sous,.bloc h2,.carte h3,.liste th,.champ label,.chiffre .lib,.chiffre .val,.puce,.ref,
+table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{font-family:var(--mono)}
+.ref{letter-spacing:0}
+.sceau .nom{letter-spacing:.02em}
+/* la feuille declare ses polices rule par rule, voir plus haut */
+
+/* ---------- portail : connexion et choix du comptoir ---------- */
+.portail{position:fixed;inset:0;z-index:100;background:var(--papier);display:grid;place-items:center;padding:24px}
+.portail[hidden]{display:none}
+.portail-carte{background:var(--surface);border:1px solid var(--ligne);border-radius:14px;
+  padding:32px 30px;width:100%;max-width:380px;box-shadow:var(--ombre)}
+.portail-marque{display:flex;align-items:center;gap:11px;margin-bottom:26px}
+.portail-marque .nom{font-family:var(--titre);font-weight:700;font-size:17px;letter-spacing:.02em}
+.portail-marque .sous{font-family:var(--mono);font-size:9px;letter-spacing:.18em;
+  color:var(--tres-doux);text-transform:uppercase;margin-top:3px}
+.portail h2{font-family:var(--titre);font-size:19px;margin:0 0 6px;font-weight:600}
+.portail p.aide{color:var(--doux);font-size:13px;margin:0 0 20px}
+.portail .champ{margin-bottom:13px}
+.portail .btn{width:100%;justify-content:center;margin-top:6px}
+.portail .lien{background:none;border:0;color:var(--marque);font-size:12.5px;cursor:pointer;
+  padding:10px 0 0;width:100%;font-family:inherit}
+.portail .lien:hover{text-decoration:underline}
+.portail .erreur{background:var(--brique-fond);color:var(--brique);border-radius:8px;
+  padding:9px 12px;font-size:12.5px;margin-bottom:14px}
+.portail .attente{color:var(--doux);font-size:13px;text-align:center;padding:10px 0}
+.choix-comptoir{display:flex;flex-direction:column;gap:9px;margin-bottom:6px}
+.choix-comptoir button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--surface);border:1px solid var(--ligne-forte);border-radius:10px;
+  padding:14px 16px;cursor:pointer;font:inherit;color:var(--encre)}
+.choix-comptoir button:hover{border-color:var(--marque);background:var(--surface2)}
+.choix-comptoir .cnom{font-weight:600;font-size:15px}
+.choix-comptoir .ccode{font-family:var(--mono);font-size:10.5px;color:var(--tres-doux);
+  letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.rail .compte{font-family:var(--mono);font-size:10px;color:var(--tres-doux);
+  letter-spacing:.06em;word-break:break-all;line-height:1.5}
+
+#impression{display:none}
+@media print{
+  .app{display:none!important}
+  #impression{display:block!important}
+  body{background:#fff}
+  /* min-height reste a 297mm : sans cela la feuille epouse son contenu et le pied
+     de page, qui est en position absolue, remonte au milieu de la page */
+  .feuille{box-shadow:none;margin:0;width:auto;min-height:297mm;padding:16mm 18mm 26mm}
+  /* les en-tetes de colonnes se repetent sur chaque page, et on ne coupe pas
+     une ligne, un total, une quittance ou un bloc de signature en deux */
+  .feuille table.art thead{display:table-header-group}
+  .feuille table.art tr,.feuille .barre-net,.feuille .totaux,.feuille .quittance,
+  .feuille .lettres,.feuille .paraphes,.feuille .recu-par,.feuille .certif{break-inside:avoid;page-break-inside:avoid}
+  @page{size:A4;margin:0}
+}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--encre);color:var(--papier);
+  padding:10px 16px;border-radius:99px;font-size:13px;font-weight:600;box-shadow:var(--ombre);z-index:50}
+.toast[hidden]{display:none}
+
+/* ---------- téléphone ---------- */
+@media (max-width:640px){
+  table.lignes thead{display:none}
+  table.lignes.certif tbody tr{grid-template-columns:1fr 1fr 1fr 1fr 40px}
+  table.lignes tbody tr{display:grid;grid-template-columns:1fr 1fr 1fr 40px;gap:5px;align-items:center;
+    padding:9px 0;border-bottom:1px solid var(--ligne)}
+  table.lignes tbody td{padding:0}
+  table.lignes tbody td:first-child{grid-column:1 / -1}
+  table.lignes tbody td[style*="width"]{width:auto!important}
+  table.lignes td[data-montant]{text-align:right;color:var(--doux);font-weight:600}
+  table.lignes td[data-montant]::before{content:"Montant ";font-weight:400;color:var(--tres-doux);font-size:11px}
+  table.lignes td:last-child button{width:100%;padding:8px 0;font-size:16px;line-height:1}
+  .somme dl{grid-template-columns:1fr 130px;width:100%}
+  .entete-vue h1{font-size:20px}
+  .chiffre .val{font-size:22px}
+}
+/* ---------- listes : cartes empilées sur petit écran ---------- */
+@media (max-width:860px){
+  .liste thead{display:none}
+  .liste tbody tr{display:block;padding:11px 14px;border-bottom:1px solid var(--ligne)}
+  .liste tbody tr:last-child{border-bottom:0}
+  .liste tbody td{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+    border:0;padding:2px 0;text-align:left}
+  .liste tbody td[data-lib]::before{content:attr(data-lib);color:var(--tres-doux);font-size:11px;
+    letter-spacing:.05em;text-transform:uppercase;font-weight:600;flex:none}
+  .liste tbody td:first-child{display:block;font-weight:600;font-size:14.5px;margin-bottom:5px}
+  .liste tbody td.num{justify-content:space-between}
+  .liste tbody td.act{margin-top:8px;justify-content:flex-end}
+  .liste tbody td.act .btn{padding:7px 14px}
+  .filtres{flex-direction:column;align-items:stretch}
+  .filtres input[type="search"],.filtres select{max-width:none;width:100%}
+  .grille{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  .barre-actions{flex-wrap:nowrap;overflow-x:auto;padding:10px 0;scrollbar-width:thin}
+  .barre-actions .btn{flex:none}
+  .barre-actions .btn[style*="margin-left"]{margin-left:8px!important}
+}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  .cadre-apercu .scene{display:none}
+  body.apercu .cadre-apercu .scene{display:block}
+  #bascule-apercu{display:inline-flex}
+  .rail{flex-direction:row;align-items:center;gap:14px;border-right:0;border-bottom:1px solid var(--ligne);
+    overflow-x:auto;padding:12px 14px;position:sticky;top:0;z-index:20}
+  .rail nav{flex-direction:row}
+  .rail nav button{white-space:nowrap;padding:7px 11px}
+  .rail nav .pastille{display:none}
+  .rail footer{display:none}
+  main{padding:18px 16px 60px}
+}
+</style>
+
+<div class="portail" id="portail">
+  <div class="portail-carte">
+    <div class="portail-marque">
+      <svg viewBox="0 0 120 120" width="30" height="30" aria-hidden="true" style="flex:none;color:var(--encre)">
+        <g stroke="currentColor" stroke-width="5" stroke-linecap="round">
+          <line x1="60" y1="60" x2="60" y2="14"/><line x1="60" y1="60" x2="106" y2="60"/>
+          <line x1="60" y1="60" x2="60" y2="106"/><line x1="60" y1="60" x2="14" y2="60"/>
+        </g>
+        <circle cx="60" cy="14" r="9" fill="#3B5BFF"/><circle cx="106" cy="60" r="9" fill="#00C2A8"/>
+        <circle cx="60" cy="106" r="9" fill="#FF5B3D"/><circle cx="14" cy="60" r="9" fill="#FFC93C"/>
+        <circle cx="60" cy="60" r="13" fill="currentColor"/>
+        <circle cx="60" cy="60" r="5" style="fill:var(--surface)"/>
+      </svg>
+      <div><div class="nom">Comptoir</div><div class="sous">Gestion commerciale</div></div>
+    </div>
+    <div id="portail-corps"><p class="attente">Chargement…</p></div>
+  </div>
+</div>
+
+<div class="app" hidden>
+  <aside class="rail">
+    <div class="sceau">
+      <svg viewBox="0 0 120 120" width="28" height="28" aria-hidden="true" style="flex:none;color:var(--encre)">
+        <g stroke="currentColor" stroke-width="5" stroke-linecap="round">
+          <line x1="60" y1="60" x2="60" y2="14"/><line x1="60" y1="60" x2="106" y2="60"/>
+          <line x1="60" y1="60" x2="60" y2="106"/><line x1="60" y1="60" x2="14" y2="60"/>
+        </g>
+        <circle cx="60" cy="14" r="9" fill="#3B5BFF"/><circle cx="106" cy="60" r="9" fill="#00C2A8"/>
+        <circle cx="60" cy="106" r="9" fill="#FF5B3D"/><circle cx="14" cy="60" r="9" fill="#FFC93C"/>
+        <circle cx="60" cy="60" r="13" fill="currentColor"/>
+        <circle cx="60" cy="60" r="5" style="fill:var(--surface)"/>
+      </svg>
+      <div>
+        <div class="nom"><span style="color:var(--ocre)">&lt;</span><span style="color:var(--encre)">ZADNA S.X</span><span style="color:var(--ocre)">/&gt;</span></div>
+        <div class="sous">Comptoir</div>
+      </div>
+    </div>
+    <nav id="nav" aria-label="Sections"></nav>
+    <footer>
+      <span class="etat" id="etat-stock"><i></i><span>Chargement…</span></span>
+      <span id="etat-tva">—</span>
+      <span class="compte" id="etat-compte"></span>
+      <button class="btn discret" id="changer-comptoir"
+              style="padding:5px 0;justify-content:flex-start;font-size:11px">Changer de comptoir</button>
+    </footer>
+  </aside>
+  <main id="vue" tabindex="-1"></main>
+</div>
+<div id="impression" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+/* ======================= socle ======================= */
+var TYPES = {
+  devis:    {label:"Devis",             court:"Devis",     code:"DEV", prix:true, validite:true},
+  proforma: {label:"Facture pro forma", court:"Pro forma", code:"PRO", prix:true, validite:true},
+  facture:  {label:"Facture",           court:"Facture",   code:"FAC", prix:true, reglement:true},
+  avoir:    {label:"Facture d'avoir",   court:"Avoir",     code:"AV",  prix:true, avoir:true},
+  bl:       {label:"Bon de livraison",  court:"Livraison", code:"BL",  prix:false},
+  recu:     {label:"Reçu de paiement",  court:"Reçu",      code:"REC", prix:true, reglement:true, recu:true}
+};
+var REGLAGES_DEFAUT = {
+  nom:"ZADNA S.X", activite:"SOLUTIONS TECHNOLOGIQUES & NUMÉRIQUES",
+  forme:"ZADNA SOLUTIONS ET SERVICES · SARL au capital de 2 000 000 F CFA",
+  rccm:"RB/COT/26 B 44001", ifu:"3202682190953",
+  tel:"+229 01 47 47 47 00", email:"zadna.sol.x@gmail.com",
+  adresse:"Parcelle f, Maison IBRAHIMA NDIAYE — Guinkomey, 5e arrondissement, Cotonou, Littoral, Bénin",
+  banque:"", compte:"", momo:"+229 01 47 47 47 00",
+  mention:"TVA non applicable — régime des Micro et Petites Entreprises (TPS).",
+  tauxTva:"18", tvaDefaut:"non",
+  validite:"30 jours", signataire:"SARANA Soulé", fonction:"Gérant",
+  groupeDefaut:"E"
+};
+/* Referentiels e-MECeF (DGI Benin). Groupes : formulaire officiel d auto-declaration de SFE. */
+var TYPES_MECEF = [["FV","Facture de vente"],["FA","Facture d'avoir"],
+                   ["EV","Facture de vente à l'exportation"],["EA","Facture d'avoir à l'exportation"]];
+var GROUPES = [["A","EXO","Exonéré"],["B","TAX","Taxable"],["C","EXP","Exportation de produits taxables"],
+               ["D","MP","TVA régime d'exception"],["E","TPS","Régime fiscal TPS"],["F","RES","Réservé"]];
+function libelleGroupe(g){
+  for(var i = 0; i < GROUPES.length; i++) if(GROUPES[i][0] === g) return GROUPES[i][1];
+  return g || "";
+}
+/* le QR est dessine dans la page : la DGI fournit son contenu, pas son image */
+/* la facture et son avoir sont les deux pieces que la DGI certifie */
+function estCertifiable(d){ return d.type === "facture" || d.type === "avoir"; }
+function qrDataURL(valeur, taille){
+  if(!valeur || typeof QRious !== "function") return "";
+  try {
+    return new QRious({value:String(valeur), size:taille || 240, level:"M", padding:0}).toDataURL("image/png");
+  } catch(e){ return ""; }
+}
+var COLS = ["clients","articles","documents","reglages"];
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function auj(){ return new Date().toISOString().slice(0,10); }
+function nombre(n){ return Math.round(Number(n)||0).toLocaleString("fr-FR").replace(/[  ]/g," "); }
+function fcfa(n){ return nombre(n) + " F CFA"; }
+function dateFr(s){ if(!s) return "…"; var p = String(s).split("-"); return p[2] + "/" + p[1] + "/" + p[0]; }
+function echap(s){
+  return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+  });
+}
+
+/* montant en toutes lettres */
+var U = ["","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","onze","douze","treize",
+         "quatorze","quinze","seize","dix-sept","dix-huit","dix-neuf"];
+var D = ["","","vingt","trente","quarante","cinquante","soixante"];
+function deuxChiffres(x){
+  if(x < 20) return U[x];
+  var t = Math.floor(x/10), r = x % 10;
+  if(t <= 6) return D[t] + (r === 0 ? "" : (r === 1 ? "-et-un" : "-" + U[r]));
+  if(t === 7) return "soixante" + (r === 1 ? "-et-onze" : "-" + U[10+r]);
+  if(t === 8) return "quatre-vingt" + (r === 0 ? "s" : "-" + U[r]);
+  return "quatre-vingt-" + U[10+r];
+}
+function troisChiffres(x){
+  var c = Math.floor(x/100), r = x % 100, s = "";
+  if(c > 0) s += (c > 1 ? U[c] + " " : "") + "cent" + (c > 1 && r === 0 ? "s" : "");
+  if(r > 0) s += (s ? " " : "") + deuxChiffres(r);
+  return s;
+}
+function enLettres(n){
+  n = Math.round(Math.abs(Number(n) || 0));
+  if(n === 0) return "zéro";
+  var reste = n, out = "";
+  [[1e9,"milliard"],[1e6,"million"],[1e3,"mille"]].forEach(function(e){
+    var q = Math.floor(reste / e[0]); reste = reste % e[0];
+    if(q > 0){
+      /* cent et vingt restent invariables devant mille, qui est un adjectif numeral,
+         mais s'accordent devant million et milliard, qui sont des noms */
+      if(e[1] === "mille") out += (out ? " " : "") +
+        (q > 1 ? troisChiffres(q).replace(/(cent|vingt)s$/, "$1") + " " : "") + "mille";
+      else out += (out ? " " : "") + troisChiffres(q) + " " + e[1] + (q > 1 ? "s" : "");
+    }
+  });
+  if(reste > 0) out += (out ? " " : "") + troisChiffres(reste);
+  return out;
+}
+
+/* ======================= stockage ======================= */
+/* Les pièces vivent dans Supabase : une ligne par document, cloisonnée par
+   comptoir, le corps en jsonb. Le repli localStorage n'est pas un cache de
+   confort — c'est ce qui permet de continuer à facturer quand le réseau
+   tombe, ce qui arrive. La synchronisation reprend d'elle-même au retour. */
+var SB_URL = "https://pfofqxhrtzydarlipcqy.supabase.co";
+var SB_CLE = "sb_publishable_dGxuOKpKi8p5F81oQ6k_Ew_62s8Di19";
+var sb = null;
+
+/* la table reglages est indexée par « cle », les autres par « id » */
+function cleDe(col){ return col === "reglages" ? "cle" : "id"; }
+
+var Store = {
+  mode:"local", data:{}, comptoir:null, canaux:[],
+
+  boite:function(col){ return "comptoir:" + (this.comptoir || "?") + ":" + col; },
+  lireLocal:function(col){
+    try { return JSON.parse(localStorage.getItem(this.boite(col)) || "[]"); }
+    catch(e){ return []; }
+  },
+  ecrireLocal:function(col){
+    try { localStorage.setItem(this.boite(col), JSON.stringify(this.data[col])); } catch(e){}
+  },
+
+  init:function(comptoir){
+    var self = this;
+    self.comptoir = comptoir;
+    COLS.forEach(function(c){ self.data[c] = self.lireLocal(c); });
+    rendre(true);
+    return self.charger().then(function(){ self.ecouter(); });
+  },
+
+  charger:function(col){
+    var self = this;
+    var cibles = col ? [col] : COLS;
+    return Promise.all(cibles.map(function(c){
+      return sb.from(c).select("*").eq("comptoir", self.comptoir).then(function(r){
+        if(r.error) throw r.error;
+        self.data[c] = (r.data || []).map(function(ligne){
+          var o = Object.assign({}, ligne.donnees || {});
+          o.id = ligne[cleDe(c)];
+          return o;
+        });
+        self.ecrireLocal(c);
+      });
+    })).then(function(){
+      self.mode = "partage";
+      rendre(); majEtat();
+      /* le nom du rail vient des réglages, qui n existent qu une fois chargés :
+         la charte posée à l ouverture affichait encore celui du gabarit */
+      appliquerCharte(charteCourante);
+    }).catch(function(e){
+      console.warn("chargement", e && e.message);
+      self.mode = "local";
+      rendre(); majEtat();
+    });
+  },
+
+  /* Chaque table est écoutée séparément et ne recharge qu'elle-même :
+     recharger les quatre à chaque frappe d'un autre appareil serait inutile. */
+  ecouter:function(){
+    var self = this;
+    self.canaux.forEach(function(c){ try { sb.removeChannel(c); } catch(e){} });
+    self.canaux = COLS.map(function(col){
+      return sb.channel("maj-" + col + "-" + self.comptoir)
+        .on("postgres_changes",
+            {event:"*", schema:"public", table:col, filter:"comptoir=eq." + self.comptoir},
+            function(){ self.charger(col); })
+        .subscribe();
+    });
+  },
+
+  tout:function(col){ return this.data[col] || []; },
+  un:function(col, id){
+    var l = this.tout(col);
+    for(var i = 0; i < l.length; i++) if(l[i].id === id) return l[i];
+    return null;
+  },
+
+  poser:function(col, obj){
+    var self = this;
+    if(!obj.id) obj.id = uid();
+    var i = -1, l = this.data[col];
+    for(var k = 0; k < l.length; k++) if(l[k].id === obj.id) i = k;
+    if(i >= 0) l[i] = obj; else l.push(obj);
+    rendre();
+    this.ecrireLocal(col);
+
+    var corps = Object.assign({}, obj); delete corps.id;
+    var ligne = {comptoir:self.comptoir, donnees:corps};
+    ligne[cleDe(col)] = obj.id;
+    return sb.from(col).upsert(ligne, {onConflict:"comptoir," + cleDe(col)}).then(function(r){
+      if(r.error){
+        self.mode = "local"; majEtat();
+        signal("Hors ligne — enregistré sur cet appareil");
+      } else if(self.mode !== "partage"){
+        self.mode = "partage"; majEtat();
+      }
+    });
+  },
+
+  retirer:function(col, id){
+    var self = this;
+    this.data[col] = this.data[col].filter(function(x){ return x.id !== id; });
+    rendre();
+    this.ecrireLocal(col);
+    var q = sb.from(col).delete().eq("comptoir", self.comptoir);
+    return q.eq(cleDe(col), id).then(function(r){
+      if(r.error){ self.mode = "local"; majEtat(); signal("Suppression non synchronisée"); }
+    });
+  },
+
+  /* Renvoie vers Supabase tout ce qui a été saisi hors ligne. */
+  resynchroniser:function(){
+    var self = this;
+    if(!sb || !self.comptoir) return Promise.resolve();
+    var envois = [];
+    COLS.forEach(function(col){
+      self.data[col].forEach(function(obj){
+        var corps = Object.assign({}, obj); delete corps.id;
+        var ligne = {comptoir:self.comptoir, donnees:corps};
+        ligne[cleDe(col)] = obj.id;
+        envois.push(sb.from(col).upsert(ligne, {onConflict:"comptoir," + cleDe(col)}));
+      });
+    });
+    return Promise.all(envois).then(function(){
+      signal("Synchronisé");
+      return self.charger();
+    }).catch(function(){ signal("Synchronisation impossible"); });
+  }
+};
+
+window.addEventListener("online", function(){ Store.resynchroniser(); });
+function reglages(){ return Object.assign({}, REGLAGES_DEFAUT, Store.un("reglages","entreprise") || {}); }
+function majEtat(){
+  var el = document.getElementById("etat-stock");
+  if(!el) return;
+  var partage = Store.mode === "partage";
+  el.className = "etat" + (partage ? "" : " local");
+  el.lastElementChild.textContent = partage ? "Synchronisé" : "Hors ligne — sur cet appareil";
+  var t = document.getElementById("etat-tva");
+  if(t){
+    var r = reglages();
+    t.textContent = r.tvaDefaut === "non" ? "Sans TVA par défaut"
+                                          : "TVA " + (r.tauxTva || 18) + " % par défaut";
+  }
+}
+
+/* ======================= calculs ======================= */
+function totalLignes(d){
+  return (d.lignes || []).reduce(function(s,l){ return s + (Number(l.q)||0) * (Number(l.pu)||0); }, 0);
+}
+function tauxTva(d){
+  if(!d || !d.tva) return 0;
+  return Number(d.tauxTva) || Number(reglages().tauxTva) || 18;
+}
+function montantHT(d){ return Math.max(0, totalLignes(d) - (Number(d.remise)||0)); }
+function montantTVA(d){ return Math.round(montantHT(d) * tauxTva(d) / 100); }
+/* AIB : acompte sur impôt assis sur les bénéfices, collecté en sus par le vendeur */
+function tauxAib(d){ return Number(d && d.aib) || 0; }
+function montantAIB(d){ return Math.round(montantHT(d) * tauxAib(d) / 100); }
+function netAPayer(d){ return montantHT(d) + montantTVA(d) + montantAIB(d); }
+function resteDu(d){ return Math.max(0, netAPayer(d) - (Number(d.regle)||0)); }
+function statutDoc(d){
+  var T = TYPES[d.type] || {};
+  if(d.statut === "brouillon") return {cle:"", libelle:"Brouillon"};
+  if(d.statut === "annule")    return {cle:"", libelle:"Annulé"};
+  if(!T.reglement)             return {cle:"", libelle:"Établi"};
+  if(resteDu(d) === 0 && netAPayer(d) > 0) return {cle:"paye", libelle:"Payé"};
+  if((Number(d.regle)||0) > 0)             return {cle:"partiel", libelle:"Partiel"};
+  return {cle:"impaye", libelle:"Impayé"};
+}
+function prochainNumero(type){
+  var an = new Date().getFullYear();
+  var seq = Store.tout("documents").filter(function(d){ return d.type === type && d.annee === an; })
+    .reduce(function(m,d){ return Math.max(m, d.seq || 0); }, 0) + 1;
+  return {seq:seq, annee:an, numero: TYPES[type].code + "-" + an + "-" + String(seq).padStart(3,"0")};
+}
+
+/* ======================= état d'écran ======================= */
+var vue = "bord", brouillon = null, formulaire = null, aConfirmer = null;
+var filtre = {texte:"", type:"", statut:""};
+var filtreCat = {texte:"", famille:"", source:""};
+var ONGLETS = [
+  {cle:"bord", titre:"Tableau de bord"},
+  {cle:"documents", titre:"Documents"},
+  {cle:"clients", titre:"Clients"},
+  {cle:"catalogue", titre:"Catalogue"},
+  {cle:"reglages", titre:"Réglages"}
+];
+function aller(cle){
+  vue = cle; brouillon = null; formulaire = null; aConfirmer = null;
+  rendre(true);
+  var m = document.getElementById("vue"); if(m) m.focus();
+}
+function signal(msg){
+  var t = document.getElementById("toast");
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(signal._t);
+  signal._t = setTimeout(function(){ t.hidden = true; }, 2800);
+}
+
+/* ======================= rendu ======================= */
+function rendre(forcer){
+  var nav = document.getElementById("nav");
+  var nb = {documents:Store.tout("documents").length, clients:Store.tout("clients").length,
+            catalogue:Store.tout("articles").length};
+  nav.innerHTML = ONGLETS.map(function(o){
+    var actif = (vue === o.cle) || (vue === "editeur" && o.cle === "documents");
+    return '<button data-vue="' + o.cle + '"' + (actif ? ' aria-current="page"' : "") + ">" + o.titre +
+      (nb[o.cle] ? '<span class="pastille">' + nb[o.cle] + "</span>" : "") + "</button>";
+  }).join("");
+  majEtat();
+
+  /* ne pas écraser une saisie en cours quand une mise à jour arrive du stockage */
+  if(!forcer && vue === "editeur" && document.getElementById("corps-lignes")){ majApercu(); return; }
+  if(!forcer && formulaire && document.getElementById("form-panneau")) return;
+
+  var el = document.getElementById("vue");
+  if(vue === "bord")           el.innerHTML = vueBord();
+  else if(vue === "documents") el.innerHTML = vueDocuments();
+  else if(vue === "clients")   el.innerHTML = vueClients();
+  else if(vue === "catalogue") el.innerHTML = vueCatalogue();
+  else if(vue === "reglages")  el.innerHTML = vueReglages();
+  else if(vue === "editeur"){  el.innerHTML = vueEditeur(); majRPR(); majApercu(); }
+}
+
+/* ---------- tableau de bord ---------- */
+function vueBord(){
+  var docs = Store.tout("documents");
+  var mois = new Date().toISOString().slice(0,7);
+  var factures = docs.filter(function(d){
+    return d.type === "facture" && d.statut !== "annule" && d.statut !== "brouillon";
+  });
+  var duMois = factures.filter(function(d){ return (d.date||"").slice(0,7) === mois; });
+  /* un avoir annule du chiffre d affaires : il se retranche du facturé */
+  var avoirsMois = docs.filter(function(d){
+    return d.type === "avoir" && d.statut !== "annule" && d.statut !== "brouillon" &&
+           (d.date||"").slice(0,7) === mois;
+  });
+  var facture = duMois.reduce(function(s,d){ return s + netAPayer(d); }, 0) -
+                avoirsMois.reduce(function(s,d){ return s + netAPayer(d); }, 0);
+  var encaisse = duMois.reduce(function(s,d){ return s + Math.min(netAPayer(d), Number(d.regle)||0); }, 0);
+  var impayes = factures.reduce(function(s,d){ return s + resteDu(d); }, 0);
+  var devisOuverts = docs.filter(function(d){ return d.type === "devis" && d.statut !== "annule"; }).length;
+  var retard = factures.filter(function(d){ return resteDu(d) > 0 && d.echeance && d.echeance < auj(); })
+    .sort(function(a,b){ return a.echeance.localeCompare(b.echeance); });
+  var recents = docs.slice().sort(function(a,b){
+    return (b.date||"").localeCompare(a.date||"") || (b.seq||0) - (a.seq||0);
+  }).slice(0,7);
+
+  return '<div class="entete-vue"><div><h1>Où en est ' + echap(reglages().nom) + ' aujourd\'hui</h1><p class="sous-titre">' +
+    new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) +
+    '</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button class="btn" data-neuf="devis">Nouveau devis</button>' +
+    '<button class="btn principal" data-neuf="facture">Nouvelle facture</button></div></div>' +
+    '<div class="chiffres">' +
+      chiffre("Facturé ce mois", fcfa(facture), duMois.length + " facture" + (duMois.length > 1 ? "s" : ""), "") +
+      chiffre("Encaissé ce mois", fcfa(encaisse), facture ? Math.round(encaisse/facture*100) + " % du facturé" : "—", "bien") +
+      chiffre("Reste à encaisser", fcfa(impayes), retard.length ? retard.length + " facture(s) en retard" : "aucun retard",
+              impayes > 0 ? "alerte" : "") +
+      chiffre("Devis en cours", String(devisOuverts), "à relancer ou convertir", "") +
+    "</div>" +
+    (retard.length ? '<div class="bloc"><h2>En retard de paiement</h2>' + tableauDocs(retard) + "</div>" : "") +
+    '<div class="bloc"><h2>Derniers documents<button class="btn discret" data-vue="documents">Tout voir</button></h2>' +
+    (recents.length ? tableauDocs(recents) :
+      '<div class="vide"><p>Aucun document pour l\'instant.</p><button class="btn principal" data-neuf="devis">Créer le premier devis</button></div>') +
+    "</div>";
+}
+function chiffre(lib, val, det, classe){
+  return '<div class="chiffre ' + classe + '"><div class="lib">' + lib + '</div><div class="val">' + val +
+    '</div><div class="det">' + det + "</div></div>";
+}
+function tableauDocs(docs){
+  return '<table class="liste"><thead><tr><th>Numéro</th><th>Type</th><th>Client</th><th>Date</th>' +
+    '<th class="num">Montant</th><th>Statut</th></tr></thead><tbody>' +
+    docs.map(function(d){
+      var s = statutDoc(d), T = TYPES[d.type] || {court:"?"};
+      return '<tr data-ouvrir="' + d.id + '"><td class="ref">' + echap(d.numero) + "</td>" +
+        '<td data-lib="Type"><span class="puce type">' + T.court + "</span></td>" +
+        '<td data-lib="Client">' + echap((d.client && d.client.nom) || "—") + "</td>" +
+        '<td data-lib="Date">' + dateFr(d.date) + "</td>" +
+        '<td class="num" data-lib="Montant">' + (T.prix ? nombre(netAPayer(d)) : "—") + "</td>" +
+        '<td data-lib="Statut"><span class="puce ' + s.cle + '">' + s.libelle + "</span></td></tr>";
+    }).join("") + "</tbody></table>";
+}
+
+/* ---------- documents ---------- */
+function vueDocuments(){
+  var docs = Store.tout("documents").slice().sort(function(a,b){
+    return (b.date||"").localeCompare(a.date||"") || (b.seq||0) - (a.seq||0);
+  });
+  if(filtre.type)   docs = docs.filter(function(d){ return d.type === filtre.type; });
+  if(filtre.statut) docs = docs.filter(function(d){ return statutDoc(d).cle === filtre.statut; });
+  if(filtre.texte){
+    var q = filtre.texte.toLowerCase();
+    docs = docs.filter(function(d){
+      var t = d.numero + " " + ((d.client && d.client.nom) || "") + " " +
+              (d.lignes||[]).map(function(l){ return l.d; }).join(" ");
+      return t.toLowerCase().indexOf(q) >= 0;
+    });
+  }
+  return '<div class="entete-vue"><div><h1>Documents</h1>' +
+    '<p class="sous-titre">Devis, pro forma, factures, bons de livraison et reçus</p></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    Object.keys(TYPES).map(function(t){
+      return '<button class="btn' + (t === "facture" ? " principal" : "") + '" data-neuf="' + t + '">+ ' + TYPES[t].court + "</button>";
+    }).join("") + "</div></div>" +
+    '<div class="filtres">' +
+    '<input type="search" id="f-texte" placeholder="Rechercher un numéro, un client, un article…" value="' + echap(filtre.texte) + '">' +
+    '<select id="f-type"><option value="">Tous les types</option>' +
+    Object.keys(TYPES).map(function(t){
+      return '<option value="' + t + '"' + (filtre.type === t ? " selected" : "") + ">" + TYPES[t].label + "</option>";
+    }).join("") + "</select>" +
+    '<select id="f-statut"><option value="">Tous les statuts</option>' +
+    [["impaye","Impayé"],["partiel","Partiel"],["paye","Payé"]].map(function(s){
+      return '<option value="' + s[0] + '"' + (filtre.statut === s[0] ? " selected" : "") + ">" + s[1] + "</option>";
+    }).join("") + "</select>" +
+    '<span style="color:var(--doux);font-size:12px">' + docs.length + " document" + (docs.length > 1 ? "s" : "") + "</span>" +
+    "</div>" +
+    '<div class="bloc">' +
+    (docs.length ? tableauDocs(docs) : '<div class="vide"><p>Rien ne correspond à cette recherche.</p></div>') +
+    "</div>";
+}
+
+/* ---------- formulaire partagé (clients / articles) ---------- */
+function champTexte(cle, lib, valeur, type){
+  return '<div class="champ"><label for="f-' + cle + '">' + lib + "</label>" +
+    '<input id="f-' + cle + '" data-form="' + cle + '"' + (type ? ' inputmode="' + type + '"' : "") +
+    ' value="' + echap(valeur == null ? "" : valeur) + '"></div>';
+}
+function panneauFormulaire(){
+  if(!formulaire) return "";
+  var o = formulaire.obj;
+  var champs = formulaire.col === "clients"
+    ? champTexte("nom","Nom ou raison sociale",o.nom) + champTexte("tel","Téléphone",o.tel) +
+      champTexte("ifu","IFU",o.ifu) + champTexte("email","E-mail",o.email) + champTexte("adresse","Adresse",o.adresse)
+    : champTexte("d","Désignation",o.d) + champTexte("u","Unité (pièce, sac, m²…)",o.u) +
+      champTexte("pu","Prix unitaire (F CFA)",o.pu,"numeric");
+  return '<div class="carte" id="form-panneau" style="margin-bottom:16px">' +
+    "<h3>" + (o.id ? "Modifier" : (formulaire.col === "clients" ? "Nouveau client" : "Nouvel article")) + "</h3>" +
+    '<div class="grille">' + champs + "</div>" +
+    '<div style="display:flex;gap:8px;margin-top:14px">' +
+    '<button class="btn principal" id="form-enr">Enregistrer</button>' +
+    '<button class="btn discret" id="form-annul">Annuler</button></div></div>';
+}
+
+/* ---------- clients ---------- */
+function vueClients(){
+  var cs = Store.tout("clients").slice().sort(function(a,b){ return (a.nom||"").localeCompare(b.nom||""); });
+  var docs = Store.tout("documents");
+  var corps = cs.map(function(c){
+    var siens = docs.filter(function(d){ return d.clientId === c.id; });
+    var du = siens.filter(function(d){ return d.type === "facture" && d.statut !== "annule"; })
+      .reduce(function(s,d){ return s + resteDu(d); }, 0);
+    var enAttente = aConfirmer === "clients:" + c.id;
+    return '<tr data-modif="clients:' + c.id + '"><td><strong>' + echap(c.nom) + "</strong>" +
+      (c.adresse ? '<div style="color:var(--doux);font-size:12px">' + echap(c.adresse) + "</div>" : "") + "</td>" +
+      '<td data-lib="IFU">' + echap(c.ifu || "—") + '</td><td data-lib="Téléphone">' + echap(c.tel || "—") + "</td>" +
+      '<td class="num" data-lib="Documents">' + siens.length + "</td>" +
+      '<td class="num" data-lib="Reste dû">' + (du ? '<span class="puce impaye">' + nombre(du) + "</span>" : "—") + "</td>" +
+      '<td class="act"><button class="btn ' + (enAttente ? "attente" : "danger") + '" data-suppr="clients:' + c.id + '">' +
+      (enAttente ? "Confirmer" : "Supprimer") + "</button></td></tr>";
+  }).join("");
+  return '<div class="entete-vue"><div><h1>Clients</h1>' +
+    '<p class="sous-titre">Le carnet d\'adresses qui remplit vos documents</p></div>' +
+    '<button class="btn principal" data-form-neuf="clients">+ Nouveau client</button></div>' +
+    panneauFormulaire() +
+    '<div class="bloc">' + (cs.length ?
+      '<table class="liste"><thead><tr><th>Nom</th><th>IFU</th><th>Téléphone</th>' +
+      '<th class="num">Documents</th><th class="num">Reste dû</th><th></th></tr></thead><tbody>' + corps + "</tbody></table>" :
+      '<div class="vide"><p>Aucun client enregistré.</p><button class="btn principal" data-form-neuf="clients">Ajouter un client</button></div>') +
+    "</div>";
+}
+
+/* ---------- catalogue ---------- */
+function famillesConnues(){
+  var vues = {}, l = [];
+  Store.tout("articles").forEach(function(a){
+    if(a.famille && !vues[a.famille]){ vues[a.famille] = 1; l.push(a.famille); }
+  });
+  return l.sort();
+}
+function vueCatalogue(){
+  var tous = Store.tout("articles").slice().sort(function(a,b){ return (a.d||"").localeCompare(b.d||""); });
+  var arts = tous;
+  if(filtreCat.source === "mien") arts = arts.filter(function(a){ return !a.ref; });
+  if(filtreCat.source === "ref")  arts = arts.filter(function(a){ return !!a.ref; });
+  if(filtreCat.famille) arts = arts.filter(function(a){ return a.famille === filtreCat.famille; });
+  if(filtreCat.texte){
+    var q = filtreCat.texte.toLowerCase();
+    arts = arts.filter(function(a){ return (a.d||"").toLowerCase().indexOf(q) >= 0; });
+  }
+  var trop = arts.length > 150;
+  var vis = trop ? arts.slice(0,150) : arts;
+  var corps = vis.map(function(a){
+    var enAttente = aConfirmer === "articles:" + a.id;
+    return '<tr data-modif="articles:' + a.id + '"><td>' + echap(a.d) +
+      (a.famille ? '<div style="color:var(--tres-doux);font-size:11.5px">' + echap(a.famille) + "</div>" : "") + "</td>" +
+      '<td data-lib="Unité">' + echap(a.u || "—") + "</td>" +
+      '<td class="num" data-lib="Mon prix">' + (Number(a.pu) ? nombre(a.pu) : '<span style="color:var(--tres-doux)">à fixer</span>') + "</td>" +
+      '<td class="num" data-lib="Répertoire">' + (a.bs ? nombre(a.bi) + " – " + nombre(a.bs) : "—") + "</td>" +
+      '<td class="act"><button class="btn ' + (enAttente ? "attente" : "danger") + '" data-suppr="articles:' + a.id + '">' +
+      (enAttente ? "Confirmer" : "Supprimer") + "</button></td></tr>";
+  }).join("");
+  var fams = famillesConnues();
+  return '<div class="entete-vue"><div><h1>Catalogue</h1>' +
+    '<p class="sous-titre">Vos articles, et les fourchettes du Répertoire des Prix de Référence de l\'État</p></div>' +
+    '<button class="btn principal" data-form-neuf="articles">+ Nouvel article</button></div>' +
+    panneauFormulaire() +
+    '<div class="filtres">' +
+    '<input type="search" id="c-texte" placeholder="Rechercher un article…" value="' + echap(filtreCat.texte) + '">' +
+    '<select id="c-source"><option value="">Tout le catalogue</option>' +
+      '<option value="mien"' + (filtreCat.source === "mien" ? " selected" : "") + ">Mes articles</option>" +
+      '<option value="ref"' + (filtreCat.source === "ref" ? " selected" : "") + ">Répertoire de l'État</option></select>" +
+    (fams.length ? '<select id="c-famille"><option value="">Toutes les familles</option>' +
+      fams.map(function(f){
+        return '<option value="' + echap(f) + '"' + (filtreCat.famille === f ? " selected" : "") + ">" + echap(f) + "</option>";
+      }).join("") + "</select>" : "") +
+    '<span style="color:var(--doux);font-size:12px">' + arts.length + " article" + (arts.length > 1 ? "s" : "") +
+    (trop ? " · 150 affichés" : "") + "</span></div>" +
+    '<div class="bloc">' + (arts.length ?
+      '<table class="liste"><thead><tr><th>Désignation</th><th>Unité</th><th class="num">Mon prix</th>' +
+      '<th class="num">Répertoire de l\'État</th><th></th></tr></thead><tbody>' + corps + "</tbody></table>" :
+      '<div class="vide"><p>Aucun article ne correspond.</p><button class="btn principal" data-form-neuf="articles">Ajouter un article</button></div>') +
+    "</div>";
+}
+
+/* ---------- réglages ---------- */
+function vueReglages(){
+  var r = reglages();
+  function ch(cle, lib, zone){
+    return '<div class="champ"><label for="r-' + cle + '">' + lib + "</label>" +
+      (zone ? '<textarea id="r-' + cle + '" data-reglage="' + cle + '">' + echap(r[cle]) + "</textarea>"
+            : '<input id="r-' + cle + '" data-reglage="' + cle + '" value="' + echap(r[cle]) + '">') + "</div>";
+  }
+  return '<div class="entete-vue"><div><h1>Réglages</h1>' +
+    '<p class="sous-titre">Ces informations alimentent l\'en-tête et le pied de tous vos documents</p></div>' +
+    '<button class="btn principal" id="enr-reglages">Enregistrer</button></div>' +
+    '<div class="carte"><h3>Identité</h3><div class="grille">' +
+      ch("nom","Nom commercial") + ch("activite","Baseline") + ch("forme","Forme juridique et capital") +
+      ch("rccm","RCCM") + ch("ifu","IFU") +
+      ch("tel","Téléphone") + ch("email","E-mail") + "</div>" +
+      '<div style="margin-top:12px">' + ch("adresse","Adresse") + "</div></div>" +
+    '<div class="carte"><h3>Encaissement</h3><div class="grille">' +
+      ch("banque","Banque") + ch("compte","N° de compte") + ch("momo","Mobile Money") + "</div></div>" +
+    '<div class="carte"><h3>Taxe sur la valeur ajoutée</h3><div class="grille">' +
+      ch("tauxTva","Taux de TVA (%)") +
+      '<div class="champ"><label for="r-tvaDefaut">TVA activée par défaut</label>' +
+      '<select id="r-tvaDefaut" data-reglage="tvaDefaut">' +
+      '<option value="oui"' + (r.tvaDefaut !== "non" ? " selected" : "") + ">Oui</option>" +
+      '<option value="non"' + (r.tvaDefaut === "non" ? " selected" : "") + ">Non</option></select></div></div>" +
+      '<p style="color:var(--doux);margin:12px 0 0;font-size:12.5px">Chaque document garde son propre réglage : ' +
+      "l'interrupteur « TVA » de l'éditeur ne touche que le document ouvert.</p></div>" +
+    '<div class="carte"><h3>Facture normalisée e-MECeF</h3><div class="grille">' +
+      '<div class="champ"><label for="r-groupeDefaut">Groupe de taxation par défaut</label>' +
+      '<select id="r-groupeDefaut" data-reglage="groupeDefaut">' +
+      GROUPES.map(function(g){
+        return '<option value="' + g[0] + '"' + (r.groupeDefaut === g[0] ? " selected" : "") +
+          ">" + g[0] + " · " + g[1] + " — " + g[2] + "</option>";
+      }).join("") + "</select></div></div>" +
+      '<p style="color:var(--doux);margin:12px 0 0;font-size:12.5px">Ce groupe est appliqué à chaque ' +
+      "nouvelle ligne de facture. Le régime TPS correspond au groupe E.</p></div>" +
+    '<div class="carte"><h3>Mentions et signature</h3><div class="grille">' +
+      ch("validite","Validité des offres") + ch("signataire","Signataire") + ch("fonction","Fonction") + "</div>" +
+      '<div style="margin-top:12px">' + ch("mention","Mention à porter quand la TVA est désactivée", true) + "</div></div>" +
+    '<div class="carte"><h3>Sauvegarde</h3>' +
+      '<p style="color:var(--doux);margin:0 0 12px">Exportez vos données pour les archiver, ou réimportez une sauvegarde.</p>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '<button class="btn" id="export">Exporter (JSON)</button>' +
+      '<label class="btn" style="cursor:pointer">Importer<input type="file" id="import" accept="application/json,.json" hidden></label>' +
+      '</div><div id="zone-export"></div></div>';
+}
+
+/* ---------- éditeur ---------- */
+function champCert(d, cle, lib){
+  var c = d.cert || {};
+  return '<div class="champ"><label for="c-' + cle + '">' + lib + "</label>" +
+    '<input id="c-' + cle + '" data-cert="' + cle + '" value="' + echap(c[cle] || "") + '"></div>';
+}
+function nouveauDoc(type){
+  var n = prochainNumero(type);
+  brouillon = {id:null, type:type, seq:n.seq, annee:n.annee, numero:n.numero, date:auj(),
+    echeance: TYPES[type].reglement ? new Date(Date.now() + 30*864e5).toISOString().slice(0,10) : "",
+    clientId:"", client:{nom:"",adresse:"",ifu:"",tel:""},
+    lignes:[{d:"",q:1,pu:0},{d:"",q:1,pu:0}], remise:0, regle:0, notes:"", objet:"", mode:"", statut:"brouillon",
+    typeMecef: type === "avoir" ? "FA" : "FV", aib:"0",
+    cert:{nim:"",code:"",compteurs:"",date:"",qr:""},
+    tva: reglages().tvaDefaut !== "non", tauxTva: Number(reglages().tauxTva) || 18};
+  vue = "editeur"; aConfirmer = null; rendre(true);
+}
+function ouvrirDoc(id){
+  var d = Store.un("documents", id);
+  if(!d) return;
+  brouillon = JSON.parse(JSON.stringify(d));
+  if(!brouillon.client) brouillon.client = {nom:"",adresse:"",ifu:"",tel:""};
+  if(!brouillon.lignes || !brouillon.lignes.length) brouillon.lignes = [{d:"",q:1,pu:0}];
+  vue = "editeur"; aConfirmer = null; rendre(true);
+}
+function convertir(type){
+  var src = brouillon, n = prochainNumero(type);
+  brouillon = Object.assign({}, JSON.parse(JSON.stringify(src)), {
+    id:null, type:type, seq:n.seq, annee:n.annee, numero:n.numero, date:auj(),
+    statut:"brouillon", regle:0, source:src.numero,
+    /* la nouvelle pièce n est pas certifiée : elle ne peut pas porter le code de l ancienne */
+    cert:{nim:"",code:"",compteurs:"",date:"",qr:""},
+    typeMecef: type === "avoir" ? "FA" : "FV",
+    echeance: TYPES[type].reglement ? new Date(Date.now() + 30*864e5).toISOString().slice(0,10) : ""
+  });
+  rendre(true);
+  signal("Converti en " + TYPES[type].court.toLowerCase() + " " + brouillon.numero + " — reste à enregistrer");
+}
+function vueEditeur(){
+  var d = brouillon, T = TYPES[d.type];
+  /* devis, pro forma, BL et reçus ne relèvent pas de la certification */
+  var certifiable = estCertifiable(d);
+  var grpDefaut = reglages().groupeDefaut || "E";
+  var clients = Store.tout("clients").slice().sort(function(a,b){ return (a.nom||"").localeCompare(b.nom||""); });
+  var arts = Store.tout("articles");
+
+  var lignes = d.lignes.map(function(l,i){
+    return "<tr>" +
+      '<td><input data-l="' + i + '" data-c="d" list="cat" value="' + echap(l.d) + '" placeholder="Désignation" aria-label="Désignation ligne ' + (i+1) + '"></td>' +
+      '<td style="width:74px"><input class="num" data-l="' + i + '" data-c="q" inputmode="decimal" value="' + echap(l.q) + '" aria-label="Quantité"></td>' +
+      (certifiable ? '<td style="width:62px"><select data-l="' + i + '" data-c="g" aria-label="Groupe de taxation ligne ' + (i+1) + '">' +
+        GROUPES.map(function(g){
+          return '<option value="' + g[0] + '"' + ((l.g || grpDefaut) === g[0] ? " selected" : "") + ">" + g[0] + "</option>";
+        }).join("") + "</select></td>" : "") +
+      (T.prix ? '<td style="width:112px"><input class="num" data-l="' + i + '" data-c="pu" inputmode="numeric" value="' + echap(l.pu) + '" aria-label="Prix unitaire"></td>' +
+        '<td style="width:118px" class="num" data-montant="' + i + '">' + nombre((Number(l.q)||0)*(Number(l.pu)||0)) + "</td>" : "") +
+      '<td style="width:36px"><button class="btn discret" data-suppr-ligne="' + i + '" aria-label="Retirer la ligne">×</button></td></tr>';
+  }).join("");
+
+  var sommes = "";
+  if(T.prix){
+    var tx = Number(d.tauxTva) || Number(reglages().tauxTva) || 18;
+    sommes = '<div class="somme"><dl><dt>Sous-total</dt><dd data-somme="brut">' + fcfa(totalLignes(d)) + "</dd>" +
+      '<dt><label for="e-remise" style="font:inherit;text-transform:none;letter-spacing:0;color:inherit">Remise</label></dt>' +
+      '<dd><input id="e-remise" class="num" data-champ="remise" inputmode="numeric" style="padding:5px 8px" value="' + echap(d.remise||0) + '"></dd>' +
+      '<dt>Montant HT</dt><dd data-somme="ht">' + fcfa(montantHT(d)) + "</dd>" +
+      '<dt><label class="bascule" for="tva-actif"><input type="checkbox" id="tva-actif"' + (d.tva ? " checked" : "") + ">TVA " + tx + " %</label></dt>" +
+      '<dd data-somme="tva">' + fcfa(montantTVA(d)) + "</dd>" +
+      (tauxAib(d) ? "<dt>AIB " + tauxAib(d) + ' %</dt><dd data-somme="aib">' + fcfa(montantAIB(d)) + "</dd>" : "") +
+      '<dt class="total">' + (d.tva ? "Net à payer TTC" : "Net à payer") + '</dt><dd class="total" data-somme="net">' + fcfa(netAPayer(d)) + "</dd>" +
+      (T.reglement ?
+        '<dt><label for="e-regle" style="font:inherit;text-transform:none;letter-spacing:0;color:inherit">' +
+        (T.recu ? "Montant reçu" : "Déjà réglé") + "</label></dt>" +
+        '<dd><input id="e-regle" class="num" data-champ="regle" inputmode="numeric" style="padding:5px 8px" value="' + echap(d.regle||0) + '"></dd>' +
+        '<dt>Reste dû</dt><dd data-somme="reste">' + fcfa(resteDu(d)) + "</dd>" : "") +
+      "</dl></div>";
+  }
+
+  return '<div class="entete-vue"><div><h1>' + T.label +
+    ' <span style="color:var(--marque);font-family:var(--titre)">' + echap(d.numero) + "</span></h1>" +
+    '<p class="sous-titre">' + (d.id ? "Enregistré" : "Nouveau document, pas encore enregistré") +
+      (d.source ? " · issu de " + echap(d.source) : "") + "</p></div>" +
+    '<button class="btn discret" data-vue="documents">← Retour</button></div>' +
+    '<div class="editeur"><div>' +
+      '<div class="carte"><h3>Client et dates</h3><div class="grille">' +
+        '<div class="champ"><label for="e-client">Client enregistré</label><select id="e-client" data-champ="clientId">' +
+        '<option value="">— Saisie libre —</option>' +
+        clients.map(function(c){
+          return '<option value="' + c.id + '"' + (d.clientId === c.id ? " selected" : "") + ">" + echap(c.nom) + "</option>";
+        }).join("") + "</select></div>" +
+        '<div class="champ"><label for="e-nom">Nom sur le document</label><input id="e-nom" data-client="nom" value="' + echap(d.client.nom) + '"></div>' +
+        '<div class="champ"><label for="e-ifu">IFU client</label><input id="e-ifu" data-client="ifu" value="' + echap(d.client.ifu) + '"></div>' +
+        '<div class="champ"><label for="e-tel">Téléphone client</label><input id="e-tel" data-client="tel" value="' + echap(d.client.tel) + '"></div>' +
+        '<div class="champ"><label for="e-adr">Adresse client</label><input id="e-adr" data-client="adresse" value="' + echap(d.client.adresse) + '"></div>' +
+        '<div class="champ"><label for="e-date">Date</label><input id="e-date" type="date" data-champ="date" value="' + echap(d.date) + '"></div>' +
+        (T.reglement && !T.recu ? '<div class="champ"><label for="e-ech">Échéance</label><input id="e-ech" type="date" data-champ="echeance" value="' + echap(d.echeance) + '"></div>' : "") +
+        (T.reglement ? '<div class="champ"><label for="e-mode">Mode de règlement</label>' +
+          '<input id="e-mode" data-champ="mode" list="modes" placeholder="Espèces, Mobile Money…" value="' + echap(d.mode || "") + '">' +
+          '<datalist id="modes"><option value="Espèces"><option value="Mobile Money">' +
+          '<option value="Virement bancaire"><option value="Chèque"></datalist></div>' : "") +
+        (T.avoir ? '<div class="champ"><label for="e-source">Facture d\'origine</label>' +
+          '<input id="e-source" data-champ="source" value="' + echap(d.source||"") + '" placeholder="FAC-2026-004"></div>' : "") +
+        '<div class="champ"><label for="e-objet">' + (T.avoir ? "Motif de l\'avoir" : "Objet") + "</label>" +
+          '<input id="e-objet" data-champ="objet" value="' + echap(d.objet||"") + '" placeholder="' +
+          (T.avoir ? "Retour de marchandise, erreur de facturation…" : "Fourniture de…") + '"></div>' +
+      "</div></div>" +
+      '<div class="carte"><h3>Articles</h3><table class="lignes' + (certifiable ? " certif" : "") + '">' +
+        '<thead><tr><th>Désignation</th><th>Qté</th>' + (certifiable ? "<th>Gr.</th>" : "") +
+        (T.prix ? "<th>P.U.</th><th>Montant</th>" : "") + '<th></th></tr></thead><tbody id="corps-lignes">' + lignes + "</tbody></table>" +
+        '<datalist id="cat">' + arts.map(function(a){ return '<option value="' + echap(a.d) + '">'; }).join("") + "</datalist>" +
+        '<button class="btn discret" id="ajout-ligne" style="margin-top:8px">+ Ajouter une ligne</button>' +
+        '<div id="rpr-info"></div>' + sommes + "</div>" +
+      (certifiable ? '<div class="carte"><h3>Certification e-MECeF</h3><div class="grille">' +
+        '<div class="champ"><label for="e-typeMecef">Type de pièce</label>' +
+        '<select id="e-typeMecef" data-champ="typeMecef">' +
+        TYPES_MECEF.map(function(t){
+          return '<option value="' + t[0] + '"' + ((d.typeMecef || "FV") === t[0] ? " selected" : "") +
+            ">" + t[0] + " · " + t[1] + "</option>";
+        }).join("") + "</select></div>" +
+        '<div class="champ"><label for="e-aib">AIB</label><select id="e-aib" data-champ="aib">' +
+        [["0","Aucun"],["1","1 %"],["5","5 %"]].map(function(a){
+          return '<option value="' + a[0] + '"' + (String(d.aib || "0") === a[0] ? " selected" : "") +
+            ">" + a[1] + "</option>";
+        }).join("") + "</select></div>" +
+        champCert(d,"nim","NIM") + champCert(d,"code","Code MECeF") +
+        champCert(d,"compteurs","Compteurs") + champCert(d,"date","Certifiée le") + "</div>" +
+        '<div style="margin-top:12px">' + champCert(d,"qr","Contenu du QR code (URL de vérification)") + "</div>" +
+        '<p style="color:var(--doux);margin:12px 0 0;font-size:12.5px">Reportez ici ce que renvoie e-MECeF. ' +
+        "Tant que ces champs sont vides, la facture s'imprime sans bande de certification.</p></div>" : "") +
+      '<div class="carte"><h3>Notes et statut</h3>' +
+        '<textarea data-champ="notes" placeholder="Conditions particulières, délai de livraison, référence de commande…">' + echap(d.notes||"") + "</textarea>" +
+        '<div class="grille" style="margin-top:12px"><div class="champ"><label for="e-statut">Statut</label>' +
+        '<select id="e-statut" data-champ="statut">' +
+        [["brouillon","Brouillon"],["envoye","Envoyé au client"],["annule","Annulé"]].map(function(s){
+          return '<option value="' + s[0] + '"' + (d.statut === s[0] ? " selected" : "") + ">" + s[1] + "</option>";
+        }).join("") + "</select></div>" +
+        '<div class="champ"><label>Cachet</label>' +
+        '<label class="bascule" for="cachet-actif" style="align-self:start"><input type="checkbox" id="cachet-actif"' +
+        (d.cachet !== false ? " checked" : "") + ">Apposer le cachet</label></div></div></div>" +
+      '<div class="barre-actions">' +
+        '<button class="btn principal" id="enregistrer">Enregistrer</button>' +
+        '<button class="btn" id="imprimer">Imprimer / PDF</button>' +
+        (d.type === "devis" ? '<button class="btn" data-convertir="proforma">→ Pro forma</button>' : "") +
+        (d.type !== "facture" && d.type !== "recu" && d.type !== "avoir" ? '<button class="btn" data-convertir="facture">→ Facture</button>' : "") +
+        (d.type === "facture" ? '<button class="btn" data-convertir="avoir">→ Avoir</button>' +
+          '<button class="btn" data-convertir="bl">→ Bon de livraison</button><button class="btn" data-convertir="recu">→ Reçu</button>' : "") +
+        (d.id ? '<button class="btn ' + (aConfirmer === "doc" ? "attente" : "danger") + '" id="supprimer" style="margin-left:auto">' +
+          (aConfirmer === "doc" ? "Confirmer la suppression" : "Supprimer") + "</button>" : "") +
+      "</div></div>" +
+      '<div class="cadre-apercu"><div class="barre"><span>Aperçu A4</span>' +
+      '<span style="display:flex;gap:6px"><button class="btn discret" id="bascule-apercu">' +
+      (document.body.classList.contains("apercu") ? "Masquer" : "Afficher") + "</button>" +
+      '<button class="btn discret" id="imprimer2">Imprimer</button></span></div>' +
+      '<div class="scene"><div class="porte" id="porte"></div></div></div>' +
+    "</div>";
+}
+
+/* ---------- le cachet ---------- */
+function cachetSVG(r){
+  var B = "#1A4FAD", P = "JetBrains Mono, ui-monospace, monospace";
+  return '<svg class="cachet" viewBox="0 0 420 420" aria-hidden="true">' +
+    '<defs><path id="cch" d="M 47,210 A 163,163 0 0 1 373,210" fill="none"/>' +
+    '<path id="ccb" d="M 38,210 A 172,172 0 0 0 382,210" fill="none"/></defs>' +
+    '<g fill="none" stroke="' + B + '"><circle cx="210" cy="210" r="203" stroke-width="9"/>' +
+    '<circle cx="210" cy="210" r="186" stroke-width="4"/></g>' +
+    '<text font-family="' + P + '" font-size="24" font-weight="700" letter-spacing="2.5" fill="' + B + '">' +
+    '<textPath href="#cch" startOffset="50%" text-anchor="middle">' + echap(r.nom).toUpperCase() +
+    ' — SOLUTIONS ET SERVICES</textPath></text>' +
+    '<text font-family="' + P + '" font-size="16" font-weight="500" letter-spacing="1.5" fill="' + B + '">' +
+    '<textPath href="#ccb" startOffset="50%" text-anchor="middle">COTONOU · REPUBLIQUE DU BENIN</textPath></text>' +
+    '<g transform="translate(210,118) scale(0.5) translate(-60,-60)">' +
+    '<g stroke="' + B + '" stroke-width="6" stroke-linecap="round">' +
+    '<line x1="60" y1="60" x2="60" y2="14"/><line x1="60" y1="60" x2="106" y2="60"/>' +
+    '<line x1="60" y1="60" x2="60" y2="106"/><line x1="60" y1="60" x2="14" y2="60"/></g>' +
+    '<circle cx="60" cy="14" r="9" fill="' + B + '"/><circle cx="106" cy="60" r="9" fill="' + B + '"/>' +
+    '<circle cx="60" cy="106" r="9" fill="' + B + '"/><circle cx="14" cy="60" r="9" fill="' + B + '"/>' +
+    '<circle cx="60" cy="60" r="13" fill="' + B + '"/><circle cx="60" cy="60" r="5" fill="#fff"/></g>' +
+    '<text x="210" y="186" text-anchor="middle" font-family="' + P + '" font-size="28" font-weight="700" fill="' + B + '">' +
+    '&lt;' + echap(r.nom) + '/&gt;</text>' +
+    '<g font-family="' + P + '" font-size="15" fill="' + B + '" text-anchor="middle">' +
+    '<text x="210" y="214">IFU : ' + echap(r.ifu) + "</text>" +
+    '<text x="210" y="236">RCCM : ' + echap(r.rccm) + "</text></g>" +
+    '<rect x="150" y="248" width="120" height="2.5" fill="' + B + '"/>' +
+    '<text x="210" y="274" text-anchor="middle" font-family="' + P + '" font-size="15" letter-spacing="4" fill="' + B + '">S.A.R.L</text></svg>';
+}
+
+/* ---------- la feuille ---------- */
+function marqueSVG(r){
+  return '<svg viewBox="0 0 340 110" width="206" height="67" role="img" aria-label="' + echap(r.nom) + '">' +
+    '<g transform="translate(4,14) scale(0.7)">' +
+    '<g stroke="#0A0A0A" stroke-width="5" stroke-linecap="round">' +
+    '<line x1="60" y1="60" x2="60" y2="14"/><line x1="60" y1="60" x2="106" y2="60"/>' +
+    '<line x1="60" y1="60" x2="60" y2="106"/><line x1="60" y1="60" x2="14" y2="60"/></g>' +
+    '<circle cx="60" cy="14" r="9" fill="#3B5BFF"/><circle cx="106" cy="60" r="9" fill="#00C2A8"/>' +
+    '<circle cx="60" cy="106" r="9" fill="#FF5B3D"/><circle cx="14" cy="60" r="9" fill="#FFC93C"/>' +
+    '<circle cx="60" cy="60" r="13" fill="#0A0A0A"/><circle cx="60" cy="60" r="5" fill="#fff"/></g>' +
+    '<text x="100" y="56" font-family="Space Grotesk, sans-serif" font-size="25" font-weight="700" letter-spacing="1.2">' +
+    '<tspan fill="#3B5BFF">&lt;</tspan><tspan fill="#0A0A0A">' + echap(r.nom) + '</tspan><tspan fill="#00C2A8">/&gt;</tspan></text>' +
+    '<text x="102" y="76" font-family="JetBrains Mono, monospace" font-size="7.2" letter-spacing="1.4" fill="#6B6B6B">' +
+    echap(r.activite) + "</text></svg>";
+}
+
+function feuilleHTML(d){
+  var T = TYPES[d.type], r = reglages(), cli = d.client || {};
+  var net = netAPayer(d), brut = totalLignes(d), reste = resteDu(d);
+  var tx = T.prix ? tauxTva(d) : 0;
+  var certifiable = estCertifiable(d);
+  var cert = d.cert || {};
+  var grpDefaut = r.groupeDefaut || "E";
+
+  /* en-tete : le nom a gauche, les coordonnees de l'entreprise a droite */
+  var tete = '<div class="tete">' + marqueSVG(r) +
+    '<div class="coord">' + echap(r.adresse).replace(/ — /g, "<br>") + "<br>" +
+    echap(r.tel) + "<br>" + echap(r.email) + "</div></div>" +
+    '<div class="regle"><i class="a"></i><i class="b"></i></div>';
+
+  var repere = '<div class="repere"><span>Cotonou, le <b>' + dateFr(d.date) + "</b></span>" +
+    '<span>Réf. <b>' + echap(d.numero) + "</b></span></div>";
+
+  /* titre du document et references, puis le destinataire */
+  var infos = [];
+  /* le reçu reprend objet, pièce d'origine et mode de règlement dans sa quittance */
+  if(d.objet && !T.recu) infos.push("<b>Objet :</b> " + echap(d.objet));
+  if(d.source && !T.recu) infos.push((T.avoir ? "Avoir sur la facture " : "Établi d'après ") + echap(d.source));
+  if(T.validite) infos.push("Validité de l'offre : " + echap(r.validite));
+  if(T.reglement && !T.recu && d.echeance) infos.push("Échéance de règlement : " + dateFr(d.echeance));
+
+  var ouverture = '<div class="ouverture"><div class="objet">' +
+    '<h2 class="type"><small>PIÈCE ' + T.code + " · " + (d.annee || new Date().getFullYear()) + "</small>" +
+    T.label.toUpperCase() + "</h2>" +
+    (infos.length ? "<p>" + infos.join("<br>") + "</p>" : "") + "</div>" +
+    '<div class="destinataire"><strong>' +
+    (d.type === "recu" ? "Reçu de" : d.type === "bl" ? "Livré à" : "Client") + "</strong>" +
+    '<div class="qui">' + echap(cli.nom || "…") + "</div>" +
+    echap(cli.adresse || "…") + "<br>IFU : " + echap(cli.ifu || "…") +
+    "<br>Tél. : " + echap(cli.tel || "…") + "</div></div>";
+
+  var colGr = certifiable ? '<th class="d" style="width:11mm">Gr.</th>' : "";
+  var cols = T.prix
+    ? '<th style="width:8mm">N°</th><th>Désignation</th><th class="d" style="width:16mm">Qté</th>' +
+      '<th class="d" style="width:26mm">P.U.</th><th class="d" style="width:30mm">Montant</th>' + colGr
+    : '<th style="width:8mm">N°</th><th>Désignation</th><th class="d" style="width:26mm">Qté commandée</th>' +
+      '<th class="d" style="width:26mm">Qté livrée</th>';
+
+  var utiles = (d.lignes||[]).filter(function(l){
+    return String(l.d||"").trim() || Number(l.q) || Number(l.pu);
+  });
+  if(!utiles.length) utiles = [{d:"…", q:"", pu:0}];
+  var corps = utiles.map(function(l,i){
+    return "<tr><td>" + String(i+1).padStart(2,"0") + "</td><td>" + echap(l.d) + '</td><td class="d">' + echap(l.q) + "</td>" +
+      (T.prix ? '<td class="d">' + nombre(l.pu) + '</td><td class="d">' + nombre((Number(l.q)||0)*(Number(l.pu)||0)) + "</td>"
+              : '<td class="d remplir"></td>') +
+      (certifiable ? '<td class="d">' + echap(l.g || grpDefaut) + "</td>" : "") + "</tr>";
+  }).join("");
+
+  /* le detail des totaux a droite, le net a payer en barre pleine largeur */
+  var totaux = "";
+  if(T.prix){
+    var det = [];
+    if(Number(d.remise)){
+      det.push(["Sous-total", nombre(brut)]);
+      det.push(["Remise", "− " + nombre(d.remise)]);
+    }
+    if(tx){
+      det.push(["Montant HT", nombre(montantHT(d))]);
+      det.push(["TVA " + tx + " %", nombre(montantTVA(d))]);
+    } else if(tauxAib(d)){
+      det.push(["Montant HT", nombre(montantHT(d))]);
+    }
+    if(tauxAib(d)) det.push(["AIB " + tauxAib(d) + " %", nombre(montantAIB(d))]);
+    if(T.reglement && !T.recu && Number(d.regle) > 0){
+      det.push(["Déjà réglé", nombre(d.regle)]);
+      det.push(["Reste dû", nombre(reste)]);
+    }
+    totaux = (det.length && !T.recu ? '<div class="totaux"><table>' + det.map(function(l){
+        return "<tr><td>" + l[0] + '</td><td class="d">' + l[1] + "</td></tr>";
+      }).join("") + "</table></div>" : "") +
+      '<div class="barre-net"><span class="lib">' +
+      (T.avoir ? "Montant de l'avoir" : T.recu ? "Montant reçu" : "Net à payer" + (tx ? " TTC" : "")) + "</span>" +
+      '<span class="val">' + nombre(T.recu ? (Number(d.regle) || net) : net) + "<i>F CFA</i></span></div>";
+  }
+
+  /* le recu ne liste pas les articles : il constate un paiement */
+  var quittance = "";
+  if(T.recu){
+    var recu = Number(d.regle) || net;
+    var du = Math.max(0, net - recu);
+    var l = [];
+    l.push(["Re\u00e7u de", "<b>" + echap(cli.nom || "\u2026") + "</b>"]);
+    if(d.objet || d.source){
+      l.push(["En r\u00e8glement de", echap(d.objet || "") +
+        (d.objet && d.source ? " \u2014 " : "") + (d.source ? "pi\u00e8ce " + echap(d.source) : "")]);
+    }
+    l.push(["Mode de r\u00e8glement", echap(d.mode || "\u2026")]);
+    if(du > 0) l.push(["Reste d\u00fb", '<span class="du">' + nombre(du) + " F CFA</span>"]);
+    quittance = '<div class="quittance"><dl>' + l.map(function(x){
+      return "<dt>" + x[0] + "</dt><dd>" + x[1] + "</dd>";
+    }).join("") + "</dl></div>";
+  }
+
+  var somme = T.recu ? (Number(d.regle) || net) : net;
+  var intro = T.avoir ? "Arrêté le présent avoir à la somme de : "
+    : T.recu ? "Reçu la somme de : "
+    : (d.type === "devis" ? "Arrêté le présent devis à la somme de : "
+    : "Arrêtée la présente " + (d.type === "proforma" ? "facture pro forma" : "facture") + " à la somme de : ");
+  var mots = enLettres(somme);
+  /* million et milliard sont des noms : ils appellent « de » quand le compte tombe rond */
+  var liaison = /milli(on|ard)s?$/.test(mots) ? " de francs CFA" : " francs CFA";
+  var lettres = T.prix ? '<div class="lettres">' + intro + mots + liaison +
+    (d.tva ? " toutes taxes comprises" : "") + ".</div>" : "";
+
+  var moyens = [r.banque && ("banque " + r.banque), r.compte && ("compte " + r.compte),
+                r.momo && ("Mobile Money " + r.momo)].filter(Boolean).map(echap).join("  ·  ");
+  /* sur un recu, le mode figure deja dans la quittance : cette ligne dit comment payer */
+  var encaissement = d.type === "facture" && moyens
+    ? '<div class="notes">Règlement : ' + moyens + "</div>" : "";
+
+  /* ZADNA signe toujours a droite ; a gauche, ce que le client doit remplir
+     change selon la nature du document */
+  var signature = '<div class="sig-d">' + (d.cachet !== false ? cachetSVG(r) : "") +
+    "<b>Pour " + echap(r.nom) + "</b>" +
+    '<span class="qui">' + echap(r.signataire) + "</span><br>" + echap(r.fonction) + "</div>";
+
+  var cote_client;
+  if(T.recu){
+    /* un recu est signe par celui qui encaisse, pas par le client */
+    cote_client = '<div class="compact"><b>Acquit</b>' +
+      "Re\u00e7u \u00e9tabli en un exemplaire et remis au client.</div>";
+  } else if(d.type === "bl"){
+    /* a la livraison, on veut le nom et la qualite de qui receptionne */
+    cote_client = '<div class="compact"><b>R\u00e9ception par le client</b>' +
+      '<div class="recu-par">Nom : <i></i><br>Qualit\u00e9 : <i></i><br>Date et signature</div></div>';
+  } else {
+    /* Devis, pro forma, facture et avoir ne portent plus de bloc de signature
+       client : seule la livraison se fait contresigner. */
+    cote_client = "";
+  }
+  var paraphes = '<div class="paraphes">' + cote_client + signature + "</div>";
+
+  /* la bande de certification : elle ne s imprime que si e-MECeF a repondu */
+  var bande = "";
+  if(certifiable && (cert.code || cert.nim || cert.qr)){
+    var img = qrDataURL(cert.qr, 240);
+    var elts = [];
+    if(cert.nim) elts.push(["NIM", echap(cert.nim)]);
+    if(cert.code) elts.push(["Code MECeF", echap(cert.code)]);
+    if(cert.compteurs) elts.push(["Compteurs", echap(cert.compteurs)]);
+    if(cert.date) elts.push(["Certifiée le", echap(cert.date)]);
+    bande = '<div class="certif">' +
+      (img ? '<div class="qr"><img src="' + img + '" alt="QR de vérification e-MECeF"></div>' : "") +
+      '<div class="corps"><div class="titre">Facture normalisée · ' +
+      echap(d.typeMecef || "FV") + ' · e-MECeF</div><dl>' +
+      elts.map(function(x){ return "<dt>" + x[0] + "</dt><dd>" + x[1] + "</dd>"; }).join("") +
+      "</dl></div></div>";
+  }
+
+  var pied = '<div class="pied"><div class="regle"><i class="a"></i><i class="b"></i></div>' +
+    '<div class="mentions"><span><b>' + echap(r.forme || r.nom) + "</b><br>RCCM : " + echap(r.rccm) +
+    "  ·  IFU : " + echap(r.ifu) + "</span>" +
+    '<span class="sceau-pale">&lt;ZSX/&gt;</span>' +
+    '<span class="droite">' + echap(r.tel) + "<br>" + echap(r.email) + "</span></div></div>";
+
+  return '<div class="feuille">' + tete + repere + ouverture +
+    (T.recu ? "" : '<table class="art"><thead><tr>' + cols + "</tr></thead><tbody>" + corps + "</tbody></table>") +
+    totaux + lettres + quittance + encaissement +
+    (d.notes ? '<div class="notes">' + echap(d.notes) + "</div>" : "") +
+    (T.prix && !T.recu ? '<div class="notes">' +
+      (d.tva ? "Montants exprimés en francs CFA. Taxe sur la valeur ajoutée au taux de " + tx + " %."
+             : echap(r.mention)) + "</div>" : "") +
+    (d.type === "bl" ? '<div class="notes">Le client reconnaît avoir reçu les articles ci-dessus en bon état et en bonne quantité.</div>' : "") +
+    bande + paraphes + pied + "</div>";
+}
+
+function refArticle(designation){
+  var q = String(designation || "").trim().toLowerCase();
+  if(!q) return null;
+  var l = Store.tout("articles");
+  for(var i = 0; i < l.length; i++){
+    if(l[i].bs && String(l[i].d).trim().toLowerCase() === q) return l[i];
+  }
+  return null;
+}
+function majRPR(){
+  var zone = document.getElementById("rpr-info");
+  if(!zone || !brouillon) return;
+  var lignes = [];
+  brouillon.lignes.forEach(function(l,i){
+    var a = refArticle(l.d);
+    if(!a) return;
+    var pu = Number(l.pu) || 0;
+    var trop = pu > a.bs;
+    lignes.push('<div class="rpr' + (trop ? " depasse" : "") + '"><b>Ligne ' + (i+1) + "</b> " +
+      echap(a.d) + " — répertoire de l'État : " + nombre(a.bi) + " à " + nombre(a.bs) + " F CFA" +
+      (trop ? " · votre prix dépasse le plafond de " + nombre(pu - a.bs) + " F CFA" : "") + "</div>");
+  });
+  zone.innerHTML = lignes.length
+    ? '<div class="rpr-bloc">' + lignes.join("") + "</div>"
+    : "";
+}
+function majApercu(){
+  var porte = document.getElementById("porte");
+  if(!porte || !brouillon) return;
+  porte.innerHTML = feuilleHTML(brouillon);
+  var scene = porte.parentElement;
+  var z = Math.min(1, (scene.clientWidth - 28) / (210 * 96 / 25.4));
+  porte.style.transform = "scale(" + z + ")";
+  scene.style.height = Math.round(297 * 96 / 25.4 * z + 4) + "px";
+}
+function majSommes(){
+  var d = brouillon;
+  d.lignes.forEach(function(l,i){
+    var c = document.querySelector('[data-montant="' + i + '"]');
+    if(c) c.textContent = nombre((Number(l.q)||0) * (Number(l.pu)||0));
+  });
+  function put(k,v){ var e = document.querySelector('[data-somme="' + k + '"]'); if(e) e.textContent = v; }
+  put("brut", fcfa(totalLignes(d)));
+  put("ht", fcfa(montantHT(d)));
+  put("tva", fcfa(montantTVA(d)));
+  put("aib", fcfa(montantAIB(d)));
+  put("net", fcfa(netAPayer(d)));
+  put("reste", fcfa(resteDu(d)));
+  var lib = document.querySelector(".somme dt.total");
+  if(lib) lib.textContent = d.tva ? "Net à payer TTC" : "Net à payer";
+  majRPR();
+  majApercu();
+}
+/* Le pied de page est en position absolue dans la feuille : il se pose donc au bas
+   du bloc, pas au bas du papier. On arrondit la hauteur du bloc au nombre entier
+   de pages A4 qu il occupe, et le pied retombe exactement en bas de la derniere. */
+function calerSurA4(f){
+  if(!f) return;
+  var A4 = 297 * 96 / 25.4;
+  f.style.minHeight = "0";
+  var pages = Math.max(1, Math.ceil((f.getBoundingClientRect().height - 2) / A4));
+  f.style.minHeight = (pages * 297) + "mm";
+  return pages;
+}
+function imprimer(){
+  var zone = document.getElementById("impression");
+  zone.innerHTML = feuilleHTML(brouillon);
+  calerSurA4(zone.querySelector(".feuille"));
+  window.print();
+}
+
+
+/* ======================= chartes ======================= */
+/* Chaque maison garde son identité : la charte ne fait que réécrire les
+   variables CSS, la maquette de la feuille se choisit plus bas. */
+var CHARTES = {
+  zadna: {},
+  nassra: {
+    clair:{ "--papier":"#FBF8F3", "--surface":"#FFFFFF", "--surface2":"#F5EFE5",
+            "--ligne":"#E5DACA", "--ligne-forte":"#CDBCA5",
+            "--encre":"#241A14", "--doux":"#6F6157", "--tres-doux":"#9C8C7E",
+            "--marque":"#5A2E1E", "--ocre":"#C98A3C", "--ivoire":"#F2E9DA",
+            "--vert":"#2C6A4E", "--vert-fond":"#E4F0E8",
+            "--brique":"#A6402A", "--brique-fond":"#F8E6E1",
+            "--bleu":"#2B5470", "--bleu-fond":"#E4EDF3" },
+    sombre:{ "--papier":"#17120F", "--surface":"#211A15", "--surface2":"#2A211A",
+            "--ligne":"#3A2E25", "--ligne-forte":"#4E3E32",
+            "--encre":"#F3E9DE", "--doux":"#AC9A8A", "--tres-doux":"#87776A",
+            "--marque":"#E8BE92", "--ocre":"#D79B4E", "--ivoire":"#2E241C",
+            "--vert":"#7CC69C", "--vert-fond":"#1D2E25",
+            "--brique":"#E79178", "--brique-fond":"#331F1A",
+            "--bleu":"#8CB6D0", "--bleu-fond":"#1B2831" }
+  }
+};
+var charteCourante = "zadna";
+
+function nuitTombee(){
+  var t = document.documentElement.getAttribute("data-theme");
+  if(t === "dark") return true;
+  if(t === "light") return false;
+  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function appliquerCharte(code){
+  charteCourante = CHARTES[code] ? code : "zadna";
+  var c = CHARTES[charteCourante];
+  var st = document.documentElement.style;
+  /* on efface d'abord : sans ça, passer de NASSRA à ZADNA laisserait les
+     variables brunes en place, ZADNA n'ayant rien à réécrire */
+  Object.keys(CHARTES.nassra.clair).forEach(function(k){ st.removeProperty(k); });
+  var jeu = c.clair ? (nuitTombee() ? c.sombre : c.clair) : null;
+  if(jeu) Object.keys(jeu).forEach(function(k){ st.setProperty(k, jeu[k]); });
+  var nom = document.querySelector(".sceau .nom");
+  if(nom) nom.innerHTML = charteCourante === "nassra"
+    ? echap(reglages().nom || "NASSRA")
+    : '<span style="color:var(--ocre)">&lt;</span><span style="color:var(--encre)">' +
+      echap(reglages().nom || "ZADNA S.X") + '</span><span style="color:var(--ocre)">/&gt;</span>';
+}
+
+if(window.matchMedia){
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){
+    appliquerCharte(charteCourante);
+  });
+}
+
+/* ======================= portail ======================= */
+/* Rien ne s'affiche avant la connexion : l'app entière reste masquée tant
+   qu'on ne sait pas qui entre ni dans quel comptoir. */
+var Session = { email:null, comptoirs:[] };
+
+function portail(html){ document.getElementById("portail-corps").innerHTML = html; }
+
+function demarrer(){
+  try {
+    sb = window.supabase.createClient(SB_URL, SB_CLE);
+  } catch(e){
+    portail('<div class="erreur">Service injoignable. Vérifiez votre connexion, puis rechargez la page.</div>');
+    return;
+  }
+  sb.auth.getSession().then(function(s){
+    if(s.data && s.data.session) apresConnexion();
+    else montrerConnexion();
+  });
+}
+
+function montrerConnexion(msg, mode){
+  var inscription = mode === "creer";
+  portail(
+    "<h2>" + (inscription ? "Créer votre accès" : "Connexion") + "</h2>" +
+    '<p class="aide">' + (inscription
+      ? "Votre adresse doit figurer parmi les accès autorisés, sinon le compte ne verra aucun comptoir."
+      : "Vos documents vous suivent d'un appareil à l'autre.") + "</p>" +
+    (msg ? '<div class="erreur">' + echap(msg) + "</div>" : "") +
+    '<div class="champ"><label for="p-email">Adresse e-mail</label>' +
+    '<input id="p-email" type="email" autocomplete="username" inputmode="email"></div>' +
+    '<div class="champ"><label for="p-mdp">Mot de passe</label>' +
+    '<input id="p-mdp" type="password" autocomplete="' + (inscription ? "new-password" : "current-password") + '"></div>' +
+    '<button class="btn principal" id="p-valider">' + (inscription ? "Créer l'accès" : "Se connecter") + "</button>" +
+    '<button class="lien" id="p-bascule">' +
+    (inscription ? "J'ai déjà un accès" : "Première connexion ? Créer mon accès") + "</button>"
+  );
+  document.getElementById("p-bascule").onclick = function(){
+    montrerConnexion("", inscription ? "entrer" : "creer");
+  };
+  document.getElementById("p-valider").onclick = function(){ soumettreConnexion(inscription); };
+  document.getElementById("p-mdp").onkeydown = function(e){
+    if(e.key === "Enter") soumettreConnexion(inscription);
+  };
+  var e = document.getElementById("p-email"); if(e) e.focus();
+}
+
+function soumettreConnexion(inscription){
+  var email = (document.getElementById("p-email").value || "").trim();
+  var mdp = document.getElementById("p-mdp").value || "";
+  if(!email || !mdp){
+    montrerConnexion("Renseignez votre adresse et votre mot de passe.", inscription ? "creer" : "entrer");
+    return;
+  }
+  var btn = document.getElementById("p-valider");
+  btn.disabled = true; btn.textContent = "Un instant…";
+  var p = inscription
+    ? sb.auth.signUp({email:email, password:mdp})
+    : sb.auth.signInWithPassword({email:email, password:mdp});
+  p.then(function(r){
+    if(r.error){
+      montrerConnexion(traduireErreurAuth(r.error.message), inscription ? "creer" : "entrer");
+      document.getElementById("p-email").value = email;
+      return;
+    }
+    /* Sans session après une inscription, c'est que la confirmation par
+       courriel est exigée : le dire, plutôt que de laisser un écran mort. */
+    if(!r.data || !r.data.session){
+      portail("<h2>Vérifiez votre boîte</h2>" +
+        '<p class="aide">Un message de confirmation part vers <b>' + echap(email) +
+        "</b>. Ouvrez le lien qu'il contient, puis revenez vous connecter.</p>" +
+        '<button class="lien" id="p-retour">Revenir à la connexion</button>');
+      document.getElementById("p-retour").onclick = function(){ montrerConnexion(); };
+      return;
+    }
+    apresConnexion();
+  });
+}
+
+function traduireErreurAuth(m){
+  m = String(m || "");
+  if(/Invalid login/i.test(m))        return "Adresse ou mot de passe incorrect.";
+  if(/already registered/i.test(m))   return "Cet accès existe déjà — connectez-vous.";
+  if(/at least|should be at least/i.test(m)) return "Le mot de passe doit faire au moins 6 caractères.";
+  if(/Email not confirmed/i.test(m))  return "Adresse pas encore confirmée : ouvrez le lien reçu par courriel.";
+  if(/rate limit|too many/i.test(m))  return "Trop de tentatives. Patientez une minute.";
+  return m;
+}
+
+function apresConnexion(){
+  portail('<p class="attente">Chargement de vos comptoirs…</p>');
+  return sb.auth.getUser().then(function(u){
+    Session.email = (u.data && u.data.user) ? u.data.user.email : "";
+    return sb.from("comptoirs").select("code,nom").order("nom");
+  }).then(function(r){
+    if(r.error) return echecPortail(r.error.message);
+    Session.comptoirs = r.data || [];
+    /* La liste blanche filtre côté base : une liste vide veut dire que ce
+       compte n'est autorisé nulle part, pas qu'il n'existe aucun comptoir. */
+    if(!Session.comptoirs.length){
+      return echecPortail("Le compte " + Session.email + " n'a accès à aucun comptoir. " +
+        "Faites ajouter cette adresse aux accès autorisés.");
+    }
+    var dernier = null;
+    try { dernier = localStorage.getItem("comptoir:dernier"); } catch(e){}
+    var connu = Session.comptoirs.some(function(c){ return c.code === dernier; });
+    if(dernier && connu) return ouvrirComptoir(dernier);
+    if(Session.comptoirs.length === 1) return ouvrirComptoir(Session.comptoirs[0].code);
+    montrerComptoirs();
+  });
+}
+
+function echecPortail(msg){
+  portail('<div class="erreur">' + echap(msg) + "</div>" +
+    '<button class="lien" id="p-sortir">Se déconnecter</button>');
+  document.getElementById("p-sortir").onclick = seDeconnecter;
+}
+
+function montrerComptoirs(){
+  portail("<h2>Quel comptoir ?</h2>" +
+    '<p class="aide">Connecté comme ' + echap(Session.email) + "</p>" +
+    '<div class="choix-comptoir">' +
+    Session.comptoirs.map(function(c){
+      return '<button data-comptoir="' + echap(c.code) + '"><span>' +
+        '<span class="cnom">' + echap(c.nom) + "</span>" +
+        '<span class="ccode">' + echap(c.code) + "</span></span></button>";
+    }).join("") + "</div>" +
+    '<button class="lien" id="p-sortir">Se déconnecter</button>');
+  Array.prototype.forEach.call(document.querySelectorAll("[data-comptoir]"), function(b){
+    b.onclick = function(){ ouvrirComptoir(b.getAttribute("data-comptoir")); };
+  });
+  document.getElementById("p-sortir").onclick = seDeconnecter;
+}
+
+function ouvrirComptoir(code){
+  try { localStorage.setItem("comptoir:dernier", code); } catch(e){}
+  var c = Session.comptoirs.filter(function(x){ return x.code === code; })[0];
+  appliquerCharte(code);
+  document.getElementById("portail").hidden = true;
+  document.querySelector(".app").hidden = false;
+  document.title = "Comptoir " + ((c && c.nom) || code);
+  var el = document.getElementById("etat-compte");
+  if(el) el.textContent = Session.email || "";
+  Store.init(code);
+}
+
+function changerDeComptoir(){
+  try { localStorage.removeItem("comptoir:dernier"); } catch(e){}
+  Store.canaux.forEach(function(c){ try { sb.removeChannel(c); } catch(e){} });
+  Store.canaux = [];
+  vue = "bord"; brouillon = null; formulaire = null;
+  document.querySelector(".app").hidden = true;
+  document.getElementById("portail").hidden = false;
+  montrerComptoirs();
+}
+
+function seDeconnecter(){
+  var fin = function(){
+    try { localStorage.removeItem("comptoir:dernier"); } catch(e){}
+    location.reload();
+  };
+  try { sb.auth.signOut().then(fin, fin); } catch(e){ fin(); }
+}
+
+/* ======================= interactions ======================= */
+document.addEventListener("click", function(e){
+  function c(s){ return e.target.closest(s); }
+  var el;
+
+  if((el = c("[data-vue]"))){ aller(el.dataset.vue); return; }
+  if((el = c("[data-neuf]"))){ nouveauDoc(el.dataset.neuf); return; }
+  if((el = c("[data-convertir]"))){ convertir(el.dataset.convertir); return; }
+
+  if((el = c("[data-suppr]"))){
+    e.stopPropagation();
+    var cle = el.dataset.suppr, part = cle.split(":");
+    if(aConfirmer === cle){ aConfirmer = null; Store.retirer(part[0], part[1]); }
+    else { aConfirmer = cle; rendre(true); }
+    return;
+  }
+  if((el = c("[data-form-neuf]"))){
+    formulaire = {col:el.dataset.formNeuf, obj:{}};
+    aConfirmer = null; rendre(true);
+    var p = document.querySelector("#form-panneau input"); if(p) p.focus();
+    return;
+  }
+  if((el = c("[data-modif]"))){
+    var m = el.dataset.modif.split(":");
+    var o = Store.un(m[0], m[1]);
+    if(o){ formulaire = {col:m[0], obj:JSON.parse(JSON.stringify(o))}; aConfirmer = null; rendre(true); }
+    return;
+  }
+  if(c("#form-annul")){ formulaire = null; rendre(true); return; }
+  if(c("#form-enr")){
+    var f = formulaire;
+    if(!f) return;
+    var vide = f.col === "clients" ? !String(f.obj.nom||"").trim() : !String(f.obj.d||"").trim();
+    if(vide){ signal(f.col === "clients" ? "Le nom est obligatoire" : "La désignation est obligatoire"); return; }
+    if(f.col === "articles") f.obj.pu = Number(f.obj.pu) || 0;
+    formulaire = null;
+    Store.poser(f.col, f.obj);
+    rendre(true);
+    signal("Enregistré");
+    return;
+  }
+
+  if((el = c("[data-ouvrir]"))){ ouvrirDoc(el.dataset.ouvrir); return; }
+
+  if(c("#ajout-ligne")){ brouillon.lignes.push({d:"",q:1,pu:0}); rendre(true); return; }
+  if((el = c("[data-suppr-ligne]"))){
+    brouillon.lignes.splice(Number(el.dataset.supprLigne), 1);
+    if(!brouillon.lignes.length) brouillon.lignes.push({d:"",q:1,pu:0});
+    rendre(true); return;
+  }
+  if(c("#enregistrer")){
+    var d = brouillon;
+    if(!String(d.client.nom || "").trim()){ signal("Indiquez au moins le nom du client"); return; }
+    if(TYPES[d.type].avoir && !String(d.source || "").trim()){
+      signal("Indiquez la facture d'origine de l'avoir");
+      return;
+    }
+    if(!d.id){
+      /* un autre appareil a pu prendre ce numéro entre-temps */
+      var pris = Store.tout("documents").some(function(x){ return x.numero === d.numero; });
+      if(pris){
+        var n = prochainNumero(d.type);
+        d.seq = n.seq; d.annee = n.annee; d.numero = n.numero;
+        signal("Numéro déjà pris ailleurs — renuméroté en " + d.numero);
+      }
+      d.id = uid();
+    }
+    Store.poser("documents", JSON.parse(JSON.stringify(d)));
+    rendre(true);
+    signal(TYPES[d.type].court + " " + d.numero + " enregistré");
+    return;
+  }
+  if(c("#bascule-apercu")){
+    var ouvert = document.body.classList.toggle("apercu");
+    el = document.getElementById("bascule-apercu");
+    if(el) el.textContent = ouvert ? "Masquer" : "Afficher";
+    if(ouvert) majApercu();
+    return;
+  }
+  if(c("#changer-comptoir")){ changerDeComptoir(); return; }
+  if(c("#imprimer") || c("#imprimer2")){ imprimer(); return; }
+  if(c("#supprimer")){
+    if(aConfirmer === "doc"){ aConfirmer = null; Store.retirer("documents", brouillon.id); aller("documents"); }
+    else { aConfirmer = "doc"; rendre(true); }
+    return;
+  }
+
+  if(c("#enr-reglages")){
+    var r = reglages();
+    Array.prototype.forEach.call(document.querySelectorAll("[data-reglage]"), function(i){
+      r[i.dataset.reglage] = i.value;
+    });
+    r.id = "entreprise";
+    Store.poser("reglages", r);
+    signal("Réglages enregistrés");
+    return;
+  }
+  if(c("#export")){
+    var paquet = {exporte:new Date().toISOString()};
+    COLS.forEach(function(k){ paquet[k] = Store.tout(k); });
+    var texte = JSON.stringify(paquet, null, 2);
+    var zone = document.getElementById("zone-export");
+    var dl = null;
+    try { if(window.claude && typeof claude.use === "function") dl = claude.use("downloads"); } catch(err){ dl = null; }
+    Promise.resolve(dl).catch(function(){ return null; }).then(function(api){
+      if(api && api.save){
+        return api.save({filename:"zadna-sauvegarde-" + auj() + ".json", data:texte})
+          .then(function(){ signal("Sauvegarde enregistrée"); })
+          .catch(function(){ montrerTexte(zone, texte); });
+      }
+      montrerTexte(zone, texte);
+    });
+    return;
+  }
+});
+function montrerTexte(zone, texte){
+  if(!zone) return;
+  zone.innerHTML = '<p style="color:var(--doux);margin:14px 0 6px">Copiez ce contenu dans un fichier <code>.json</code> :</p>' +
+    '<textarea readonly style="min-height:180px;font-family:ui-monospace,monospace;font-size:12px"></textarea>';
+  zone.querySelector("textarea").value = texte;
+  signal("Sauvegarde affichée ci-dessous");
+}
+
+document.addEventListener("input", function(e){
+  var t = e.target;
+
+  if(t.id === "f-texte"){
+    filtre.texte = t.value;
+    var pos = t.selectionStart;
+    rendre(true);
+    var n = document.getElementById("f-texte");
+    if(n){ n.focus(); try { n.setSelectionRange(pos, pos); } catch(err){} }
+    return;
+  }
+  if(t.id === "c-texte"){
+    filtreCat.texte = t.value;
+    var p2 = t.selectionStart;
+    rendre(true);
+    var n2 = document.getElementById("c-texte");
+    if(n2){ n2.focus(); try { n2.setSelectionRange(p2, p2); } catch(err){} }
+    return;
+  }
+  if(formulaire && t.dataset.form){ formulaire.obj[t.dataset.form] = t.value; return; }
+  if(!brouillon) return;
+
+  if(t.id === "tva-actif"){
+    brouillon.tva = t.checked;
+    if(t.checked && !brouillon.tauxTva) brouillon.tauxTva = Number(reglages().tauxTva) || 18;
+    majSommes();
+    return;
+  }
+  if(t.id === "cachet-actif"){ brouillon.cachet = t.checked; majApercu(); return; }
+
+  if(t.dataset.l !== undefined){
+    var i = Number(t.dataset.l), l = brouillon.lignes[i], c = t.dataset.c;
+    l[c] = (c === "d" || c === "g") ? t.value : (t.value === "" ? "" : Number(t.value));
+    if(c === "d"){
+      var a = Store.tout("articles").filter(function(x){ return x.d === t.value; })[0];
+      var champPu = document.querySelector('[data-l="' + i + '"][data-c="pu"]');
+      if(a && champPu && !Number(l.pu)){ l.pu = a.pu; champPu.value = a.pu; }
+    }
+    majSommes();
+    return;
+  }
+  if(t.dataset.client){ brouillon.client[t.dataset.client] = t.value; majApercu(); return; }
+  if(t.dataset.cert){
+    if(!brouillon.cert) brouillon.cert = {};
+    brouillon.cert[t.dataset.cert] = t.value;
+    majApercu(); return;
+  }
+
+  var ch = t.dataset.champ;
+  if(ch){
+    if(ch === "clientId"){
+      brouillon.clientId = t.value;
+      var x = Store.un("clients", t.value);
+      if(x){
+        brouillon.client = {nom:x.nom||"", adresse:x.adresse||"", ifu:x.ifu||"", tel:x.tel||""};
+        rendre(true); return;
+      }
+    } else if(ch === "aib"){
+      /* le libellé de la ligne AIB porte le taux : il faut reconstruire le bloc */
+      brouillon.aib = t.value; rendre(true); return;
+    } else if(ch === "remise" || ch === "regle"){
+      brouillon[ch] = Number(t.value) || 0; majSommes(); return;
+    } else brouillon[ch] = t.value;
+    majApercu();
+  }
+});
+
+document.addEventListener("change", function(e){
+  if(e.target.id === "f-type"){ filtre.type = e.target.value; rendre(true); return; }
+  if(e.target.id === "f-statut"){ filtre.statut = e.target.value; rendre(true); return; }
+  if(e.target.id === "c-source"){ filtreCat.source = e.target.value; rendre(true); return; }
+  if(e.target.id === "c-famille"){ filtreCat.famille = e.target.value; rendre(true); return; }
+  if(e.target.id === "import"){
+    var f = e.target.files && e.target.files[0];
+    if(!f) return;
+    var lecteur = new FileReader();
+    lecteur.onload = function(){
+      try {
+        var p = JSON.parse(lecteur.result);
+        COLS.forEach(function(col){
+          if(Array.isArray(p[col])) p[col].forEach(function(o){ Store.poser(col, o); });
+        });
+        signal("Sauvegarde importée");
+      } catch(err){ signal("Fichier illisible"); }
+    };
+    lecteur.readAsText(f);
+  }
+});
+
+window.addEventListener("resize", function(){ if(vue === "editeur") majApercu(); });
+
+demarrer();
+</script>
