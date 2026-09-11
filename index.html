@@ -1565,11 +1565,13 @@ function feuilleNassra(d){
     bandeCertif(d) +
     '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? cachetNassra(r) : "") +
     "<b>Pour " + echap(r.nom) + "</b>" + echap(r.signataire) + "<br>" + echap(r.fonction) + "</div>" +
-    /* Seule la livraison se fait contresigner par le client. */
+    /* La livraison se fait contresigner, et le devis se fait accepter. */
     (d.type === "bl"
       ? '<div class="droite"><b>Cachet et signature du client</b>Date, signature, cachet</div>'
+      : d.type === "devis"
+      ? '<div class="droite"><b>Bon pour accord du client</b>Date, signature, cachet</div>'
       : "") + "</div>" +
-    '<div class="pied"><b>' + echap(r.nom) + "</b> — Entreprise individuelle<br>RCCM : " + echap(r.rccm) +
+    '<div class="pied"><b>' + echap(r.nom) + "</b> — " + echap(r.forme || "") + "<br>RCCM : " + echap(r.rccm) +
     "  ·  IFU : " + echap(r.ifu) + "  ·  Tél. : " + echap(r.tel) + "  ·  " + echap(r.email) + "<br>" +
     echap(r.adresse) + "</div></div>";
 }
@@ -1732,9 +1734,12 @@ function feuilleZadna(d){
     /* a la livraison, on veut le nom et la qualite de qui receptionne */
     cote_client = '<div class="compact"><b>R\u00e9ception par le client</b>' +
       '<div class="recu-par">Nom : <i></i><br>Qualit\u00e9 : <i></i><br>Date et signature</div></div>';
+  } else if(d.type === "devis"){
+    /* Le devis se fait contresigner : cette case est ce qui vaut acceptation,
+       et sans elle un devis accepté ne garde aucune trace signée. */
+    cote_client = "<div><b>Bon pour accord du client</b>Date, signature, cachet</div>";
   } else {
-    /* Devis, pro forma, facture et avoir ne portent plus de bloc de signature
-       client : seule la livraison se fait contresigner. */
+    /* Pro forma, facture et avoir ne se contresignent pas. */
     cote_client = "";
   }
   var paraphes = '<div class="paraphes">' + cote_client + signature + "</div>";
