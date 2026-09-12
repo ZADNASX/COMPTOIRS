@@ -148,6 +148,8 @@ table.lignes th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;c
   text-align:left;padding:0 6px 6px;font-weight:600}
 table.lignes td{padding:3px}
 table.lignes input{padding:7px 8px}
+table.lignes input.ref-rpr{margin-top:4px;padding:4px 8px;font-size:11.5px;
+  font-family:var(--mono);color:var(--doux)}
 .somme{display:flex;justify-content:flex-end;padding:12px 4px 0}
 .somme dl{margin:0;display:grid;grid-template-columns:auto 130px;gap:6px 18px;text-align:right;align-items:center}
 .somme dt{color:var(--doux)}
@@ -993,7 +995,8 @@ function panneauFormulaire(){
     ? champTexte("nom","Nom ou raison sociale",o.nom) + champTexte("tel","Téléphone",o.tel) +
       champTexte("ifu","IFU",o.ifu) + champTexte("email","E-mail",o.email) + champTexte("adresse","Adresse",o.adresse)
     : champTexte("d","Désignation",o.d) + champTexte("u","Unité (pièce, sac, m²…)",o.u) +
-      champTexte("pu","Prix unitaire (F CFA)",o.pu,"numeric");
+      champTexte("pu","Prix unitaire (F CFA)",o.pu,"numeric") +
+      champTexte("code","Référence au Répertoire",o.code);
   return '<div class="carte" id="form-panneau" style="margin-bottom:16px">' +
     "<h3>" + (o.id ? "Modifier" : (formulaire.col === "clients" ? "Nouveau client" : "Nouvel article")) + "</h3>" +
     '<div class="grille">' + champs + "</div>" +
@@ -1053,7 +1056,9 @@ function vueCatalogue(){
   var corps = vis.map(function(a){
     var enAttente = aConfirmer === "articles:" + a.id;
     return '<tr data-modif="articles:' + a.id + '"><td>' + echap(a.d) +
-      (a.famille ? '<div style="color:var(--tres-doux);font-size:11.5px">' + echap(a.famille) + "</div>" : "") + "</td>" +
+      (a.famille || a.code ? '<div style="color:var(--tres-doux);font-size:11.5px">' +
+        echap(a.famille || "") + (a.famille && a.code ? "  ·  " : "") +
+        (a.code ? "Réf. " + echap(a.code) : "") + "</div>" : "") + "</td>" +
       '<td data-lib="Unité">' + echap(a.u || "—") + "</td>" +
       '<td class="num" data-lib="Mon prix">' + (Number(a.pu) ? nombre(a.pu) : '<span style="color:var(--tres-doux)">à fixer</span>') + "</td>" +
       '<td class="num" data-lib="Répertoire">' + (a.bs ? nombre(a.bi) + " – " + nombre(a.bs) : "—") + "</td>" +
@@ -1255,7 +1260,9 @@ function vueEditeur(){
 
   var lignes = d.lignes.map(function(l,i){
     return "<tr>" +
-      '<td><input data-l="' + i + '" data-c="d" list="cat" value="' + echap(l.d) + '" placeholder="Désignation" aria-label="Désignation ligne ' + (i+1) + '"></td>' +
+      '<td><input data-l="' + i + '" data-c="d" list="cat" value="' + echap(l.d) + '" placeholder="Désignation" aria-label="Désignation ligne ' + (i+1) + '">' +
+        '<input class="ref-rpr" data-l="' + i + '" data-c="code" value="' + echap(l.code || "") +
+        '" placeholder="Réf. Répertoire" aria-label="Référence au Répertoire, ligne ' + (i+1) + '"></td>' +
       '<td style="width:74px"><input class="num" data-l="' + i + '" data-c="q" inputmode="decimal" value="' + echap(l.q) + '" aria-label="Quantité"></td>' +
       (certifiable ? '<td style="width:62px"><select data-l="' + i + '" data-c="g" aria-label="Groupe de taxation ligne ' + (i+1) + '">' +
         GROUPES.map(function(g){
@@ -1564,7 +1571,9 @@ function feuilleNassra(d){
   });
   if(!utiles.length) utiles = [{d:"…", q:"", pu:0}];
   var corps = utiles.map(function(l,i){
-    return "<tr><td>" + (i+1) + "</td><td>" + echap(l.d) + '</td><td class="d">' + echap(l.q) + "</td>" +
+    return "<tr><td>" + (i+1) + "</td><td>" + echap(l.d) +
+      (l.code ? '<span style="display:block;font-size:8pt;color:#6b6b6b;letter-spacing:.02em">Réf. ' + echap(l.code) + "</span>" : "") +
+      '</td><td class="d">' + echap(l.q) + "</td>" +
       (T.prix ? '<td class="d">' + nombre(prixLigne(d,l)) + '</td><td class="d">' + nombre((Number(l.q)||0) * prixLigne(d,l)) + "</td>"
               : '<td class="d"></td>') +
       (certifiable ? '<td class="d">' + echap(l.g || grpDefaut) + "</td>" : "") + "</tr>";
@@ -1718,7 +1727,9 @@ function feuilleZadna(d){
   });
   if(!utiles.length) utiles = [{d:"…", q:"", pu:0}];
   var corps = utiles.map(function(l,i){
-    return "<tr><td>" + String(i+1).padStart(2,"0") + "</td><td>" + echap(l.d) + '</td><td class="d">' + echap(l.q) + "</td>" +
+    return "<tr><td>" + String(i+1).padStart(2,"0") + "</td><td>" + echap(l.d) +
+      (l.code ? '<span style="display:block;font-size:8pt;color:#6b6b6b;letter-spacing:.02em">Réf. ' + echap(l.code) + "</span>" : "") +
+      '</td><td class="d">' + echap(l.q) + "</td>" +
       (T.prix ? '<td class="d">' + nombre(prixLigne(d,l)) + '</td><td class="d">' + nombre((Number(l.q)||0) * prixLigne(d,l)) + "</td>"
               : '<td class="d remplir"></td>') +
       (certifiable ? '<td class="d">' + echap(l.g || grpDefaut) + "</td>" : "") + "</tr>";
@@ -2319,7 +2330,7 @@ document.addEventListener("input", function(e){
 
   if(t.dataset.l !== undefined){
     var i = Number(t.dataset.l), l = brouillon.lignes[i], c = t.dataset.c;
-    l[c] = (c === "d" || c === "g") ? t.value : (t.value === "" ? "" : Number(t.value));
+    l[c] = (c === "d" || c === "g" || c === "code") ? t.value : (t.value === "" ? "" : Number(t.value));
     if(c === "pu" && brouillon.saisieTTC){
       /* Le nombre tapé est le prix que le client paie. On garde le P.U. en HT. */
       l.ttc = l.pu;
@@ -2332,6 +2343,11 @@ document.addEventListener("input", function(e){
         l.pu = a.pu;
         if(brouillon.saisieTTC) l.ttc = ttcDepuisHT(a.pu, tauxTva(brouillon));
         champPu.value = puAffiche(brouillon, l);
+      }
+      if(a && a.code && !String(l.code || "").trim()){
+        l.code = a.code;
+        var champRef = document.querySelector('[data-l="' + i + '"][data-c="code"]');
+        if(champRef) champRef.value = a.code;
       }
     }
     majSommes();
