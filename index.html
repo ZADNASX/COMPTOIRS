@@ -1320,7 +1320,7 @@ var Store = {
   poser:function(col, obj){
     var self = this;
     if(!obj.id) obj.id = uid();
-    var i = -1, l = this.data[col];
+    var i = -1, l = this.data[col] || (this.data[col] = []);
     for(var k = 0; k < l.length; k++) if(l[k].id === obj.id) i = k;
     if(i >= 0) l[i] = obj; else l.push(obj);
     rendre();
@@ -3748,7 +3748,7 @@ function majEnteteMarque() {
     .filter(m => m.length > 2).slice(0, 3).map(m => m[0].toUpperCase()).join("") : "";
   document.getElementById("brandMark").textContent = (sigle || auto || "—").slice(0, 5);
   document.getElementById("brandNom").textContent = "Marchés Publics";
-  document.title = (sigle || rs || "Marchés Publics") + " — Marchés Publics";
+  /* Le titre de l'onglet appartient au comptoir, pas au module. */
 }
 
 const modalSetup = document.getElementById("modalSetup");
