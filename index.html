@@ -759,13 +759,21 @@ function majEtat(){
 
 /* ======================= calculs ======================= */
 function totalLignes(d){
-  return (d.lignes || []).reduce(function(s,l){ return s + (Number(l.q)||0) * (Number(l.pu)||0); }, 0);
+  return (d.lignes || []).reduce(function(s,l){ return s + (Number(l.q)||0) * prixLigne(d,l); }, 0);
 }
 function tauxTva(d){
   if(!d || !d.tva) return 0;
   return Number(d.tauxTva) || Number(reglages().tauxTva) || 18;
 }
-function montantHT(d){ return Math.max(0, totalLignes(d) - (Number(d.remise)||0)); }
+function baseDoc(d){ return Math.max(0, totalLignes(d) - (Number(d.remise)||0)); }
+/* En saisie TTC, le total des lignes EST un TTC : le hors taxe s'en dégage au
+   total, et la TVA est ce qui reste. Dégager ligne à ligne aurait décalé la
+   somme de la colonne du total imprimé, d'un franc ou deux — visible sur le
+   papier, et indéfendable devant un acheteur qui refait l'addition. */
+function montantHT(d){
+  var b = baseDoc(d);
+  return (d && d.saisieTTC) ? htDepuisTTC(b, tauxTva(d)) : b;
+}
 
 /* Le Répertoire de l'État publie ses bornes en TTC. Quand on facture à ce
    prix-là, c'est le TTC qui est arrêté : le hors taxe et la TVA s'en dégagent,
@@ -773,14 +781,26 @@ function montantHT(d){ return Math.max(0, totalLignes(d) - (Number(d.remise)||0)
    toute l'application — une seule unité, aucun document ne peut se tromper
    sur ce qu'il imprime ; seule la saisie bascule. L'arrondi du HT va vers le
    bas pour que le TTC reconstitué ne franchisse jamais le plafond. */
-function htDepuisTTC(ttc, tx){ return Math.floor((Number(ttc)||0) / (1 + (Number(tx)||0) / 100)); }
-/* ceil, et non round : c'est l'inverse exact du floor ci-dessus. Avec round,
-   cocher puis décocher la case rognait un franc sur le prix à chaque passage. */
-function ttcDepuisHT(pu, tx){ return Math.ceil((Number(pu)||0) * (1 + (Number(tx)||0) / 100)); }
+/* Le hors taxe le plus proche, et la TVA est ce qui reste. Sur environ un
+   montant sur sept, aucun entier ne redonne exactement le TTC une fois la TVA
+   arrondie : la TVA imprimée s'écarte alors d'un franc du taux exact. C'est le
+   sens dans lequel il faut céder — sur une facture, l'addition de la colonne
+   doit tomber juste, un acheteur la refait. */
+function htDepuisTTC(ttc, tx){
+  var T = Math.round(Number(ttc)||0);
+  if(T <= 0) return 0;
+  return Math.round(T / (1 + (Number(tx)||0) / 100));
+}
+function ttcDepuisHT(pu, tx){ return Math.round((Number(pu)||0) * (1 + (Number(tx)||0) / 100)); }
 function puAffiche(d, l){
   if(!d.saisieTTC) return l.pu;
   return (l.ttc === undefined || l.ttc === null) ? ttcDepuisHT(l.pu, tauxTva(d)) : l.ttc;
 }
+/* Le prix d'une ligne dans l'unité où le document est tenu : en saisie TTC,
+   c'est le prix payé qui fait foi — celui qu'on a tapé, celui qui figure au
+   Répertoire, celui qui s'imprime. */
+function prixLigne(d, l){ return Number(puAffiche(d, l)) || 0; }
+
 /* Le TTC est l'ancre : si la TVA change, c'est le HT qui bouge, pas le prix payé. */
 function recalerLignesTTC(d){
   if(!d || !d.saisieTTC) return;
@@ -790,7 +810,9 @@ function recalerLignesTTC(d){
     if(l.ttc !== undefined && l.ttc !== null) l.pu = htDepuisTTC(l.ttc, tx);
   });
 }
-function montantTVA(d){ return Math.round(montantHT(d) * tauxTva(d) / 100); }
+function montantTVA(d){
+  return (d && d.saisieTTC) ? baseDoc(d) - montantHT(d) : Math.round(montantHT(d) * tauxTva(d) / 100);
+}
 /* AIB : acompte sur impôt assis sur les bénéfices, collecté en sus par le vendeur */
 function tauxAib(d){ return Number(d && d.aib) || 0; }
 function montantAIB(d){ return Math.round(montantHT(d) * tauxAib(d) / 100); }
@@ -1240,7 +1262,7 @@ function vueEditeur(){
           return '<option value="' + g[0] + '"' + ((l.g || grpDefaut) === g[0] ? " selected" : "") + ">" + g[0] + "</option>";
         }).join("") + "</select></td>" : "") +
       (T.prix ? '<td style="width:112px"><input class="num" data-l="' + i + '" data-c="pu" inputmode="numeric" value="' + echap(puAffiche(d,l)) + '" aria-label="Prix unitaire' + (d.saisieTTC ? " TTC" : "") + '"></td>' +
-        '<td style="width:118px" class="num" data-montant="' + i + '">' + nombre((Number(l.q)||0)*(Number(l.pu)||0)) + "</td>" : "") +
+        '<td style="width:118px" class="num" data-montant="' + i + '">' + nombre((Number(l.q)||0) * prixLigne(d,l)) + "</td>" : "") +
       '<td style="width:36px"><button class="btn discret" data-suppr-ligne="' + i + '" aria-label="Retirer la ligne">×</button></td></tr>';
   }).join("");
 
@@ -1309,7 +1331,7 @@ function vueEditeur(){
       (T.lettre ? carteCourrier(d) :
       '<div class="carte"><h3>Articles</h3><table class="lignes' + (certifiable ? " certif" : "") + '">' +
         '<thead><tr><th>Désignation</th><th>Qté</th>' + (certifiable ? "<th>Gr.</th>" : "") +
-        (T.prix ? (d.saisieTTC ? "<th>P.U. TTC</th><th>Montant HT</th>" : "<th>P.U.</th><th>Montant</th>") : "") + '<th></th></tr></thead><tbody id="corps-lignes">' + lignes + "</tbody></table>" +
+        (T.prix ? (d.saisieTTC ? "<th>P.U. TTC</th><th>Montant TTC</th>" : "<th>P.U.</th><th>Montant</th>") : "") + '<th></th></tr></thead><tbody id="corps-lignes">' + lignes + "</tbody></table>" +
         '<datalist id="cat">' + arts.map(function(a){ return '<option value="' + echap(a.d) + '">'; }).join("") + "</datalist>" +
         '<button class="btn discret" id="ajout-ligne" style="margin-top:8px">+ Ajouter une ligne</button>' +
         '<div id="rpr-info"></div>' + sommes + "</div>") +
@@ -1532,17 +1554,18 @@ function feuilleNassra(d){
   var colGr = certifiable ? '<th class="d" style="width:11mm">Gr.</th>' : "";
   var cols = T.prix
     ? '<th style="width:8mm">N°</th><th>Désignation</th><th class="d" style="width:16mm">Qté</th>' +
-      '<th class="d" style="width:26mm">P.U.</th><th class="d" style="width:30mm">Montant</th>' + colGr
+      '<th class="d" style="width:26mm">P.U.' + (d.saisieTTC ? " TTC" : "") + '</th>' +
+      '<th class="d" style="width:30mm">Montant' + (d.saisieTTC ? " TTC" : "") + "</th>" + colGr
     : '<th style="width:8mm">N°</th><th>Désignation</th><th class="d" style="width:26mm">Qté commandée</th>' +
       '<th class="d" style="width:26mm">Qté livrée</th>';
 
   var utiles = (d.lignes||[]).filter(function(l){
-    return String(l.d||"").trim() || Number(l.q) || Number(l.pu);
+    return String(l.d||"").trim() || Number(l.q) || Number(l.pu) || Number(l.ttc);
   });
   if(!utiles.length) utiles = [{d:"…", q:"", pu:0}];
   var corps = utiles.map(function(l,i){
     return "<tr><td>" + (i+1) + "</td><td>" + echap(l.d) + '</td><td class="d">' + echap(l.q) + "</td>" +
-      (T.prix ? '<td class="d">' + nombre(l.pu) + '</td><td class="d">' + nombre((Number(l.q)||0)*(Number(l.pu)||0)) + "</td>"
+      (T.prix ? '<td class="d">' + nombre(prixLigne(d,l)) + '</td><td class="d">' + nombre((Number(l.q)||0) * prixLigne(d,l)) + "</td>"
               : '<td class="d"></td>') +
       (certifiable ? '<td class="d">' + echap(l.g || grpDefaut) + "</td>" : "") + "</tr>";
   }).join("");
@@ -1551,10 +1574,14 @@ function feuilleNassra(d){
   if(T.prix){
     var tx = tauxTva(d);
     totaux = '<div class="totaux"><table>' +
-      (Number(d.remise) ? '<tr><td>Sous-total</td><td class="d">' + nombre(brut) + "</td></tr>" +
+      (Number(d.remise) ? "<tr><td>Sous-total" + (d.saisieTTC ? " TTC" : "") + '</td><td class="d">' + nombre(brut) + "</td></tr>" +
         '<tr><td>Remise</td><td class="d">− ' + nombre(d.remise) + "</td></tr>" : "") +
-      (tx ? '<tr><td>Montant HT</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>" +
-            '<tr><td>TVA ' + tx + ' %</td><td class="d">' + nombre(montantTVA(d)) + "</td></tr>"
+      (tx ? (d.saisieTTC
+              ? '<tr><td>Montant TTC</td><td class="d">' + nombre(montantHT(d) + montantTVA(d)) + "</td></tr>" +
+                '<tr><td>dont TVA ' + tx + ' %</td><td class="d">' + nombre(montantTVA(d)) + "</td></tr>" +
+                '<tr><td>Montant HT</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>"
+              : '<tr><td>Montant HT</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>" +
+                '<tr><td>TVA ' + tx + ' %</td><td class="d">' + nombre(montantTVA(d)) + "</td></tr>")
           : (tauxAib(d) ? '<tr><td>Montant HT</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>" : "")) +
       (tauxAib(d) ? '<tr><td>AIB ' + tauxAib(d) + ' %</td><td class="d">' + nombre(montantAIB(d)) + "</td></tr>" : "") +
       '<tr class="net"><td>' + (T.avoir ? "MONTANT DE L'AVOIR" : T.recu ? "MONTANT REÇU" : "NET À PAYER" + (tx ? " TTC" : "")) + ' (F CFA)</td><td class="d">' +
@@ -1681,17 +1708,18 @@ function feuilleZadna(d){
   var colGr = certifiable ? '<th class="d" style="width:11mm">Gr.</th>' : "";
   var cols = T.prix
     ? '<th style="width:8mm">N°</th><th>Désignation</th><th class="d" style="width:16mm">Qté</th>' +
-      '<th class="d" style="width:26mm">P.U.</th><th class="d" style="width:30mm">Montant</th>' + colGr
+      '<th class="d" style="width:26mm">P.U.' + (d.saisieTTC ? " TTC" : "") + '</th>' +
+      '<th class="d" style="width:30mm">Montant' + (d.saisieTTC ? " TTC" : "") + "</th>" + colGr
     : '<th style="width:8mm">N°</th><th>Désignation</th><th class="d" style="width:26mm">Qté commandée</th>' +
       '<th class="d" style="width:26mm">Qté livrée</th>';
 
   var utiles = (d.lignes||[]).filter(function(l){
-    return String(l.d||"").trim() || Number(l.q) || Number(l.pu);
+    return String(l.d||"").trim() || Number(l.q) || Number(l.pu) || Number(l.ttc);
   });
   if(!utiles.length) utiles = [{d:"…", q:"", pu:0}];
   var corps = utiles.map(function(l,i){
     return "<tr><td>" + String(i+1).padStart(2,"0") + "</td><td>" + echap(l.d) + '</td><td class="d">' + echap(l.q) + "</td>" +
-      (T.prix ? '<td class="d">' + nombre(l.pu) + '</td><td class="d">' + nombre((Number(l.q)||0)*(Number(l.pu)||0)) + "</td>"
+      (T.prix ? '<td class="d">' + nombre(prixLigne(d,l)) + '</td><td class="d">' + nombre((Number(l.q)||0) * prixLigne(d,l)) + "</td>"
               : '<td class="d remplir"></td>') +
       (certifiable ? '<td class="d">' + echap(l.g || grpDefaut) + "</td>" : "") + "</tr>";
   }).join("");
@@ -1701,10 +1729,15 @@ function feuilleZadna(d){
   if(T.prix){
     var det = [];
     if(Number(d.remise)){
-      det.push(["Sous-total", nombre(brut)]);
+      det.push([d.saisieTTC ? "Sous-total TTC" : "Sous-total", nombre(brut)]);
       det.push(["Remise", "− " + nombre(d.remise)]);
     }
-    if(tx){
+    if(tx && d.saisieTTC){
+      /* Les colonnes sont en TTC : le détail se lit dans le même sens. */
+      det.push(["Montant TTC", nombre(montantHT(d) + montantTVA(d))]);
+      det.push(["dont TVA " + tx + " %", nombre(montantTVA(d))]);
+      det.push(["Montant HT", nombre(montantHT(d))]);
+    } else if(tx){
       det.push(["Montant HT", nombre(montantHT(d))]);
       det.push(["TVA " + tx + " %", nombre(montantTVA(d))]);
     } else if(tauxAib(d)){
@@ -1837,9 +1870,12 @@ function majRPR(){
        le prix payé : on compare directement. Au réel, c'est le P.U. majoré
        de la TVA que l'acheteur public débourse — c'est lui qu'il faut
        confronter au plafond, sinon on se croit conforme à tort. */
-    var pu = Number(l.pu) || 0;
     var tx = tauxTva(brouillon);
-    var paye = Math.round(pu * (1 + tx / 100));
+    /* En saisie TTC, le prix tapé EST le prix payé : on le compare tel quel,
+       sans le reconstituer — pas d'arrondi entre le Répertoire et nous. */
+    var paye = brouillon.saisieTTC
+      ? prixLigne(brouillon, l)
+      : Math.round((Number(l.pu) || 0) * (1 + tx / 100));
     var trop = paye > a.bs;
     var plafondHT = tx ? Math.round(a.bs / (1 + tx / 100)) : a.bs;
     lignes.push('<div class="rpr' + (trop ? " depasse" : "") + '"><b>Ligne ' + (i+1) + "</b> " +
@@ -1864,7 +1900,7 @@ function majSommes(){
   var d = brouillon;
   d.lignes.forEach(function(l,i){
     var c = document.querySelector('[data-montant="' + i + '"]');
-    if(c) c.textContent = nombre((Number(l.q)||0) * (Number(l.pu)||0));
+    if(c) c.textContent = nombre((Number(l.q)||0) * prixLigne(d,l));
   });
   function put(k,v){ var e = document.querySelector('[data-somme="' + k + '"]'); if(e) e.textContent = v; }
   put("brut", fcfa(totalLignes(d)));
