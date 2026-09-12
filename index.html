@@ -719,7 +719,12 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
 
 /* En-tête entreprise imprimé */#marches .print-entreprise, #marches-print .print-entreprise{
   border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 14px;
-}#marches .print-entreprise .rs, #marches-print .print-entreprise .rs{ font-weight: 700; font-size: 14px; }#marches .print-entreprise .coord, #marches-print .print-entreprise .coord{ font-size: 11px; color: #333; margin-top: 2px; }#marches .print-chap, #marches-print .print-chap{ margin: 14px 0 6px; font-size: 13px; font-weight: 700; }#marches .print-chap-total, #marches-print .print-chap-total{ font-size: 12px; font-style: italic; text-align: right; margin: 4px 0 12px; }
+}#marches .print-entreprise.avec-logo, #marches-print .print-entreprise.avec-logo{
+  display: flex; align-items: flex-start; gap: 10mm; }
+#marches .print-entreprise .print-ident, #marches-print .print-entreprise .print-ident{ flex: 1; }
+#marches .print-logo, #marches-print .print-logo{
+  height: 20mm; width: auto; max-width: 40mm; object-fit: contain; flex: none; }
+#marches .print-entreprise .rs, #marches-print .print-entreprise .rs{ font-weight: 700; font-size: 14px; }#marches .print-entreprise .coord, #marches-print .print-entreprise .coord{ font-size: 11px; color: #333; margin-top: 2px; }#marches .print-chap, #marches-print .print-chap{ margin: 14px 0 6px; font-size: 13px; font-weight: 700; }#marches .print-chap-total, #marches-print .print-chap-total{ font-size: 12px; font-style: italic; text-align: right; margin: 4px 0 12px; }
 
 @media print {#marches .print-lot, #marches-print .print-lot{ page-break-after: always; }#marches .print-lot:last-child, #marches-print .print-lot:last-child{ page-break-after: auto; }
   /* les champs de saisie s'impriment comme du texte simple */#marches input, #marches-print input, #marches select, #marches-print select, #marches textarea, #marches-print textarea{
@@ -1984,10 +1989,16 @@ function loadProfile() {
   var r = reglages(), enregistre = etatMarches().profil || {};
   var p = Object.assign(defaultProfile(), {
     raisonSociale: r.forme || r.nom || "",
+    nomCourt: r.nom || "",
     rccm: r.rccm || "", ifu: r.ifu || "",
     tel: r.tel || "", email: r.email || "",
+    adresse: r.adresse || "",
     representant: [r.signataire, r.fonction].filter(Boolean).join(" — ")
   }, enregistre);
+  /* Le logo n'est jamais figé dans le profil du module : il suit toujours les
+     réglages du comptoir, sinon changer de logo laisserait l'ancien sur les
+     soumissions. */
+  p.logo = r.logo || "";
   ["references", "personnel", "materiel"].forEach(function (k) { if (!Array.isArray(p[k])) p[k] = []; });
   return p;
 }
@@ -2919,9 +2930,16 @@ function enteteEntrepriseHtml() {
     p.ifu ? "IFU : " + p.ifu : "",
     p.tel, p.email, p.adresse,
   ].filter(Boolean).map(esc).join(" · ");
-  return `<div class="print-entreprise">
-    <div class="rs">${esc(p.raisonSociale)}</div>
-    <div class="coord">${coord}</div>
+  /* La maison signe ses soumissions de sa marque, comme sur ses factures. */
+  const marque = p.logo
+    ? `<img class="print-logo" src="${esc(p.logo)}" alt="${esc(p.nomCourt || p.raisonSociale)}">`
+    : "";
+  return `<div class="print-entreprise${marque ? " avec-logo" : ""}">
+    ${marque}
+    <div class="print-ident">
+      <div class="rs">${esc(p.raisonSociale)}</div>
+      <div class="coord">${coord}</div>
+    </div>
   </div>`;
 }
 
