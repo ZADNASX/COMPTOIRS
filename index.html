@@ -1531,8 +1531,15 @@ function prochainNumero(type){
   var aujourdhui = new Date();
   var an = aujourdhui.getFullYear();
   var mois = String(aujourdhui.getMonth() + 1).padStart(2, "0");
-  var seq = Store.tout("documents").filter(function(d){ return d.type === type && d.annee === an; })
-    .reduce(function(m,d){ return Math.max(m, d.seq || 0); }, 0) + 1;
+  var m = maquetteCourante();
+  /* DSN porte le mois dans son numéro : son compteur repart à 0001 chaque
+     mois, sinon 0008/10-2026 succéderait à 0007/09-2026 et le mois ne
+     voudrait plus rien dire. Les pièces émises avant ce changement n'ont pas
+     de mois : elles sortent du décompte, et la série repart proprement. */
+  var parMois = (m === "dsn");
+  var seq = Store.tout("documents").filter(function(d){
+      return d.type === type && d.annee === an && (!parMois || d.mois === mois);
+    }).reduce(function(x,d){ return Math.max(x, d.seq || 0); }, 0) + 1;
   var code = TYPES[type].code;
   /* Trois formats sans ressemblance possible entre eux :
      - DSN  : N° 0007/DSN/FAC/09-2026, sa maison et le mois ;
@@ -1540,12 +1547,11 @@ function prochainNumero(type){
      - ZADNA : FAC-2026-007, à la manière technique.
      La séquence reste comptée PAR AN, pas par mois : elle l'était déjà pour
      les pièces émises, et la recompter par mois les aurait renumérotées. */
-  var m = maquetteCourante();
   var numero;
   if(m === "dsn")        numero = "N° " + String(seq).padStart(4,"0") + "/DSN/" + code + "/" + mois + "-" + an;
   else if(m !== "zadna") numero = "N° " + String(seq).padStart(4,"0") + "/" + code + "/" + an;
   else                   numero = code + "-" + an + "-" + String(seq).padStart(3,"0");
-  return {seq:seq, annee:an, numero:numero};
+  return {seq:seq, annee:an, mois:mois, numero:numero};
 }
 
 /* ======================= état d'écran ======================= */
@@ -4310,7 +4316,7 @@ function champCert(d, cle, lib){
 }
 function nouveauDoc(type){
   var n = prochainNumero(type);
-  brouillon = {id:null, type:type, seq:n.seq, annee:n.annee, numero:n.numero, date:auj(),
+  brouillon = {id:null, type:type, seq:n.seq, annee:n.annee, mois:n.mois, numero:n.numero, date:auj(),
     echeance: TYPES[type].reglement ? new Date(Date.now() + 30*864e5).toISOString().slice(0,10) : "",
     clientId:"", client:{nom:"",adresse:"",ifu:"",tel:""},
     lignes:[{d:"",q:1,pu:0},{d:"",q:1,pu:0}], remise:0, regle:0, notes:"", objet:"", mode:"", statut:"brouillon",
@@ -4333,7 +4339,7 @@ function ouvrirDoc(id){
 function convertir(type){
   var src = brouillon, n = prochainNumero(type);
   brouillon = Object.assign({}, JSON.parse(JSON.stringify(src)), {
-    id:null, type:type, seq:n.seq, annee:n.annee, numero:n.numero, date:auj(),
+    id:null, type:type, seq:n.seq, annee:n.annee, mois:n.mois, numero:n.numero, date:auj(),
     statut:"brouillon", regle:0, source:src.numero,
     /* la nouvelle pièce n est pas certifiée : elle ne peut pas porter le code de l ancienne */
     cert:{nim:"",code:"",compteurs:"",date:"",qr:""},
@@ -5572,7 +5578,7 @@ document.addEventListener("click", function(e){
       var pris = Store.tout("documents").some(function(x){ return x.numero === d.numero; });
       if(pris){
         var n = prochainNumero(d.type);
-        d.seq = n.seq; d.annee = n.annee; d.numero = n.numero;
+        d.seq = n.seq; d.annee = n.annee; d.mois = n.mois; d.numero = n.numero;
         signal("Numéro déjà pris ailleurs — renuméroté en " + d.numero);
       }
       d.id = uid();
