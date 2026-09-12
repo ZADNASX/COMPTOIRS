@@ -4638,7 +4638,45 @@ function feuilleCourrier(d){
    reproduit. */
 function cachetFichier(r){
   var src = String((r && r.cachetFichier) || "").trim();
-  return src ? '<img class="cachet" src="' + echap(src) + '" alt="">' : "";
+  if(src) return '<img class="cachet" src="' + echap(src) + '" alt="">';
+  /* À défaut d'empreinte déposée, la forme choisie dans les réglages. */
+  return String((r && r.cachetForme) || "") === "couronne" ? cachetRond(r) : "";
+}
+
+/* Le cachet en couronne : tout le texte fait le tour entre deux cercles, la
+   marque occupe le centre. C'est la forme de l'empreinte d'Ets DSN.
+   La taille du texte se déduit de sa longueur pour qu'il remplisse le tour
+   sans se chevaucher ni flotter. */
+function cachetRond(r){
+  var encre = String(r.cachetCouleur || "").trim() || "#0E56A8";
+  var marque = String(r.cachetMarqueCouleur || "").trim() || "#2B22D6";
+  var texte = String(r.cachetTexte || "").trim() ||
+    [r.cachetTitre || r.nom, r.cachetLieu || r.ville, r.tel].filter(Boolean).join("  \u2022  ");
+  texte = texte.toUpperCase();
+
+  var RAYON = 168;                       /* le cercle que suit le texte */
+  var tour = 2 * Math.PI * RAYON;        /* ce qu'on a de place */
+  /* Une capitale occupe environ 0,62 fois la hauteur de police : on en déduit
+     la taille qui remplit le tour, bornée pour rester lisible. */
+  var taille = Math.max(15, Math.min(30, Math.floor(tour / Math.max(texte.length, 1) / 0.66)));
+
+  /* Le chemin part du bas et tourne dans le sens des aiguilles : le milieu du
+     texte tombe alors en haut, à l'endroit. */
+  var anneau = "M 210," + (210 + RAYON) + " A " + RAYON + "," + RAYON + " 0 1 1 210.01," + (210 + RAYON);
+
+  var centre = r.logo
+    ? '<image href="' + echap(r.logo) + '" x="92" y="92" width="236" height="236" preserveAspectRatio="xMidYMid meet"/>'
+    : '<text x="210" y="234" text-anchor="middle" font-family="Poppins,sans-serif" font-size="86" font-weight="700" fill="' +
+      marque + '">' + echap(String(r.nom || "").slice(0, 3).toUpperCase()) + "</text>";
+
+  return '<svg class="cachet" viewBox="0 0 420 420" aria-hidden="true">' +
+    '<defs><path id="anneau-cachet" d="' + anneau + '" fill="none"/></defs>' +
+    '<g fill="none" stroke="' + encre + '">' +
+    '<circle cx="210" cy="210" r="203" stroke-width="5"/>' +
+    '<circle cx="210" cy="210" r="147" stroke-width="3"/></g>' +
+    '<text font-family="Poppins,sans-serif" font-size="' + taille + '" font-weight="600" letter-spacing="1.5" fill="' + encre + '">' +
+    '<textPath href="#anneau-cachet" startOffset="50%" text-anchor="middle">' + echap(texte) + "</textPath></text>" +
+    centre + "</svg>";
 }
 
 function cachetNassra(r){
