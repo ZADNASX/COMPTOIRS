@@ -1528,20 +1528,23 @@ function statutDoc(d){
   return {cle:"impaye", libelle:"Impayé"};
 }
 function prochainNumero(type){
-  var an = new Date().getFullYear();
+  var aujourdhui = new Date();
+  var an = aujourdhui.getFullYear();
+  var mois = String(aujourdhui.getMonth() + 1).padStart(2, "0");
   var seq = Store.tout("documents").filter(function(d){ return d.type === type && d.annee === an; })
     .reduce(function(m,d){ return Math.max(m, d.seq || 0); }, 0) + 1;
   var code = TYPES[type].code;
-  /* Deux formats sans ressemblance : NASSRA numérote à la manière
-     administrative (N°, quatre chiffres, barres obliques), ZADNA à la
-     manière technique (code, année, tirets). */
+  /* Trois formats sans ressemblance possible entre eux :
+     - DSN  : N° 0007/DSN/FAC/09-2026, sa maison et le mois ;
+     - NASSRA : N° 0007/FAC/2026, à la manière administrative ;
+     - ZADNA : FAC-2026-007, à la manière technique.
+     La séquence reste comptée PAR AN, pas par mois : elle l'était déjà pour
+     les pièces émises, et la recompter par mois les aurait renumérotées. */
   var m = maquetteCourante();
-  /* DSN signe ses pièces de son nom : c'est la référence qu'on lui demande
-     de rappeler dans les correspondances. */
-  var maison = m === "dsn" ? "/DSN" : "";
-  var numero = m !== "zadna"
-    ? "N° " + String(seq).padStart(4,"0") + maison + "/" + code + "/" + an
-    : code + "-" + an + "-" + String(seq).padStart(3,"0");
+  var numero;
+  if(m === "dsn")        numero = "N° " + String(seq).padStart(4,"0") + "/DSN/" + code + "/" + mois + "-" + an;
+  else if(m !== "zadna") numero = "N° " + String(seq).padStart(4,"0") + "/" + code + "/" + an;
+  else                   numero = code + "-" + an + "-" + String(seq).padStart(3,"0");
   return {seq:seq, annee:an, numero:numero};
 }
 
