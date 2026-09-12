@@ -1252,12 +1252,22 @@ function vueEditeur(){
         (d.saisieTTC ? " checked" : "") + ">Prix saisis TTC</label></dt>" +
       '<dd style="font-size:12px;color:var(--doux)">' +
         (d.saisieTTC ? "HT et TVA dégagés du prix tapé" : "le prix tapé est un prix HT") + "</dd>" +
-      "<dt>" + (d.saisieTTC ? "Sous-total HT" : "Sous-total") + '</dt><dd data-somme="brut">' + fcfa(totalLignes(d)) + "</dd>" +
-      '<dt><label for="e-remise" style="font:inherit;text-transform:none;letter-spacing:0;color:inherit">Remise</label></dt>' +
-      '<dd><input id="e-remise" class="num" data-champ="remise" inputmode="numeric" style="padding:5px 8px" value="' + echap(d.remise||0) + '"></dd>' +
-      '<dt>Montant HT</dt><dd data-somme="ht">' + fcfa(montantHT(d)) + "</dd>" +
-      '<dt><label class="bascule" for="tva-actif"><input type="checkbox" id="tva-actif"' + (d.tva ? " checked" : "") + ">TVA " + tx + " %</label></dt>" +
-      '<dd data-somme="tva">' + fcfa(montantTVA(d)) + "</dd>" +
+      /* L'ordre suit le raisonnement. En saisie TTC, on part de ce que le
+         client paie, on en dégage la TVA, il reste le hors taxe. En saisie
+         HT, on part des lignes et la TVA s'ajoute : c'est l'ordre inverse. */
+      (d.saisieTTC
+        ? '<dt>Montant TTC</dt><dd data-somme="ttc">' + fcfa(montantHT(d) + montantTVA(d)) + "</dd>" +
+          '<dt><label class="bascule" for="tva-actif"><input type="checkbox" id="tva-actif"' + (d.tva ? " checked" : "") + ">dont TVA " + tx + " %</label></dt>" +
+          '<dd data-somme="tva">' + fcfa(montantTVA(d)) + "</dd>" +
+          '<dt>Montant HT</dt><dd data-somme="ht">' + fcfa(montantHT(d)) + "</dd>" +
+          '<dt><label for="e-remise" style="font:inherit;text-transform:none;letter-spacing:0;color:inherit">Remise HT</label></dt>' +
+          '<dd><input id="e-remise" class="num" data-champ="remise" inputmode="numeric" style="padding:5px 8px" value="' + echap(d.remise||0) + '"></dd>'
+        : '<dt>Sous-total</dt><dd data-somme="brut">' + fcfa(totalLignes(d)) + "</dd>" +
+          '<dt><label for="e-remise" style="font:inherit;text-transform:none;letter-spacing:0;color:inherit">Remise</label></dt>' +
+          '<dd><input id="e-remise" class="num" data-champ="remise" inputmode="numeric" style="padding:5px 8px" value="' + echap(d.remise||0) + '"></dd>' +
+          '<dt>Montant HT</dt><dd data-somme="ht">' + fcfa(montantHT(d)) + "</dd>" +
+          '<dt><label class="bascule" for="tva-actif"><input type="checkbox" id="tva-actif"' + (d.tva ? " checked" : "") + ">TVA " + tx + " %</label></dt>" +
+          '<dd data-somme="tva">' + fcfa(montantTVA(d)) + "</dd>") +
       (tauxAib(d) ? "<dt>AIB " + tauxAib(d) + ' %</dt><dd data-somme="aib">' + fcfa(montantAIB(d)) + "</dd>" : "") +
       '<dt class="total">' + (d.tva ? "Net à payer TTC" : "Net à payer") + '</dt><dd class="total" data-somme="net">' + fcfa(netAPayer(d)) + "</dd>" +
       (T.reglement ?
@@ -1859,6 +1869,7 @@ function majSommes(){
   function put(k,v){ var e = document.querySelector('[data-somme="' + k + '"]'); if(e) e.textContent = v; }
   put("brut", fcfa(totalLignes(d)));
   put("ht", fcfa(montantHT(d)));
+  put("ttc", fcfa(montantHT(d) + montantTVA(d)));
   put("tva", fcfa(montantTVA(d)));
   put("aib", fcfa(montantAIB(d)));
   put("net", fcfa(netAPayer(d)));
