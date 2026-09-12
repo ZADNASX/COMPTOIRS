@@ -766,6 +766,30 @@ function tauxTva(d){
   return Number(d.tauxTva) || Number(reglages().tauxTva) || 18;
 }
 function montantHT(d){ return Math.max(0, totalLignes(d) - (Number(d.remise)||0)); }
+
+/* Le Répertoire de l'État publie ses bornes en TTC. Quand on facture à ce
+   prix-là, c'est le TTC qui est arrêté : le hors taxe et la TVA s'en dégagent,
+   au lieu de s'ajouter par-dessus. Le prix unitaire reste stocké en HT dans
+   toute l'application — une seule unité, aucun document ne peut se tromper
+   sur ce qu'il imprime ; seule la saisie bascule. L'arrondi du HT va vers le
+   bas pour que le TTC reconstitué ne franchisse jamais le plafond. */
+function htDepuisTTC(ttc, tx){ return Math.floor((Number(ttc)||0) / (1 + (Number(tx)||0) / 100)); }
+/* ceil, et non round : c'est l'inverse exact du floor ci-dessus. Avec round,
+   cocher puis décocher la case rognait un franc sur le prix à chaque passage. */
+function ttcDepuisHT(pu, tx){ return Math.ceil((Number(pu)||0) * (1 + (Number(tx)||0) / 100)); }
+function puAffiche(d, l){
+  if(!d.saisieTTC) return l.pu;
+  return (l.ttc === undefined || l.ttc === null) ? ttcDepuisHT(l.pu, tauxTva(d)) : l.ttc;
+}
+/* Le TTC est l'ancre : si la TVA change, c'est le HT qui bouge, pas le prix payé. */
+function recalerLignesTTC(d){
+  if(!d || !d.saisieTTC) return;
+  var tx = tauxTva(d);
+  (d.lignes || []).forEach(function(l){
+    if(l.ttc === "" ) { l.pu = ""; return; }
+    if(l.ttc !== undefined && l.ttc !== null) l.pu = htDepuisTTC(l.ttc, tx);
+  });
+}
 function montantTVA(d){ return Math.round(montantHT(d) * tauxTva(d) / 100); }
 /* AIB : acompte sur impôt assis sur les bénéfices, collecté en sus par le vendeur */
 function tauxAib(d){ return Number(d && d.aib) || 0; }
@@ -1215,7 +1239,7 @@ function vueEditeur(){
         GROUPES.map(function(g){
           return '<option value="' + g[0] + '"' + ((l.g || grpDefaut) === g[0] ? " selected" : "") + ">" + g[0] + "</option>";
         }).join("") + "</select></td>" : "") +
-      (T.prix ? '<td style="width:112px"><input class="num" data-l="' + i + '" data-c="pu" inputmode="numeric" value="' + echap(l.pu) + '" aria-label="Prix unitaire"></td>' +
+      (T.prix ? '<td style="width:112px"><input class="num" data-l="' + i + '" data-c="pu" inputmode="numeric" value="' + echap(puAffiche(d,l)) + '" aria-label="Prix unitaire' + (d.saisieTTC ? " TTC" : "") + '"></td>' +
         '<td style="width:118px" class="num" data-montant="' + i + '">' + nombre((Number(l.q)||0)*(Number(l.pu)||0)) + "</td>" : "") +
       '<td style="width:36px"><button class="btn discret" data-suppr-ligne="' + i + '" aria-label="Retirer la ligne">×</button></td></tr>';
   }).join("");
@@ -1223,7 +1247,12 @@ function vueEditeur(){
   var sommes = "";
   if(T.prix){
     var tx = Number(d.tauxTva) || Number(reglages().tauxTva) || 18;
-    sommes = '<div class="somme"><dl><dt>Sous-total</dt><dd data-somme="brut">' + fcfa(totalLignes(d)) + "</dd>" +
+    sommes = '<div class="somme"><dl>' +
+      '<dt><label class="bascule" for="pu-ttc"><input type="checkbox" id="pu-ttc"' +
+        (d.saisieTTC ? " checked" : "") + ">Prix saisis TTC</label></dt>" +
+      '<dd style="font-size:12px;color:var(--doux)">' +
+        (d.saisieTTC ? "HT et TVA dégagés du prix tapé" : "le prix tapé est un prix HT") + "</dd>" +
+      "<dt>" + (d.saisieTTC ? "Sous-total HT" : "Sous-total") + '</dt><dd data-somme="brut">' + fcfa(totalLignes(d)) + "</dd>" +
       '<dt><label for="e-remise" style="font:inherit;text-transform:none;letter-spacing:0;color:inherit">Remise</label></dt>' +
       '<dd><input id="e-remise" class="num" data-champ="remise" inputmode="numeric" style="padding:5px 8px" value="' + echap(d.remise||0) + '"></dd>' +
       '<dt>Montant HT</dt><dd data-somme="ht">' + fcfa(montantHT(d)) + "</dd>" +
@@ -1270,7 +1299,7 @@ function vueEditeur(){
       (T.lettre ? carteCourrier(d) :
       '<div class="carte"><h3>Articles</h3><table class="lignes' + (certifiable ? " certif" : "") + '">' +
         '<thead><tr><th>Désignation</th><th>Qté</th>' + (certifiable ? "<th>Gr.</th>" : "") +
-        (T.prix ? "<th>P.U.</th><th>Montant</th>" : "") + '<th></th></tr></thead><tbody id="corps-lignes">' + lignes + "</tbody></table>" +
+        (T.prix ? (d.saisieTTC ? "<th>P.U. TTC</th><th>Montant HT</th>" : "<th>P.U.</th><th>Montant</th>") : "") + '<th></th></tr></thead><tbody id="corps-lignes">' + lignes + "</tbody></table>" +
         '<datalist id="cat">' + arts.map(function(a){ return '<option value="' + echap(a.d) + '">'; }).join("") + "</datalist>" +
         '<button class="btn discret" id="ajout-ligne" style="margin-top:8px">+ Ajouter une ligne</button>' +
         '<div id="rpr-info"></div>' + sommes + "</div>") +
@@ -2219,10 +2248,24 @@ document.addEventListener("input", function(e){
   if(formulaire && t.dataset.form){ formulaire.obj[t.dataset.form] = t.value; return; }
   if(!brouillon) return;
 
+  if(t.id === "pu-ttc"){
+    brouillon.saisieTTC = t.checked;
+    var txB = tauxTva(brouillon);
+    brouillon.lignes.forEach(function(l){
+      /* Ce qui est déjà tapé reste ce qu'il vaut : on note seulement son
+         équivalent dans l'autre unité, sans réinterpréter le nombre. */
+      if(t.checked) l.ttc = (l.pu === "" ? "" : ttcDepuisHT(l.pu, txB));
+      else delete l.ttc;
+    });
+    rendre(true);
+    return;
+  }
   if(t.id === "tva-actif"){
     brouillon.tva = t.checked;
     if(t.checked && !brouillon.tauxTva) brouillon.tauxTva = Number(reglages().tauxTva) || 18;
-    majSommes();
+    /* Sans TVA, le prix payé est le hors taxe : le HT remonte au niveau du TTC. */
+    recalerLignesTTC(brouillon);
+    if(brouillon.saisieTTC) rendre(true); else majSommes();
     return;
   }
   if(t.id === "cachet-actif"){ brouillon.cachet = t.checked; majApercu(); return; }
@@ -2230,10 +2273,19 @@ document.addEventListener("input", function(e){
   if(t.dataset.l !== undefined){
     var i = Number(t.dataset.l), l = brouillon.lignes[i], c = t.dataset.c;
     l[c] = (c === "d" || c === "g") ? t.value : (t.value === "" ? "" : Number(t.value));
+    if(c === "pu" && brouillon.saisieTTC){
+      /* Le nombre tapé est le prix que le client paie. On garde le P.U. en HT. */
+      l.ttc = l.pu;
+      l.pu = (l.ttc === "" ? "" : htDepuisTTC(l.ttc, tauxTva(brouillon)));
+    }
     if(c === "d"){
       var a = Store.tout("articles").filter(function(x){ return x.d === t.value; })[0];
       var champPu = document.querySelector('[data-l="' + i + '"][data-c="pu"]');
-      if(a && champPu && !Number(l.pu)){ l.pu = a.pu; champPu.value = a.pu; }
+      if(a && champPu && !Number(l.pu)){
+        l.pu = a.pu;
+        if(brouillon.saisieTTC) l.ttc = ttcDepuisHT(a.pu, tauxTva(brouillon));
+        champPu.value = puAffiche(brouillon, l);
+      }
     }
     majSommes();
     return;
