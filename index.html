@@ -4670,10 +4670,12 @@ function cachetRond(r){
   var sigle = String(r.cachetSigle || "").trim() ||
     String(r.nom || "").replace(/[^A-Za-z\u00C0-\u024F]/g, "").slice(0, 3).toUpperCase();
   var marqueImage = String(r.cachetMonogramme || r.logo || "").trim();
+  /* Le carré inscrit dans le cercle intérieur : côté = rayon × √2, soit 204
+     pour un rayon de 147. L'image tient dedans en entier — « meet » et non
+     « slice », qui la faisait déborder puis la rognait. */
   var centre = marqueImage
-    ? '<clipPath id="coeur-cachet"><circle cx="210" cy="210" r="140"/></clipPath>' +
-      '<g clip-path="url(#coeur-cachet)"><image href="' + echap(marqueImage) +
-      '" x="22" y="22" width="376" height="376" preserveAspectRatio="xMidYMid slice"/></g>'
+    ? '<image href="' + echap(marqueImage) +
+      '" x="108" y="108" width="204" height="204" preserveAspectRatio="xMidYMid meet"/>'
     : '<text x="210" y="245" text-anchor="middle" font-family="Poppins,sans-serif" font-size="98" ' +
       'font-weight="700" letter-spacing="3" fill="' + marque + '">' + echap(sigle) + "</text>";
 
