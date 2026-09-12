@@ -5375,10 +5375,11 @@ function appliquerCharte(code){
   var jeu = c.clair ? (nuitTombee() ? c.sombre : c.clair) : null;
   if(jeu) Object.keys(jeu).forEach(function(k){ st.setProperty(k, jeu[k]); });
   var nom = document.querySelector(".sceau .nom");
-  if(nom) nom.innerHTML = charteCourante === "nassra"
-    ? echap(reglages().nom || "NASSRA")
-    : '<span style="color:var(--ocre)">&lt;</span><span style="color:var(--encre)">' +
-      echap(reglages().nom || "ZADNA S.X") + '</span><span style="color:var(--ocre)">/&gt;</span>';
+  /* Les chevrons appartiennent à ZADNA : toute autre maison porte son nom nu. */
+  if(nom) nom.innerHTML = charteCourante === "zadna"
+    ? '<span style="color:var(--ocre)">&lt;</span><span style="color:var(--encre)">' +
+      echap(reglages().nom || "ZADNA S.X") + '</span><span style="color:var(--ocre)">/&gt;</span>'
+    : echap(reglages().nom || "");
 }
 
 if(window.matchMedia){
