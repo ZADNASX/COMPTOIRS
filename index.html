@@ -4664,16 +4664,16 @@ function cachetRond(r){
      texte tombe alors en haut, à l'endroit. */
   var anneau = "M 210," + (210 + RAYON) + " A " + RAYON + "," + RAYON + " 0 1 1 210.01," + (210 + RAYON);
 
-  /* Le centre porte un sigle dessiné. On n'y met le logo de la maison que
-     s'il est fourni NU (`cachetMonogramme`) : celui d'Ets DSN porte sa propre
-     couronne de mentions, qui devenait une frise illisible sous celle du
-     cachet. Un cachet doit d'abord se lire. */
+  /* Le centre porte la marque de la maison : son monogramme nu s'il en existe
+     un, sinon son logo, agrandi et détouré au cercle intérieur. Le sigle
+     dessiné n'est que le repli d'une maison sans logo. */
   var sigle = String(r.cachetSigle || "").trim() ||
     String(r.nom || "").replace(/[^A-Za-z\u00C0-\u024F]/g, "").slice(0, 3).toUpperCase();
-  var centre = r.cachetMonogramme
+  var marqueImage = String(r.cachetMonogramme || r.logo || "").trim();
+  var centre = marqueImage
     ? '<clipPath id="coeur-cachet"><circle cx="210" cy="210" r="140"/></clipPath>' +
-      '<g clip-path="url(#coeur-cachet)"><image href="' + echap(r.cachetMonogramme) +
-      '" x="76" y="76" width="268" height="268" preserveAspectRatio="xMidYMid meet"/></g>'
+      '<g clip-path="url(#coeur-cachet)"><image href="' + echap(marqueImage) +
+      '" x="22" y="22" width="376" height="376" preserveAspectRatio="xMidYMid slice"/></g>'
     : '<text x="210" y="245" text-anchor="middle" font-family="Poppins,sans-serif" font-size="98" ' +
       'font-weight="700" letter-spacing="3" fill="' + marque + '">' + echap(sigle) + "</text>";
 
