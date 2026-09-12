@@ -1231,18 +1231,20 @@ var TYPES = {
   bl:       {label:"Bon de livraison",  court:"Livraison", code:"BL",  prix:false},
   recu:     {label:"Reçu de paiement",  court:"Reçu",      code:"REC", prix:true, reglement:true, recu:true}
 };
+/* Aucune identité par défaut. Ces valeurs portaient celles de ZADNA — IFU,
+   RCCM, adresse, signataire — et un comptoir nouveau en héritait sans rien
+   signaler : sur une facture normalisée, c'est le numéro fiscal d'autrui.
+   Ne restent ici que des conventions, qui n'appartiennent à personne. */
 var REGLAGES_DEFAUT = {
-  nom:"ZADNA S.X", activite:"SOLUTIONS TECHNOLOGIQUES & NUMÉRIQUES",
-  forme:"ZADNA SOLUTIONS ET SERVICES · SARL au capital de 2 000 000 F CFA",
-  rccm:"RB/COT/26 B 44001", ifu:"3202682190953",
-  tel:"+229 01 47 47 47 00", email:"zadna.sol.x@gmail.com",
-  adresse:"Parcelle f, Maison IBRAHIMA NDIAYE — Guinkomey, 5e arrondissement, Cotonou, Littoral, Bénin",
-  banque:"", compte:"", momo:"+229 01 47 47 47 00",
-  mention:"TVA non applicable — régime des Micro et Petites Entreprises (TPS).",
+  nom:"", activite:"", forme:"",
+  rccm:"", ifu:"",
+  tel:"", email:"", adresse:"",
+  banque:"", compte:"", momo:"",
+  mention:"",
   tauxTva:"18", tvaDefaut:"non",
-  ville:"Cotonou",
-  validite:"30 jours", signataire:"SARANA Soulé", fonction:"Gérant",
-  groupeDefaut:"E"
+  ville:"",
+  validite:"30 jours", signataire:"", fonction:"",
+  groupeDefaut:"B"
 };
 /* Referentiels e-MECeF (DGI Benin). Groupes : formulaire officiel d auto-declaration de SFE. */
 var TYPES_MECEF = [["FV","Facture de vente"],["FA","Facture d'avoir"],
@@ -4208,9 +4210,18 @@ function vueReglages(){
       (zone ? '<textarea id="r-' + cle + '" data-reglage="' + cle + '">' + echap(r[cle]) + "</textarea>"
             : '<input id="r-' + cle + '" data-reglage="' + cle + '" value="' + echap(r[cle]) + '">') + "</div>";
   }
+  /* Sans identité, les documents sortent avec des trous à la place du nom et
+     du numéro fiscal. Mieux vaut le dire ici que le découvrir à l'impression. */
+  var manque = ["nom","ifu","rccm","adresse","signataire"]
+    .filter(function(c){ return !String(r[c] || "").trim(); });
+
   return '<div class="entete-vue"><div><h1>Réglages</h1>' +
     '<p class="sous-titre">Ces informations alimentent l\'en-tête et le pied de tous vos documents</p></div>' +
     '<button class="btn principal" id="enr-reglages">Enregistrer</button></div>' +
+    (manque.length ? '<div class="carte" style="border-color:var(--brique);background:var(--brique-fond)">' +
+      '<b style="color:var(--brique)">Ce comptoir n\'est pas encore configuré.</b>' +
+      '<p style="margin:6px 0 0;font-size:13px">Tant que ces champs sont vides, vos documents sortiront ' +
+      'incomplets : <b>' + manque.join(", ") + '</b>.</p></div>' : "") +
     '<div class="carte"><h3>Identité</h3><div class="grille">' +
       ch("nom","Nom commercial") + ch("activite","Baseline") + ch("forme","Forme juridique et capital") +
       '<div class="champ"><label for="r-maquette">Maquette des documents</label>' +
