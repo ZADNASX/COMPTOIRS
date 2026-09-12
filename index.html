@@ -290,6 +290,7 @@ table.lignes input.ref-rpr{margin-top:4px;padding:4px 8px;font-size:11.5px;
 .feuille.nassra{width:210mm;min-height:297mm;background:#fff;color:#241A14;padding:16mm 18mm 26mm;position:relative;
   font-family:"Public Sans",sans-serif;font-size:10.5pt;line-height:1.5;box-shadow:0 2px 14px rgba(0,0,0,.12)}
 .feuille .logo-comptoir,.feuille-mini .logo-comptoir{width:auto;max-width:72mm;object-fit:contain}
+.feuille img.cachet{object-fit:contain}
 .feuille.nassra .marque-bloc{display:flex;align-items:flex-start;justify-content:space-between;gap:14mm}
 .feuille.nassra .filet{height:1mm;display:flex;margin-top:5mm}
 .feuille.nassra .filet i{display:block;height:100%}
@@ -331,7 +332,7 @@ table.lignes input.ref-rpr{margin-top:4px;padding:4px 8px;font-size:11.5px;
 .feuille.nassra .sig-g{position:relative;flex:1}
 /* Le blanc de signature vivait sous « Pour NASSRA ». Cette mention retirée,
    c'est le nom qui le porte. */
-.feuille.nassra .paraphes .qui{display:block;color:#241A14;font-weight:600;margin-top:14mm}
+.feuille.nassra .paraphes .qui{display:block;color:#241A14;font-weight:600;margin-top:36mm}
 .feuille.nassra .cachet{position:absolute;left:1mm;top:0;width:33mm;height:33mm;transform:rotate(-9deg);opacity:.92;pointer-events:none}
 .feuille.nassra .paraphes .droite{text-align:right}
 .feuille.nassra .pied{position:absolute;left:18mm;right:18mm;bottom:10mm;border-top:.3mm solid #E5DACA;padding-top:2.5mm;
@@ -389,7 +390,8 @@ table.lignes input.ref-rpr{margin-top:4px;padding:4px 8px;font-size:11.5px;
 .feuille.dsn .paraphes{display:flex;justify-content:space-between;gap:10mm;margin-top:12mm;font-size:9pt;color:#595959}
 .feuille.dsn .paraphes b{display:block;color:#12203A;margin-bottom:14mm;font-size:9pt}
 .feuille.dsn .sig-g{position:relative;flex:1}
-.feuille.dsn .paraphes .qui{display:block;color:#12203A;font-weight:600;margin-top:14mm}
+/* Le cachet fait 33 mm : sous 14 mm de blanc, il recouvrait le nom. */
+.feuille.dsn .paraphes .qui{display:block;color:#12203A;font-weight:600;margin-top:36mm}
 .feuille.dsn .cachet{position:absolute;left:1mm;top:0;width:33mm;height:33mm;transform:rotate(-9deg);opacity:.92;pointer-events:none}
 .feuille.dsn .paraphes .droite{text-align:right}
 .feuille.dsn .pied{position:absolute;left:18mm;right:18mm;bottom:10mm;border-top:.3mm solid #D8E4F3;padding-top:2.5mm;
@@ -4605,9 +4607,9 @@ function feuilleCourrier(d){
   if(d.copie) annexes.push("<b>Copie \u00e0 :</b> " + echap(d.copie));
 
   var signature = m === "nassra"
-    ? '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? cachetNassra(r) : "") +
+    ? '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? (cachetFichier(r) || cachetNassra(r)) : "") +
       '<span class="qui">' + echap(r.signataire) + "</span>" + echap(r.fonction) + "</div></div>"
-    : '<div class="paraphes"><div class="sig-d">' + (d.cachet !== false ? cachetSVG(r) : "") +
+    : '<div class="paraphes"><div class="sig-d">' + (d.cachet !== false ? (cachetFichier(r) || cachetSVG(r)) : "") +
       "<b>Pour " + echap(r.nom) + "</b>" +
       '<span class="qui">' + echap(r.signataire) + "</span><br>" + echap(r.fonction) + "</div></div>";
 
@@ -4631,20 +4633,39 @@ function feuilleCourrier(d){
 /* ---------- la feuille NASSRA ----------
    Reprise de son application dédiée. Les deux maquettes cohabitent :
    le CSS les cloisonne, cet aiguillage choisit laquelle imprimer. */
+/* Le cachet déposé par l'entreprise. Le dessin qui suit n'est qu'un repli :
+   un vrai cachet a sa forme, ses mentions et son usure, qu'aucun tracé ne
+   reproduit. */
+function cachetFichier(r){
+  var src = String((r && r.cachetFichier) || "").trim();
+  return src ? '<img class="cachet" src="' + echap(src) + '" alt="">' : "";
+}
+
 function cachetNassra(r){
   var B = "#1B3A8F", P = "Poppins,sans-serif";
+  /* Le titre du cachet se règle : « ETABLISSEMENT NASSRA » était écrit en dur
+     et se retrouvait sur les pièces des autres maisons. */
+  var titre = String(r.cachetTitre || r.nom || "").toUpperCase();
+  var lieu = (String(r.ville || "Cotonou") + " \u00b7 R\u00c9PUBLIQUE DU B\u00c9NIN").toUpperCase();
+  /* Au centre, la marque de la maison : son logo s'il en a un, sinon l'arche
+     de NASSRA, qui n'appartient qu'à elle. */
+  var centre = r.logo
+    ? '<image href="' + echap(r.logo) + '" x="152" y="62" width="116" height="86" preserveAspectRatio="xMidYMid meet"/>'
+    : (String(r.cachetMarque || "") === "nassra"
+      ? '<g transform="translate(210,104) scale(0.5) translate(-60,-6)">' +
+        '<path d="M22 74 V44 a38 38 0 0 1 76 0 v30 h-13 V44 a25 25 0 0 0 -50 0 v30 z" fill="' + B + '"/>' +
+        '<rect x="22" y="80" width="76" height="7" rx="3.5" fill="' + B + '"/></g>'
+      : "");
   return '<svg class="cachet" viewBox="0 0 420 420" aria-hidden="true">' +
     '<defs><path id="cch" d="M 47,210 A 163,163 0 0 1 373,210" fill="none"/>' +
     '<path id="ccb" d="M 38,210 A 172,172 0 0 0 382,210" fill="none"/></defs>' +
     '<g fill="none" stroke="' + B + '"><circle cx="210" cy="210" r="203" stroke-width="9"/>' +
     '<circle cx="210" cy="210" r="186" stroke-width="4"/></g>' +
     '<text font-family="' + P + '" font-size="29" font-weight="700" letter-spacing="3" fill="' + B + '">' +
-    '<textPath href="#cch" startOffset="50%" text-anchor="middle">ETABLISSEMENT NASSRA</textPath></text>' +
+    '<textPath href="#cch" startOffset="50%" text-anchor="middle">' + echap(titre) + "</textPath></text>" +
     '<text font-family="' + P + '" font-size="19" font-weight="600" letter-spacing="2" fill="' + B + '">' +
-    '<textPath href="#ccb" startOffset="50%" text-anchor="middle">COTONOU · REPUBLIQUE DU BENIN</textPath></text>' +
-    '<g transform="translate(210,104) scale(0.5) translate(-60,-6)">' +
-    '<path d="M22 74 V44 a38 38 0 0 1 76 0 v30 h-13 V44 a25 25 0 0 0 -50 0 v30 z" fill="' + B + '"/>' +
-    '<rect x="22" y="80" width="76" height="7" rx="3.5" fill="' + B + '"/></g>' +
+    '<textPath href="#ccb" startOffset="50%" text-anchor="middle">' + echap(lieu) + "</textPath></text>" +
+    centre +
     '<g font-family="' + P + '" font-size="18" fill="' + B + '" text-anchor="middle">' +
     '<text x="210" y="190">RCCM : ' + echap(r.rccm) + "</text>" +
     '<text x="210" y="216">IFU : ' + echap(r.ifu) + "</text>" +
@@ -4776,7 +4797,7 @@ function feuilleDsn(d){
       ? '<div class="notes">' + echap(r.mention) + "</div>" : "") +
     (d.type === "bl" ? '<div class="notes">Le client reconnaît avoir reçu les articles ci-dessus en bon état et en bonne quantité.</div>' : "") +
     bandeCertif(d) +
-    '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? cachetNassra(r) : "") +
+    '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? (cachetFichier(r) || cachetNassra(r)) : "") +
     '<span class="qui">' + echap(r.signataire) + "</span>" + echap(r.fonction) + "</div>" +
     /* La livraison se fait contresigner, et le devis se fait accepter. */
     (d.type === "bl"
@@ -4887,7 +4908,7 @@ function feuilleNassra(d){
       ? '<div class="notes">' + echap(r.mention) + "</div>" : "") +
     (d.type === "bl" ? '<div class="notes">Le client reconnaît avoir reçu les articles ci-dessus en bon état et en bonne quantité.</div>' : "") +
     bandeCertif(d) +
-    '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? cachetNassra(r) : "") +
+    '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? (cachetFichier(r) || cachetNassra(r)) : "") +
     '<span class="qui">' + echap(r.signataire) + "</span>" + echap(r.fonction) + "</div>" +
     /* La livraison se fait contresigner, et le devis se fait accepter. */
     (d.type === "bl"
@@ -5067,7 +5088,7 @@ function feuilleZadna(d){
 
   /* ZADNA signe toujours a droite ; a gauche, ce que le client doit remplir
      change selon la nature du document */
-  var signature = '<div class="sig-d">' + (d.cachet !== false ? cachetSVG(r) : "") +
+  var signature = '<div class="sig-d">' + (d.cachet !== false ? (cachetFichier(r) || cachetSVG(r)) : "") +
     "<b>Pour " + echap(r.nom) + "</b>" +
     '<span class="qui">' + echap(r.signataire) + "</span><br>" + echap(r.fonction) + "</div>";
 
