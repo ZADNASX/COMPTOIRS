@@ -4670,12 +4670,13 @@ function cachetRond(r){
   var sigle = String(r.cachetSigle || "").trim() ||
     String(r.nom || "").replace(/[^A-Za-z\u00C0-\u024F]/g, "").slice(0, 3).toUpperCase();
   var marqueImage = String(r.cachetMonogramme || r.logo || "").trim();
-  /* Le carré inscrit dans le cercle intérieur : côté = rayon × √2, soit 204
-     pour un rayon de 147. L'image tient dedans en entier — « meet » et non
-     « slice », qui la faisait déborder puis la rognait. */
+  /* La marque emplit le cercle intérieur. Elle peut le mordre un peu : son
+     fond est transparent, elle n'efface donc rien. C'est le détourage qui
+     permet de l'agrandir — avec un fond blanc opaque, tout débordement
+     aurait effacé le cercle. */
   var centre = marqueImage
     ? '<image href="' + echap(marqueImage) +
-      '" x="108" y="108" width="204" height="204" preserveAspectRatio="xMidYMid meet"/>'
+      '" x="72" y="72" width="276" height="276" preserveAspectRatio="xMidYMid meet"/>'
     : '<text x="210" y="245" text-anchor="middle" font-family="Poppins,sans-serif" font-size="98" ' +
       'font-weight="700" letter-spacing="3" fill="' + marque + '">' + echap(sigle) + "</text>";
 
