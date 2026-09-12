@@ -471,6 +471,222 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
     border:1px solid var(--ligne-forte);border-radius:8px}
   main{padding:18px 16px 60px}
 }
+
+/* ═══ Marchés publics : styles du module, cloisonnés ═══ */
+#marches, #marches-print{
+  --bg: #F4F6F3;
+  --surface: #FFFFFF;
+  --surface-2: #EDF1EC;
+  --ink: #12201A;
+  --ink-soft: #51625A;
+  --ink-faint: #8B9990;
+  --line: #DCE5DD;
+  --line-strong: #C3D0C6;
+  --accent: #0E6B4C;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E1EFE7;
+  --gold: #96702F;
+  --gold-soft: #F3E9D8;
+  --red: #B3261E;
+  --red-soft: #FBE9E7;
+  --shadow: 0 1px 2px rgba(18, 32, 26, 0.06), 0 4px 16px rgba(18, 32, 26, 0.06);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+@media (prefers-color-scheme: dark) {html:not([data-theme="light"]) #marches, html:not([data-theme="light"]) #marches-print{
+    --bg: #0E1512;
+    --surface: #151D19;
+    --surface-2: #1B2420;
+    --ink: #E7EEE9;
+    --ink-soft: #A7B7AE;
+    --ink-faint: #6D8078;
+    --line: #263029;
+    --line-strong: #34423A;
+    --accent: #3FAE82;
+    --accent-ink: #06140E;
+    --accent-soft: #1B3129;
+    --gold: #D3AE72;
+    --gold-soft: #3A2E1B;
+    --red: #E5877E;
+    --red-soft: #3A211E;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.35);
+  }
+}html[data-theme="dark"] #marches, html[data-theme="dark"] #marches-print{
+  --bg: #0E1512;
+  --surface: #151D19;
+  --surface-2: #1B2420;
+  --ink: #E7EEE9;
+  --ink-soft: #A7B7AE;
+  --ink-faint: #6D8078;
+  --line: #263029;
+  --line-strong: #34423A;
+  --accent: #3FAE82;
+  --accent-ink: #06140E;
+  --accent-soft: #1B3129;
+  --gold: #D3AE72;
+  --gold-soft: #3A2E1B;
+  --red: #E5877E;
+  --red-soft: #3A211E;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.35);
+}#marches *, #marches-print *{ box-sizing: border-box; }#marches, #marches-print{ margin: 0; padding: 0; }#marches, #marches-print{
+  background: var(--bg); color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  min-height: 100vh; min-height: 100dvh;
+}#marches button, #marches-print button, #marches input, #marches-print input, #marches select, #marches-print select, #marches textarea, #marches-print textarea{ font-family: inherit; font-size: inherit; color: inherit; }#marches button, #marches-print button{ cursor: pointer; }#marches a, #marches-print a{ color: var(--accent); }
+
+/* ---------- App shell ---------- */#marches #app, #marches-print #app{ display: flex; flex-direction: column; min-height: 100dvh; }#marches header.topbar, #marches-print header.topbar{
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
+}#marches header.topbar .brand, #marches-print header.topbar .brand{ display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: -0.01em; }#marches header.topbar .brand .mark, #marches-print header.topbar .brand .mark{
+  width: 28px; height: 28px; border-radius: 7px; background: var(--accent); color: var(--accent-ink);
+  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;
+}#marches header.topbar .spacer, #marches-print header.topbar .spacer{ flex: 1; }#marches header.topbar .dossier-pill, #marches-print header.topbar .dossier-pill{
+  display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 600;
+  border: 1px solid transparent; max-width: 40vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}#marches nav.tabs, #marches-print nav.tabs{
+  display: flex; gap: 2px; padding: 6px 10px; background: var(--surface); border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}#marches nav.tabs button, #marches-print nav.tabs button{
+  border: none; background: transparent; color: var(--ink-soft); padding: 8px 14px; border-radius: var(--radius-sm);
+  font-weight: 600; font-size: 13.5px; white-space: nowrap;
+}#marches nav.tabs button[aria-current="true"], #marches-print nav.tabs button[aria-current="true"]{ background: var(--accent-soft); color: var(--accent); }#marches nav.tabs button:disabled, #marches-print nav.tabs button:disabled{ opacity: .4; cursor: not-allowed; }#marches main, #marches-print main{ flex: 1; padding: 16px; max-width: 1100px; margin: 0 auto; width: 100%; }#marches .view, #marches-print .view{ display: none; }#marches .view.active, #marches-print .view.active{ display: block; }
+
+/* ---------- Cards / generic ---------- */#marches .card, #marches-print .card{
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px; box-shadow: var(--shadow);
+}#marches .card + .card, #marches-print .card + .card{ margin-top: 12px; }#marches .card h2, #marches-print .card h2{ margin: 0 0 4px; font-size: 16px; }#marches .card h3, #marches-print .card h3{ margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: 0; }#marches .muted, #marches-print .muted{ color: var(--ink-soft); }#marches .faint, #marches-print .faint{ color: var(--ink-faint); font-size: 12.5px; }#marches .row, #marches-print .row{ display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }#marches .row.between, #marches-print .row.between{ justify-content: space-between; }#marches .stack, #marches-print .stack{ display: flex; flex-direction: column; gap: 10px; }#marches .grid2, #marches-print .grid2{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 640px) {#marches .grid2, #marches-print .grid2{ grid-template-columns: 1fr; } }#marches label.field, #marches-print label.field{ display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--ink-soft); font-weight: 600; }#marches label.field input, #marches-print label.field input, #marches label.field select, #marches-print label.field select, #marches label.field textarea, #marches-print label.field textarea{
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 9px 10px;
+  background: var(--surface); color: var(--ink); font-size: 14px;
+}#marches label.field input:focus, #marches-print label.field input:focus, #marches label.field select:focus, #marches-print label.field select:focus, #marches label.field textarea:focus, #marches-print label.field textarea:focus{ outline: 2px solid var(--accent); outline-offset: -1px; }#marches .btn, #marches-print .btn{
+  border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); border-radius: var(--radius-sm);
+  padding: 9px 14px; font-weight: 600; font-size: 13.5px; display: inline-flex; align-items: center; gap: 6px;
+}#marches .btn:hover, #marches-print .btn:hover{ border-color: var(--accent); }#marches .btn.primary, #marches-print .btn.primary{ background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }#marches .btn.ghost, #marches-print .btn.ghost{ border-color: transparent; background: transparent; }#marches .btn.danger, #marches-print .btn.danger{ color: var(--red); border-color: var(--red-soft); }#marches .btn.sm, #marches-print .btn.sm{ padding: 5px 10px; font-size: 12.5px; }#marches .btn:disabled, #marches-print .btn:disabled{ opacity: .45; cursor: not-allowed; }#marches .badge, #marches-print .badge{ display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }#marches .badge.ok, #marches-print .badge.ok{ background: var(--accent-soft); color: var(--accent); }#marches .badge.warn, #marches-print .badge.warn{ background: var(--gold-soft); color: var(--gold); }#marches .progress, #marches-print .progress{ height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }#marches .progress > span, #marches-print .progress > span{ display: block; height: 100%; background: var(--accent); }
+
+/* ---------- Dossiers list ---------- */#marches .dossier-card, #marches-print .dossier-card{ cursor: pointer; }#marches .dossier-card:hover, #marches-print .dossier-card:hover{ border-color: var(--accent); }#marches .dossier-card .title, #marches-print .dossier-card .title{ font-weight: 700; font-size: 15px; margin-bottom: 2px; }#marches .dossier-card .meta, #marches-print .dossier-card .meta{ font-size: 12.5px; color: var(--ink-soft); }#marches .empty-state, #marches-print .empty-state{ text-align: center; padding: 48px 16px; color: var(--ink-soft); }
+
+/* ---------- Répertoire ---------- */#marches .repertoire-controls, #marches-print .repertoire-controls{ position: sticky; top: 96px; z-index: 5; background: var(--bg); padding-bottom: 8px; }#marches .search-box, #marches-print .search-box{ display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 9px 12px; }#marches .search-box input, #marches-print .search-box input{ flex: 1; border: none; background: transparent; font-size: 14px; }#marches .search-box input:focus, #marches-print .search-box input:focus{ outline: none; }#marches .chips, #marches-print .chips{ display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }#marches .chip, #marches-print .chip{
+  border: 1px solid var(--line-strong); background: var(--surface); border-radius: 999px; padding: 5px 11px;
+  font-size: 12px; font-weight: 600; color: var(--ink-soft);
+}#marches .chip[aria-pressed="true"], #marches-print .chip[aria-pressed="true"]{ background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }#marches table.plain, #marches-print table.plain{ width: 100%; border-collapse: collapse; }#marches table.plain th, #marches-print table.plain th, #marches table.plain td, #marches-print table.plain td{ text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: top; }#marches table.plain th, #marches-print table.plain th{ color: var(--ink-soft); font-size: 12px; font-weight: 600; letter-spacing: 0; position: sticky; top: 0; background: var(--surface); }#marches table.plain tr:hover td, #marches-print table.plain tr:hover td{ background: var(--surface-2); }#marches .mono, #marches-print .mono{ font-family: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; }#marches .price-range, #marches-print .price-range{ white-space: nowrap; font-variant-numeric: tabular-nums; }#marches .rep-item, #marches-print .rep-item{ padding: 10px 8px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: flex-start; }#marches .rep-item .info, #marches-print .rep-item .info{ flex: 1; min-width: 0; }#marches .rep-item .desig, #marches-print .rep-item .desig{ font-weight: 600; font-size: 13.5px; }#marches .rep-item .sub, #marches-print .rep-item .sub{ color: var(--ink-soft); font-size: 12px; margin-top: 2px; }#marches .rep-item .price, #marches-print .rep-item .price{ font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--ink-soft); white-space: nowrap; }
+
+/* ---------- Bordereau ---------- */#marches .bordereau-table, #marches-print .bordereau-table{ width: 100%; border-collapse: collapse; }#marches .bordereau-table th, #marches-print .bordereau-table th, #marches .bordereau-table td, #marches-print .bordereau-table td{ border: 1px solid var(--line); padding: 6px; font-size: 13px; }#marches .bordereau-table th, #marches-print .bordereau-table th{ background: var(--surface-2); font-size: 12px; font-weight: 600; color: var(--ink-soft); }#marches .bordereau-table input, #marches-print .bordereau-table input{ width: 100%; border: none; background: transparent; padding: 4px; font-size: 13px; color: var(--ink); }#marches .bordereau-table input:focus, #marches-print .bordereau-table input:focus{ outline: 1.5px solid var(--accent); border-radius: 4px; }#marches .bordereau-table td.num input, #marches-print .bordereau-table td.num input, #marches .bordereau-table td.num, #marches-print .bordereau-table td.num{ text-align: right; font-variant-numeric: tabular-nums; }#marches .bordereau-table tfoot td, #marches-print .bordereau-table tfoot td{ font-weight: 700; background: var(--surface-2); }#marches .bordereau-table .rm-btn, #marches-print .bordereau-table .rm-btn{ color: var(--red); }
+
+/* ---------- Checklist ---------- */#marches .bloc, #marches-print .bloc{ margin-bottom: 14px; }#marches .bloc-head, #marches-print .bloc-head{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }#marches .bloc-head h3, #marches-print .bloc-head h3{ margin: 0; }#marches .piece-row, #marches-print .piece-row{ display: flex; align-items: flex-start; gap: 10px; padding: 8px 4px; border-bottom: 1px solid var(--line); }#marches .piece-row input[type="checkbox"], #marches-print .piece-row input[type="checkbox"]{ margin-top: 3px; width: 17px; height: 17px; accent-color: var(--accent); }#marches .piece-row .label, #marches-print .piece-row .label{ flex: 1; font-size: 13.5px; }#marches .piece-row .label.done, #marches-print .piece-row .label.done{ color: var(--ink-faint); text-decoration: line-through; }#marches .piece-row .note, #marches-print .piece-row .note{ width: 220px; }#marches .piece-row .note input, #marches-print .piece-row .note input{ width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; font-size: 12px; background: var(--surface); color: var(--ink); }
+
+/* ---------- Toast ---------- */#marches #toast, #marches-print #toast{
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 13px;
+  opacity: 0; pointer-events: none; transition: all .2s ease; z-index: 100; box-shadow: var(--shadow);
+}#marches #toast.show, #marches-print #toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Modal ---------- */#marches .overlay, #marches-print .overlay{
+  position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center;
+  z-index: 50; padding: 16px;
+}#marches .overlay[hidden], #marches-print .overlay[hidden]{ display: none; }#marches .modal, #marches-print .modal{ background: var(--surface); border-radius: var(--radius); padding: 20px; max-width: 640px; width: 100%; box-shadow: var(--shadow); max-height: 88vh; overflow: auto; }#marches .modal.large, #marches-print .modal.large{ max-width: 760px; }#marches .modal h2, #marches-print .modal h2{ margin-top: 0; }
+
+/* ---------- Écran de configuration au premier lancement ---------- */#marches .setup, #marches-print .setup{ max-width: 620px; }#marches .setup .setup-intro, #marches-print .setup .setup-intro{ font-size: 14px; line-height: 1.6; color: var(--ink-soft); margin: 0 0 18px; }#marches .setup .req, #marches-print .setup .req{ color: var(--red); }#marches .setup-sep, #marches-print .setup-sep{
+  display: flex; align-items: center; gap: 12px;
+  margin: 22px 0 16px; color: var(--ink-faint); font-size: 12px;
+  letter-spacing: .02em;
+}#marches .setup-sep::before, #marches-print .setup-sep::before, #marches .setup-sep::after, #marches-print .setup-sep::after{ content: ""; flex: 1; height: 1px; background: var(--line); }#marches .setup-err, #marches-print .setup-err{
+  margin: 12px 0 0; padding: 9px 12px; border-radius: var(--radius-sm);
+  background: var(--red-soft); color: var(--red); font-size: 13px;
+}
+
+/* Barre des lots repliable */#marches .lot-toggle, #marches-print .lot-toggle{
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-size: 12.5px; color: var(--accent); font-weight: 600;
+}#marches .lot-toggle:hover, #marches-print .lot-toggle:hover{ text-decoration: underline; }#marches .lot-resume, #marches-print .lot-resume{ font-size: 13px; color: var(--ink-soft); }#marches .print-only, #marches-print .print-only{ display: none; }
+
+@media print {#marches header.topbar, #marches-print header.topbar, #marches nav.tabs, #marches-print nav.tabs, #marches .no-print, #marches-print .no-print, #marches .screen-only, #marches-print .screen-only{ display: none !important; }#marches, #marches-print{ background: #fff; color: #000; font-family: var(--police-doc, inherit); }#marches main, #marches-print main{ max-width: none; padding: 0; }#marches .print-only, #marches-print .print-only{ display: block; }#marches .print-lot, #marches-print .print-lot{ page-break-inside: avoid; margin-bottom: 22px; }#marches .print-lot h3, #marches-print .print-lot h3{ font-size: 14px; margin: 0 0 6px; }#marches .print-header, #marches-print .print-header{ margin-bottom: 16px; }#marches .print-header h2, #marches-print .print-header h2{ margin: 0 0 4px; font-size: 17px; }#marches .print-header .meta, #marches-print .print-header .meta{ font-size: 12px; color: #444; }#marches .print-grand-total, #marches-print .print-grand-total{ margin-top: 10px; font-weight: 700; text-align: right; font-size: 13px; }
+}
+
+/* ---------- Ajouts v3 : chapitres, fiches entreprise, impression ---------- */#marches .soft-sep, #marches-print .soft-sep{
+  height: 1px; background: var(--line);
+  margin: 14px 0; border: 0;
+}#marches .nudge, #marches-print .nudge{
+  margin-top: 12px; padding: 10px 14px;
+  background: var(--gold-soft); color: var(--gold);
+  border: 1px solid var(--gold); border-radius: var(--radius-sm);
+  font-size: 13px; line-height: 1.45;
+}#marches .nudge strong, #marches-print .nudge strong{ font-weight: 700; }
+
+/* Onglets internes de la modale profil */#marches .stab, #marches-print .stab{ animation: none; }
+
+/* Micro-boutons de réordonnancement */#marches .row-tools, #marches-print .row-tools{ display: flex; gap: 2px; align-items: center; justify-content: flex-end; }#marches .row-tools button, #marches-print .row-tools button{
+  border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink-soft); border-radius: 6px;
+  width: 22px; height: 24px; padding: 0;
+  font-size: 11px; line-height: 1;
+}#marches .row-tools button:hover:not(:disabled), #marches-print .row-tools button:hover:not(:disabled){ border-color: var(--line-strong); color: var(--ink); }#marches .row-tools button:disabled, #marches-print .row-tools button:disabled{ opacity: .3; cursor: default; }#marches .row-tools button.rm-btn, #marches-print .row-tools button.rm-btn{ color: var(--red); border-color: var(--line); }
+
+/* Ligne d'en-tête de chapitre dans le tableau */#marches tr.chap-head td, #marches-print tr.chap-head td{
+  background: var(--surface-2); font-weight: 700;
+  font-size: 12.5px; letter-spacing: 0;
+  color: var(--ink-soft); padding: 7px 8px;
+}
+
+/* Fiches répétables (références / personnel / matériel) */#marches .fiche, #marches-print .fiche{
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 10px 12px; background: var(--surface-2);
+}#marches .fiche .fiche-head, #marches-print .fiche .fiche-head{
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}#marches .fiche .fiche-head span, #marches-print .fiche .fiche-head span{ font-size: 12px; font-weight: 700; color: var(--ink-soft); }#marches .empty-fiche, #marches-print .empty-fiche{ font-size: 13px; color: var(--ink-faint); padding: 8px 0; }
+
+/* Blocs générés pour la lettre de soumission et les formulaires */#marches .doc-prose, #marches-print .doc-prose{ font-size: 14px; line-height: 1.7; }#marches .doc-prose h3, #marches-print .doc-prose h3{
+  font-size: 15px; margin: 0 0 12px; font-weight: 600;
+  letter-spacing: .04em; text-align: center;
+}#marches .doc-prose p, #marches-print .doc-prose p{ margin: 0 0 11px; }#marches .doc-prose .adresse-bloc, #marches-print .doc-prose .adresse-bloc{ margin: 18px 0; }#marches .doc-prose .objet, #marches-print .doc-prose .objet{ font-weight: 700; margin: 16px 0; }#marches .doc-prose ul, #marches-print .doc-prose ul{ margin: 0 0 11px; padding-left: 20px; }#marches .doc-prose li, #marches-print .doc-prose li{ margin-bottom: 5px; }#marches .signature-bloc, #marches-print .signature-bloc{
+  margin-top: 34px; display: flex; justify-content: flex-end;
+}#marches .signature-bloc div, #marches-print .signature-bloc div{ text-align: center; font-size: 13px; min-width: 220px; }#marches .signature-bloc .sig-space, #marches-print .signature-bloc .sig-space{ height: 52px; }
+
+/* En-tête entreprise imprimé */#marches .print-entreprise, #marches-print .print-entreprise{
+  border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 14px;
+}#marches .print-entreprise .rs, #marches-print .print-entreprise .rs{ font-weight: 700; font-size: 14px; }#marches .print-entreprise .coord, #marches-print .print-entreprise .coord{ font-size: 11px; color: #333; margin-top: 2px; }#marches .print-chap, #marches-print .print-chap{ margin: 14px 0 6px; font-size: 13px; font-weight: 700; }#marches .print-chap-total, #marches-print .print-chap-total{ font-size: 12px; font-style: italic; text-align: right; margin: 4px 0 12px; }
+
+@media print {#marches .print-lot, #marches-print .print-lot{ page-break-after: always; }#marches .print-lot:last-child, #marches-print .print-lot:last-child{ page-break-after: auto; }
+  /* les champs de saisie s'impriment comme du texte simple */#marches input, #marches-print input, #marches select, #marches-print select, #marches textarea, #marches-print textarea{
+    border: none !important; background: transparent !important;
+    padding: 0 !important; box-shadow: none !important;
+    -webkit-appearance: none; appearance: none; color: #000 !important;
+  }#marches .doc-prose, #marches-print .doc-prose{ font-size: 12.5px; }
+}
+
+/* ---------- v5 : hiérarchie visuelle ---------- */
+
+/* La carte est réservée aux objets (un dossier, un document).
+   Les barres d'outils deviennent des bandes discrètes : ni ombre, ni relief. */#marches .bar, #marches-print .bar{
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  box-shadow: none;
+}
+
+/* L'échéance : l'information la plus lourde de conséquence du métier. */#marches .echeance, #marches-print .echeance{ display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }#marches .echeance .n, #marches-print .echeance .n{
+  font-size: 27px; font-weight: 700; line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: -.02em;
+  color: var(--ink-soft);
+}#marches .echeance .u, #marches-print .echeance .u{ font-size: 12px; color: var(--ink-faint); }#marches .echeance.proche .n, #marches-print .echeance.proche .n{ color: var(--gold); }#marches .echeance.urgent .n, #marches-print .echeance.urgent .n, #marches .echeance.echu .n, #marches-print .echeance.echu .n{ color: var(--red); }#marches .echeance.echu .u, #marches-print .echeance.echu .u{ color: var(--red); }#marches .dossier-card.urgent, #marches-print .dossier-card.urgent{ border-color: var(--red); }#marches .dossier-card.proche, #marches-print .dossier-card.proche{ border-color: var(--gold); }
+
+/* Métadonnées : une nature d'information par traitement, plus de chaîne à points. */#marches .meta-grid, #marches-print .meta-grid{ display: flex; flex-wrap: wrap; gap: 3px 18px; margin-top: 7px; }#marches .meta-item, #marches-print .meta-item{ font-size: 12.5px; color: var(--ink); }#marches .meta-item .k, #marches-print .meta-item .k{ color: var(--ink-faint); margin-right: 5px; }#marches .tab-num, #marches-print .tab-num{ font-variant-numeric: tabular-nums; }
+
+/* Jauge de fourchette ARMP : la relation prix / bornes, vue d'un coup. */#marches .jauge, #marches-print .jauge{ display: block; margin-top: 5px; }#marches .jauge-legende, #marches-print .jauge-legende{ font-size: 11.5px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }#marches .jauge-legende.dehors, #marches-print .jauge-legende.dehors{ color: var(--red); font-weight: 600; }
+
+/* Niveau d'exigence des blocs de checklist. */#marches .niveau, #marches-print .niveau{
+  font-size: 11px; font-weight: 600; padding: 2px 8px;
+  border-radius: 999px; white-space: nowrap;
+}#marches .niveau.elim, #marches-print .niveau.elim{ background: var(--red-soft); color: var(--red); }#marches .niveau.qualif, #marches-print .niveau.qualif{ background: var(--gold-soft); color: var(--gold); }#marches .niveau.plus-tard, #marches-print .niveau.plus-tard{ background: var(--surface-2); color: var(--ink-faint); }#marches .bloc-head, #marches-print .bloc-head{ flex-wrap: wrap; gap: 8px; }
+
+/* L'aperçu d'un document se lit comme un document, pas comme un écran. */#marches #docContent, #marches-print #docContent{ font-family: Georgia, "Nimbus Roman", "Times New Roman", serif; }#marches #docContent .bordereau-table, #marches-print #docContent .bordereau-table{ font-family: inherit; }#marches #docContent input, #marches-print #docContent input, #marches #docContent select, #marches-print #docContent select{ font-family: var(--police-ecran, inherit); }#marches, #marches-print{ --police-ecran: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }#marches .num-fmt, #marches-print .num-fmt{ font-variant-numeric: tabular-nums; }#marches label.field .num-fmt, #marches-print label.field .num-fmt{ text-align: right; }
+
+
 </style>
 
 <div class="portail" id="portail">
@@ -520,6 +736,404 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
     </footer>
   </aside>
   <main id="vue" tabindex="-1"></main>
+  <!-- Le module a son propre cycle de vie : il est rendu une fois et masqué,
+       jamais réécrit par rendre(), sinon ses écouteurs seraient perdus. -->
+<section id="marches" hidden>
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand"><span class="mark" id="brandMark">—</span> <span id="brandNom">Marchés Publics</span></div>
+    <div class="spacer"></div>
+    <button class="dossier-pill no-print" id="activeDossierPill" hidden></button>
+    <button class="btn ghost sm no-print" id="btnSettings" title="Profil entreprise">⚙︎</button>
+  </header>
+
+  <nav class="tabs no-print">
+    <button data-view="dossiers" aria-current="true">Dossiers</button>
+    <button data-view="repertoire">Répertoire des prix</button>
+    <button data-view="bordereau" id="tabBordereau" disabled>Bordereau</button>
+    <button data-view="documents" id="tabDocuments" disabled>Documents</button>
+    <button data-view="checklist" id="tabChecklist" disabled>Checklist</button>
+  </nav>
+
+  <main>
+
+    <!-- ===================== VUE DOSSIERS ===================== -->
+    <section class="view active" id="view-dossiers">
+      <div class="row between">
+        <h1 style="font-size:18px;margin:0;">Mes dossiers</h1>
+        <button class="btn primary" id="btnNewDossier">+ Nouveau dossier</button>
+      </div>
+      <div id="backupNudge" class="nudge" hidden></div>
+      <div id="dossierList" class="stack" style="margin-top:12px;"></div>
+    </section>
+
+    <!-- ===================== VUE REPERTOIRE ===================== -->
+    <section class="view" id="view-repertoire">
+      <div class="row between">
+        <h1 style="font-size:18px;margin:0;">Répertoire des Prix de Référence 2026</h1>
+        <span class="faint" id="repCount"></span>
+      </div>
+      <p class="faint" id="repTravauxNotice" hidden>⚠ Le dossier actif est un marché de <strong>travaux</strong> : ce répertoire couvre surtout les fournitures/biens administratifs et ne contient quasiment pas de prix unitaires BTP (gros œuvre, VRD, corps d'état...). Utilisez plutôt la saisie manuelle dans le bordereau, à partir de votre CCTP/métré.</p>
+      <div class="repertoire-controls">
+        <div class="search-box">
+          <span>🔎</span>
+          <input type="search" id="repSearch" placeholder="Rechercher un article (code, désignation, famille)…">
+        </div>
+        <div class="chips" id="repCats"></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div id="repList"></div>
+      </div>
+    </section>
+
+    <!-- ===================== VUE BORDEREAU ===================== -->
+    <section class="view" id="view-bordereau">
+      <div class="row between screen-only">
+        <h1 style="font-size:18px;margin:0;">Bordereau des prix (BPU / DQE)</h1>
+        <div class="row no-print">
+          <button class="btn sm" id="btnAddLigne">+ Ligne manuelle</button>
+          <button class="btn sm" id="btnExportCsv">Export CSV</button>
+          <button class="btn sm" id="btnPrint">Imprimer</button>
+        </div>
+      </div>
+
+      <div class="bar no-print" style="margin-bottom:12px;">
+        <div class="row between" style="flex-wrap:wrap;gap:12px;">
+          <div class="row" style="flex-wrap:wrap;gap:10px;">
+            <span class="lot-resume" id="lotResume"></span>
+            <button class="lot-toggle" id="btnLotToggle" type="button">Ce marché est alloti</button>
+          </div>
+          <div class="row">
+            <span class="faint">Saisie des prix :</span>
+            <div class="chips" id="priceModeToggle" style="margin:0;">
+              <button class="chip" data-mode="HT" type="button">HT</button>
+              <button class="chip" data-mode="TTC" type="button">TTC</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="lotZone" hidden>
+          <div class="soft-sep"></div>
+
+          <div class="row" style="flex-wrap:wrap;gap:12px;">
+            <label class="field" style="margin:0;">Lot (unité d'attribution)
+              <select id="lotSelect"></select>
+            </label>
+            <label class="field" style="margin:0;">Nom du lot
+              <input type="text" id="lotNameInput" style="width:150px;">
+            </label>
+            <button class="btn sm" id="btnAddLot">+ Lot</button>
+            <button class="btn sm danger" id="btnDeleteLot">Supprimer ce lot</button>
+          </div>
+
+          <div class="soft-sep"></div>
+
+          <div class="row" style="flex-wrap:wrap;gap:12px;">
+            <label class="field" style="margin:0;">Chapitre affiché
+              <select id="chapSelect"></select>
+            </label>
+            <label class="field" style="margin:0;">Nom du chapitre
+              <input type="text" id="chapNameInput" style="width:180px;" placeholder="(sans titre)">
+            </label>
+            <button class="btn sm" id="btnAddChap">+ Chapitre</button>
+            <label class="field" style="margin:0;" id="corpsMetierWrap">
+              <select id="corpsMetierSelect" hidden></select>
+            </label>
+            <button class="btn sm danger" id="btnDeleteChap">Supprimer ce chapitre</button>
+          </div>
+          <p class="faint" style="margin:10px 0 0;">Un <strong>lot</strong> est une unité d'attribution : il donne lieu à une offre financière séparée et s'imprime sur ses propres pages. Un <strong>chapitre</strong> (ou corps de métier) est une section interne au lot, avec son sous-total.</p>
+        </div>
+      </div>
+
+      <p class="faint no-print" id="dossierTotalHint"></p>
+
+      <div class="card screen-only" style="overflow-x:auto;">
+        <table class="bordereau-table" id="bordereauTable">
+          <thead>
+            <tr>
+              <th style="width:66px;">N°</th>
+              <th>Désignation</th>
+              <th style="width:70px;">Unité</th>
+              <th style="width:120px;">Date livraison</th>
+              <th style="width:70px;">Qté</th>
+              <th style="width:110px;" id="puColHeader">PU HT (FCFA)</th>
+              <th style="width:120px;">Total HT (FCFA)</th>
+              <th style="width:76px;" class="no-print"></th>
+            </tr>
+          </thead>
+          <tbody id="bordereauBody"></tbody>
+          <tfoot>
+            <tr id="rowChapTotal"><td colspan="6" style="text-align:right;" id="footChapLabel">Sous-total du chapitre</td><td class="num" id="totalChap">0</td><td class="no-print"></td></tr>
+            <tr><td colspan="6" style="text-align:right;">Total HTVA du lot</td><td class="num" id="totalHT">0</td><td class="no-print"></td></tr>
+            <tr><td colspan="6" style="text-align:right;">TVA (18%)</td><td class="num" id="totalTVA">0</td><td class="no-print"></td></tr>
+            <tr><td colspan="6" style="text-align:right;">TOTAL TTC du lot</td><td class="num" id="totalTTC">0</td><td class="no-print"></td></tr>
+          </tfoot>
+        </table>
+        <p class="faint" style="margin-top:8px;">Seul le chapitre sélectionné s'affiche ici. « Imprimer » sort <strong>chaque lot sur ses propres pages</strong>, tous chapitres inclus — c'est ce que vous joignez à l'offre.</p>
+      </div>
+
+      <div id="printAllLots" class="print-only"></div>
+    </section>
+
+    <!-- ===================== VUE DOCUMENTS ===================== -->
+    <section class="view" id="view-documents">
+      <div class="row between screen-only">
+        <h1 style="font-size:18px;margin:0;">Documents du dossier</h1>
+        <div class="row no-print">
+          <button class="btn sm" id="btnDocPrint">Imprimer ce document</button>
+          <button class="btn sm" id="btnDocExportCsv">Export CSV</button>
+        </div>
+      </div>
+      <p class="faint screen-only">Générés à partir des lignes du Bordereau et de votre profil entreprise — rien à ressaisir.</p>
+
+      <div class="bar no-print" style="margin-bottom:12px;">
+        <div class="row" style="flex-wrap:wrap;gap:12px;">
+          <label class="field" style="margin:0;">Lot
+            <select id="docLotSelect"></select>
+          </label>
+        </div>
+        <div class="chips" id="docTypeChips" style="margin-top:10px;"></div>
+      </div>
+
+      <p class="faint no-print" id="docDisclaimer" hidden></p>
+
+      <div class="card" style="overflow-x:auto;">
+        <div id="docPrintHead" class="print-only"></div>
+        <div id="docContent"></div>
+        <div id="docPrintFoot" class="print-only"></div>
+      </div>
+    </section>
+
+    <!-- ===================== VUE CHECKLIST ===================== -->
+    <section class="view" id="view-checklist">
+      <div class="row between">
+        <h1 style="font-size:18px;margin:0;">Checklist du dossier</h1>
+        <span class="faint" id="checklistProgressLabel"></span>
+      </div>
+      <p class="faint" style="margin-top:4px;">Les mentions « Rejet si absent », « Qualification » et « Surtout à la signature » suivent l'Annexe A des DAO types ARMP. Vérifiez-les contre l'annexe de votre propre dossier : le classement peut varier d'une autorité à l'autre.</p>
+      <p class="faint" id="checklistDisclaimer" hidden>⚠ Checklist travaux basée sur la structure standard ARMP/UEMOA — non calée sur un DAO travaux réel (contrairement à la checklist fournitures). À faire valider dès qu'un vrai dossier de ce type est disponible.</p>
+      <div class="progress" style="margin:8px 0 16px;"><span id="checklistProgressBar" style="width:0%"></span></div>
+      <div id="checklistBlocs"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== MODAL: nouveau/edit dossier ===================== -->
+<div class="overlay" id="modalDossier" hidden>
+  <div class="modal">
+    <h2 id="modalDossierTitle">Nouveau dossier</h2>
+    <div class="stack">
+      <label class="field">Type de marché
+        <select id="fType">
+          <option value="fournitures">Fournitures / acquisition</option>
+          <option value="travaux">Travaux (BTP)</option>
+        </select>
+      </label>
+      <label class="field">Objet du marché
+        <input type="text" id="fObjet" placeholder="Ex. Acquisition de consommables informatiques">
+      </label>
+      <label class="field">Référence du DAO / DRP
+        <input type="text" id="fReference" placeholder="Ex. DRP N°080/MEF/PRMP/SP">
+      </label>
+      <label class="field">Autorité contractante
+        <input type="text" id="fAutorite" placeholder="Ex. Ministère de l'Économie et des Finances">
+      </label>
+      <div class="grid2">
+        <label class="field">Mode de passation
+          <select id="fMode">
+            <option value="">— non précisé —</option>
+            <option value="AOO">Appel d'offres ouvert (AOO)</option>
+            <option value="AOR">Appel d'offres restreint (AOR)</option>
+            <option value="DRP">Demande de renseignements et de prix (DRP)</option>
+            <option value="AMI">Avis à manifestation d'intérêt (AMI)</option>
+            <option value="ED">Entente directe</option>
+          </select>
+        </label>
+        <label class="field">Date limite de dépôt
+          <input type="date" id="fDateLimite">
+        </label>
+        <label class="field">Heure limite
+          <input type="time" id="fHeureLimite">
+        </label>
+        <label class="field">Validité de l'offre (jours)
+          <input type="number" min="0" id="fValidite" placeholder="90">
+        </label>
+        <label class="field">Délai de livraison / d'exécution
+          <input type="text" id="fDelaiExec" placeholder="Ex. 45 jours calendaires">
+        </label>
+        <label class="field">Garantie de soumission (FCFA)
+          <input type="text" inputmode="numeric" class="num-fmt" id="fGarantie" placeholder="0">
+        </label>
+      </div>
+      <label class="field">Lieu de dépôt des offres
+        <input type="text" id="fLieuDepot" placeholder="Ex. Secrétariat de la PRMP, 3e étage">
+      </label>
+      <label class="field">Police des documents imprimés
+        <select id="fPolice"></select>
+        <span class="faint" style="margin-top:5px;display:block;">N'affecte que l'impression et l'aperçu, pas l'affichage à l'écran. Times New Roman est l'usage courant des documents administratifs.</span>
+      </label>
+    </div>
+    <div class="row" style="justify-content:flex-end;margin-top:16px;">
+      <button class="btn ghost" id="btnCancelDossier">Annuler</button>
+      <button class="btn primary" id="btnSaveDossier">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL: profil entreprise ===================== -->
+<div class="overlay" id="modalSettings" hidden>
+  <div class="modal large">
+    <h2>Profil entreprise</h2>
+    <p class="faint">Ces informations alimentent les en-têtes imprimés, la lettre de soumission et les formulaires.</p>
+
+    <div class="chips" id="settingsTabs" style="margin-bottom:14px;">
+      <button class="chip" data-stab="identite" type="button" aria-pressed="true">Identité</button>
+      <button class="chip" data-stab="references" type="button" aria-pressed="false">Références</button>
+      <button class="chip" data-stab="personnel" type="button" aria-pressed="false">Personnel</button>
+      <button class="chip" data-stab="materiel" type="button" aria-pressed="false">Matériel</button>
+      <button class="chip" data-stab="sauvegarde" type="button" aria-pressed="false">Sauvegarde</button>
+    </div>
+
+    <div class="stab" data-stab-panel="identite">
+      <div class="stack">
+        <label class="field">Raison sociale
+          <input type="text" id="sRaisonSociale">
+        </label>
+        <div class="grid2">
+          <label class="field">Sigle pour l'en-tête
+            <input type="text" id="sNomCourt" maxlength="5" placeholder="Ex. ABC">
+          </label>
+          <label class="field">Forme juridique
+            <input type="text" id="sFormeJuridique" placeholder="Ex. Établissement / SARL">
+          </label>
+          <label class="field">Capital social (FCFA)
+            <input type="text" id="sCapital" placeholder="Optionnel">
+          </label>
+          <label class="field">RCCM
+            <input type="text" id="sRccm">
+          </label>
+          <label class="field">IFU
+            <input type="text" id="sIfu">
+          </label>
+          <label class="field">Téléphone
+            <input type="text" id="sTel">
+          </label>
+          <label class="field">Email
+            <input type="text" id="sEmail">
+          </label>
+        </div>
+        <label class="field">Adresse / siège social
+          <input type="text" id="sAdresse" placeholder="Ex. Lot 1234, Fidjrossè, Cotonou">
+        </label>
+        <label class="field">Représentant (signataire)
+          <input type="text" id="sRepresentant" placeholder="Nom — Qualité">
+        </label>
+        <div class="grid2">
+          <label class="field">Banque
+            <input type="text" id="sBanque" placeholder="Ex. Bank Of Africa">
+          </label>
+          <label class="field">RIB / IBAN
+            <input type="text" id="sRib">
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="stab" data-stab-panel="references" hidden>
+      <p class="faint">Marchés similaires déjà exécutés. Saisis une fois, réutilisés dans tous vos dossiers.</p>
+      <div id="refList" class="stack"></div>
+      <button class="btn sm" id="btnAddRef" style="margin-top:10px;">+ Référence</button>
+    </div>
+
+    <div class="stab" data-stab-panel="personnel" hidden>
+      <p class="faint">Personnel clé mobilisable, repris dans le formulaire « Liste du personnel ».</p>
+      <div id="persList" class="stack"></div>
+      <button class="btn sm" id="btnAddPers" style="margin-top:10px;">+ Personne</button>
+    </div>
+
+    <div class="stab" data-stab-panel="materiel" hidden>
+      <p class="faint">Matériel en propriété ou en location, repris dans le formulaire « Liste du matériel ».</p>
+      <div id="matList" class="stack"></div>
+      <button class="btn sm" id="btnAddMat" style="margin-top:10px;">+ Matériel</button>
+    </div>
+
+    <div class="stab" data-stab-panel="sauvegarde" hidden>
+      <p class="faint">Tout est stocké uniquement sur cet appareil. Exportez régulièrement pour ne rien perdre en cas de changement d'appareil ou de nettoyage du navigateur.</p>
+      <p class="faint" id="lastBackupInfo"></p>
+      <div class="row">
+        <button class="btn" id="btnExportBackup">⬇ Exporter toute ma base (.json)</button>
+        <button class="btn" id="btnImportBackup">⬆ Importer une sauvegarde</button>
+        <input type="file" id="importFileInput" accept="application/json" hidden>
+      </div>
+    </div>
+
+    <div class="row" style="justify-content:flex-end;margin-top:18px;">
+      <button class="btn ghost" id="btnCancelSettings">Fermer</button>
+      <button class="btn primary" id="btnSaveSettings">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ÉCRAN DE PREMIER LANCEMENT ===================== -->
+<div class="overlay" id="modalSetup" hidden>
+  <div class="modal setup">
+    <h2>Bienvenue</h2>
+    <p class="setup-intro">
+      Cette application prépare vos réponses aux appels d'offres publics. Tout reste
+      <strong>sur cet appareil</strong> : rien n'est envoyé en ligne.<br>
+      Commencez par l'identité de votre société — elle alimentera les en-têtes,
+      la lettre de soumission et les formulaires.
+    </p>
+
+    <div class="stack">
+      <label class="field">Raison sociale <span class="req">*</span>
+        <input type="text" id="uRaisonSociale" placeholder="Ex. Ets ABC — Btp &amp; Commerce Général">
+      </label>
+      <div class="grid2">
+        <label class="field">Sigle pour l'en-tête <span class="req">*</span>
+          <input type="text" id="uNomCourt" maxlength="5" placeholder="Ex. ABC">
+        </label>
+        <label class="field">Forme juridique
+          <input type="text" id="uFormeJuridique" placeholder="Ex. SARL / Établissement">
+        </label>
+        <label class="field">RCCM
+          <input type="text" id="uRccm">
+        </label>
+        <label class="field">IFU
+          <input type="text" id="uIfu">
+        </label>
+        <label class="field">Téléphone
+          <input type="text" id="uTel">
+        </label>
+        <label class="field">Email
+          <input type="text" id="uEmail">
+        </label>
+      </div>
+      <label class="field">Adresse / siège social
+        <input type="text" id="uAdresse" placeholder="Ex. Lot 1234, Fidjrossè, Cotonou">
+      </label>
+      <label class="field">Représentant habilité à signer
+        <input type="text" id="uRepresentant" placeholder="Nom — Qualité">
+      </label>
+    </div>
+    <p class="faint" style="margin:10px 0 0;">Tout est modifiable plus tard depuis ⚙︎ Profil entreprise. Seuls les deux champs marqués <span class="req">*</span> sont requis maintenant.</p>
+    <div id="setupErr" class="setup-err" hidden></div>
+
+    <div class="row" style="justify-content:flex-end;margin-top:16px;">
+      <button class="btn primary" id="btnSetupSave">Commencer</button>
+    </div>
+
+    <div class="setup-sep">ou</div>
+    <p class="faint" style="margin:0 0 10px;">Vous avez déjà utilisé l'application ailleurs ? Restaurez votre sauvegarde : profil, dossiers et fiches seront rétablis.</p>
+    <button class="btn" id="btnSetupImport">⬆ Importer une sauvegarde (.json)</button>
+    <input type="file" id="setupFileInput" accept="application/json" hidden>
+  </div>
+</div>
+
+<div id="mp-toast"></div>
+</section>
 </div>
 <div id="impression" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -865,11 +1479,17 @@ var ONGLETS = [
   {cle:"documents", titre:"Documents"},
   {cle:"clients", titre:"Clients"},
   {cle:"catalogue", titre:"Catalogue"},
+  {cle:"marches", titre:"Marchés publics"},
   {cle:"reglages", titre:"Réglages"}
 ];
 function aller(cle){
   vue = cle; brouillon = null; formulaire = null; aConfirmer = null;
   rendre(true);
+  if(cle === "marches"){
+    demarrerMarches();
+    /* Les dossiers appartiennent au comptoir : en changer doit changer la liste. */
+    if(typeof rafraichirMarches === "function") rafraichirMarches();
+  }
   var m = document.getElementById("vue"); if(m) m.focus();
 }
 function signal(msg){
@@ -877,6 +1497,2364 @@ function signal(msg){
   t.textContent = msg; t.hidden = false;
   clearTimeout(signal._t);
   signal._t = setTimeout(function(){ t.hidden = true; }, 2800);
+}
+
+/* ═══════════════ Marchés publics ═══════════════
+   Module repris de « Ets DSN — Marchés Publics » v5 et cloisonné ici : son
+   CSS est préfixé (#marches), son script enfermé, ses dossiers rangés dans la
+   ligne de réglages « marches » du comptoir actif, et son Répertoire branché
+   sur la recherche serveur du comptoir. */
+var marchesDemarre = false;
+var rafraichirMarches = null;
+function demarrerMarches(){
+  if(marchesDemarre) return;
+  marchesDemarre = true;
+  function imprimerParLeComptoir(html){
+    /* Le comptoir masque .app à l'impression et n'affiche que #impression :
+       on y dépose le contenu, enveloppé pour que le CSS du module s'y applique. */
+    var cible = document.getElementById("impression");
+    cible.innerHTML = '<div id="marches-print">' + html + '</div>';
+    window.print();
+  }
+
+
+// ============================================================
+// Ets DSN — Marchés Publics
+// Stockage 100% local (localStorage). Aucune donnée envoyée en ligne.
+// v3 : modèle Dossier > Lot > Chapitre > Ligne
+// ============================================================
+
+const LS_DOSSIERS = "dsn_dossiers_v1";
+const LS_ACTIVE = "dsn_active_dossier_v1";
+const LS_PROFILE = "dsn_profile_v1";
+const LS_LASTBACKUP = "dsn_last_backup_v1";
+const APP_DATA_VERSION = 3;
+
+const TVA_RATE = 0.18;
+const BACKUP_RAPPEL_JOURS = 7;
+
+const CHECKLIST_BLOCS_FOURNITURES = [
+  { id: "formulaires", label: "Formulaires", pieces: [
+    { id: "lettre_soumission", label: "Lettre de soumission" },
+    { id: "renseignements_candidat", label: "Renseignements sur le candidat (formulaire ELI-1.1 / 1.2)" },
+    { id: "habilitation_signataire", label: "Confirmation d'habilitation du signataire" },
+    { id: "engagement_ethique", label: "Engagement du soumissionnaire (éthique)" },
+  ]},
+  { id: "technique", label: "Offre technique", pieces: [
+    { id: "liste_fournitures_calendrier", label: "Liste des fournitures et calendrier de livraison" },
+    { id: "description_technique", label: "Description technique des fournitures" },
+    { id: "bordereau_services_connexes", label: "Bordereau et calendrier des services connexes (SAV, garantie technique)" },
+    { id: "personnel_affecte", label: "Personnel affecté au marché" },
+  ]},
+  { id: "financiere", label: "Offre financière", pieces: [
+    { id: "bordereau_prix_fournitures", label: "Bordereau des prix pour les fournitures (à importer / déjà importées / fabriquées au Bénin)" },
+    { id: "bpu_secs", label: "Bordereau des prix unitaires — BPU (en lettres et en chiffres)" },
+    { id: "bordereau_prix_services", label: "Bordereau des prix et calendrier des services connexes" },
+  ]},
+  { id: "capacite_technique", label: "Capacité technique", pieces: [
+    { id: "references_similaires", label: "Références de marchés similaires exécutés (min. 2) + attestations de bonne fin" },
+    { id: "ca_annuel", label: "Chiffre d'affaires annuel moyen" },
+    { id: "personnel_cle", label: "Liste du personnel clé" },
+    { id: "materiel", label: "Liste du matériel" },
+  ]},
+  { id: "capacite_financiere", label: "Capacité financière", pieces: [
+    { id: "garantie_soumission", label: "Garantie de soumission ou lettre de déclaration de garantie" },
+    { id: "attestation_bancaire", label: "Attestation bancaire de capacité financière / ligne de crédit" },
+    { id: "etats_financiers", label: "États financiers des 3 dernières années (bilans + comptes de résultat)" },
+  ]},
+  { id: "administratif", label: "Pièces administratives", pieces: [
+    { id: "rccm", label: "Extrait RCCM (Modèle K)" },
+    { id: "non_faillite", label: "Attestation de non-faillite" },
+    { id: "regularite_fiscale", label: "Attestation de régularité fiscale (DGI)" },
+    { id: "ifu", label: "Attestation d'immatriculation IFU" },
+    { id: "cnss", label: "Attestation CNSS" },
+    { id: "non_exclusion", label: "Attestation de non-exclusion de la commande publique (ARMP)" },
+    { id: "rib", label: "Relevé d'Identité Bancaire (RIB)" },
+    { id: "beneficiaires_effectifs", label: "Formulaire de divulgation des bénéficiaires effectifs" },
+  ]},
+];
+
+// Structure standard ARMP/UEMOA pour un marché de TRAVAUX (BTP) — non calée sur un DAO réel
+// (contrairement au jeu "fournitures"), à faire valider dès qu'un vrai dossier travaux est disponible.
+const CHECKLIST_BLOCS_TRAVAUX = [
+  { id: "formulaires", label: "Formulaires", pieces: [
+    { id: "lettre_soumission", label: "Lettre de soumission" },
+    { id: "renseignements_candidat", label: "Renseignements sur le candidat (formulaire ELI-1.1 / 1.2)" },
+    { id: "habilitation_signataire", label: "Confirmation d'habilitation du signataire" },
+    { id: "engagement_ethique", label: "Engagement du soumissionnaire (éthique)" },
+    { id: "formulaire_qualification", label: "Formulaire de qualification technique" },
+  ]},
+  { id: "technique", label: "Offre technique", pieces: [
+    { id: "memoire_technique", label: "Mémoire technique et méthodologie d'exécution" },
+    { id: "planning_execution", label: "Planning d'exécution des travaux (Gantt / PERT)" },
+    { id: "plan_installation_chantier", label: "Plan d'installation de chantier" },
+    { id: "plan_hse", label: "Plan d'hygiène, sécurité et environnement (PHSE / PGES)" },
+    { id: "description_technique_cctp", label: "Description technique — conformité au CCTP" },
+    { id: "materiel_chantier", label: "Liste et calendrier de mobilisation du matériel de chantier" },
+    { id: "personnel_technique", label: "Liste et calendrier d'affectation du personnel technique clé" },
+  ]},
+  { id: "financiere", label: "Offre financière", pieces: [
+    { id: "dqe_corps_metier", label: "Devis Quantitatif et Estimatif (DQE) par lot / corps de métier" },
+    { id: "bpu_secs", label: "Bordereau des prix unitaires — BPU (en lettres et en chiffres)" },
+    { id: "sous_detail_prix", label: "Sous-détail des prix unitaires" },
+    { id: "decomposition_prix_global", label: "Décomposition du prix global et forfaitaire (le cas échéant)" },
+  ]},
+  { id: "capacite_technique", label: "Capacité technique", pieces: [
+    { id: "references_travaux_similaires", label: "Références de travaux similaires exécutés (min. 2-3) + attestations de bonne fin / PV de réception" },
+    { id: "ca_annuel_travaux", label: "Chiffre d'affaires annuel moyen en travaux (3 dernières années)" },
+    { id: "cv_personnel_technique", label: "CV du personnel technique clé (ingénieurs, chef de chantier, conducteur de travaux)" },
+    { id: "liste_materiel_chantier", label: "Liste du matériel de chantier (propriété ou location, avec preuves)" },
+    { id: "agrement_btp", label: "Agrément technique / qualification professionnelle BTP (catégorie)" },
+  ]},
+  { id: "capacite_financiere", label: "Capacité financière", pieces: [
+    { id: "garantie_soumission", label: "Garantie de soumission ou lettre de déclaration de garantie" },
+    { id: "attestation_bancaire", label: "Attestation bancaire de capacité financière / ligne de crédit" },
+    { id: "etats_financiers", label: "États financiers des 3 dernières années (bilans + comptes de résultat)" },
+  ]},
+  { id: "administratif", label: "Pièces administratives", pieces: [
+    { id: "rccm", label: "Extrait RCCM (Modèle K)" },
+    { id: "non_faillite", label: "Attestation de non-faillite" },
+    { id: "regularite_fiscale", label: "Attestation de régularité fiscale (DGI)" },
+    { id: "ifu", label: "Attestation d'immatriculation IFU" },
+    { id: "cnss", label: "Attestation CNSS" },
+    { id: "non_exclusion", label: "Attestation de non-exclusion de la commande publique (ARMP)" },
+    { id: "rib", label: "Relevé d'Identité Bancaire (RIB)" },
+    { id: "beneficiaires_effectifs", label: "Formulaire de divulgation des bénéficiaires effectifs" },
+    { id: "assurance_decennale", label: "Assurance responsabilité civile professionnelle / décennale" },
+  ]},
+];
+
+
+// Annexe A du DAOR : les pièces ne pèsent pas toutes le même poids.
+// A-1 et A-2 entraînent le rejet de l'offre ; A-3 joue à la qualification ;
+// A-4 n'est exigée qu'à la signature du marché.
+const NIVEAUX_BLOCS = {
+  formulaires:        { cle: "elim",      label: "Rejet si absent" },
+  technique:          { cle: "elim",      label: "Rejet si absent" },
+  financiere:         { cle: "elim",      label: "Rejet si absent" },
+  capacite_technique: { cle: "qualif",    label: "Qualification" },
+  capacite_financiere:{ cle: "qualif",    label: "Qualification" },
+  administratif:      { cle: "plus-tard", label: "Surtout à la signature" },
+};
+
+function checklistBlocsFor(d) {
+  return d && d.type === "travaux" ? CHECKLIST_BLOCS_TRAVAUX : CHECKLIST_BLOCS_FOURNITURES;
+}
+
+const CORPS_DE_METIER_STANDARD = [
+  "Installation de chantier", "Terrassement", "Fondations", "Gros œuvre (élévation)",
+  "Charpente - Couverture", "Étanchéité", "Menuiserie bois", "Menuiserie aluminium / métallique",
+  "Plomberie - Sanitaire", "Électricité", "Peinture - Revêtements", "Carrelage - Faïence",
+  "VRD (Voirie et Réseaux Divers)", "Aménagements extérieurs",
+];
+
+
+// ---------- Utilitaires ----------
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function fmtInt(n) { return (Number(n) || 0).toLocaleString("fr-FR"); }
+
+// ---------- Champs numériques à séparateurs de milliers ----------
+// Un <input type="number"> refuse les espaces : ces champs sont donc en texte,
+// avec un clavier numérique sur mobile, et sont reformatés à chaque frappe.
+
+// Lit un champ formaté ("1 250 000") et rend un entier (1250000).
+function parseNum(v) { return Number(String(v ?? "").replace(/\D/g, "")) || 0; }
+
+// Reformate le champ en conservant le curseur au bon endroit.
+function formatNumInput(el) {
+  const avant = el.value;
+  const curseur = el.selectionStart ?? avant.length;
+  // Repère stable malgré l'insertion d'espaces : le nombre de chiffres à gauche du curseur.
+  const chiffresAGauche = avant.slice(0, curseur).replace(/\D/g, "").length;
+  const chiffres = avant.replace(/\D/g, "");
+  const apres = chiffres === "" ? "" : fmtInt(Number(chiffres));
+  if (apres !== avant) el.value = apres;
+  let pos = 0, vus = 0;
+  while (pos < apres.length && vus < chiffresAGauche) {
+    if (/\d/.test(apres[pos])) vus++;
+    pos++;
+  }
+  try { el.setSelectionRange(pos, pos); } catch { /* champ non focalisé */ }
+}
+
+// Phase de capture : le champ est reformaté AVANT que les gestionnaires métier ne le lisent.
+document.addEventListener("input", (e) => {
+  const el = e.target;
+  if (el && el.classList && el.classList.contains("num-fmt")) formatNumInput(el);
+}, true);
+
+// Sans cela, une correction sur un séparateur donnerait l'impression que la touche ne répond pas.
+document.addEventListener("keydown", (e) => {
+  const el = e.target;
+  if (!el || !el.classList || !el.classList.contains("num-fmt")) return;
+  if (e.key !== "Backspace") return;
+  const pos = el.selectionStart;
+  if (pos === null || pos !== el.selectionEnd || pos < 2) return;
+  if (/\d/.test(el.value[pos - 1])) return;   // un chiffre : suppression normale
+  e.preventDefault();                          // un séparateur : on supprime le chiffre d'avant
+  const v = el.value;
+  el.value = v.slice(0, pos - 2) + v.slice(pos - 1);
+  el.setSelectionRange(pos - 2, pos - 2);
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+});
+
+// Un champ est numérique s'il porte la classe de formatage ou reste un input natif.
+function estChampNum(el) {
+  return (el.classList && el.classList.contains("num-fmt")) || el.type === "number";
+}
+function valeurChamp(el) { return estChampNum(el) ? parseNum(el.value) : el.value; }
+// Le franc CFA n'a pas de subdivision en usage : tout montant est un entier.
+function money(n) { return Math.round(Number(n) || 0); }
+function fmtDate(d) {
+  if (!d) return "—";
+  const dt = new Date(d + "T00:00:00");
+  if (isNaN(dt)) return d;
+  return dt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+function today() { return new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }); }
+function esc(s) { return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function toast(msg) {
+  const t = document.getElementById("mp-toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+// ---------- Modèle : dossier > lot > chapitre > ligne ----------
+// Polices proposées pour l'impression. Chaque pile déclare des substituts :
+// Liberation/Nimbus/Carlito sont les équivalents métriques présents sous Linux
+// et sur beaucoup d'appareils Android, pour que le rendu reste proche partout.
+const POLICES_DOC = {
+  systeme: { label: "Système (par défaut)", stack: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' },
+  times:   { label: "Times New Roman — usage administratif", stack: '"Times New Roman", Times, "Liberation Serif", "Nimbus Roman", "Tinos", serif' },
+  georgia: { label: "Georgia — lisible en petit corps", stack: 'Georgia, "Nimbus Roman", "Times New Roman", serif' },
+  arial:   { label: "Arial / Helvetica", stack: 'Arial, Helvetica, "Liberation Sans", "Arimo", sans-serif' },
+  calibri: { label: "Calibri", stack: 'Calibri, Carlito, "Segoe UI", Arial, sans-serif' },
+  verdana: { label: "Verdana — large, consomme des pages", stack: 'Verdana, "DejaVu Sans", Geneva, Tahoma, sans-serif' },
+};
+function policeStack(cle) { return (POLICES_DOC[cle] || POLICES_DOC.systeme).stack; }
+
+// La police ne vaut que pour l'impression : on pose la variable juste avant,
+// le rendu à l'écran n'est jamais touché.
+function appliquerPoliceImpression(d) {
+  document.body.style.setProperty("--police-doc", policeStack(d && d.police));
+}
+
+const ORIGINES = {
+  locale: "Locale (marché national)",
+  a_importer: "À importer",
+  deja_importee: "Déjà importée",
+  fabriquee_benin: "Fabriquée au Bénin",
+};
+function defaultLigneFields() {
+  return {
+    numero: "", site: "", descriptionDetaillee: "", origine: "locale",
+    paysOrigine: "", incoterm: "", droitsDouane: 0, transportTerrestre: 0,
+    tauxMainOeuvre: 0, taxeVente: 0,
+  };
+}
+function normalizeLigne(l) {
+  const n = { ...defaultLigneFields(), ...l };
+  n.puht = money(n.puht);
+  return n;
+}
+function newChapitre(nom) { return { id: uid(), nom: nom || "", lignes: [] }; }
+function newLot(nom) { return { id: uid(), nom: nom || "Lot 1", chapitres: [newChapitre("")], services: [] }; }
+function newDossier(type) {
+  const lot = newLot("Lot 1");
+  return {
+    id: uid(),
+    type: type === "travaux" ? "travaux" : "fournitures",
+    objet: "", reference: "", autorite: "", dateLimite: "", heureLimite: "",
+    modePassation: "", delaiValidite: 90, delaiExec: "", garantieSoumission: 0, lieuDepot: "",
+    priceMode: "HT",
+    police: "systeme",
+    lots: [lot],
+    activeLotId: lot.id,
+    activeChapitreId: lot.chapitres[0].id,
+    checklist: {},
+    createdAt: Date.now(), updatedAt: Date.now(),
+  };
+}
+
+// Migration v1 (lignes à plat) puis v2 (lots sans chapitres) vers v3.
+function migrateDossier(d) {
+  if (!d.lots) {
+    d.lots = [{ id: uid(), nom: "Lot unique", lignes: d.lignes || [] }];
+    delete d.lignes;
+  }
+  d.lots.forEach(lot => {
+    if (!lot.chapitres) {
+      lot.chapitres = [{ id: uid(), nom: "", lignes: lot.lignes || [] }];
+      delete lot.lignes;
+    }
+    if (!lot.chapitres.length) lot.chapitres = [newChapitre("")];
+    if (!lot.services) lot.services = [];
+    lot.chapitres.forEach(c => { c.lignes = (c.lignes || []).map(normalizeLigne); });
+  });
+  if (!d.activeLotId || !d.lots.find(l => l.id === d.activeLotId)) d.activeLotId = d.lots[0].id;
+  const lotA = d.lots.find(l => l.id === d.activeLotId);
+  if (!d.activeChapitreId || !lotA.chapitres.find(c => c.id === d.activeChapitreId)) {
+    d.activeChapitreId = lotA.chapitres[0].id;
+  }
+  if (!d.priceMode) d.priceMode = "HT";
+  if (!d.police || !POLICES_DOC[d.police]) d.police = "systeme";
+  if (!d.checklist) d.checklist = {};
+  if (d.type !== "travaux" && d.type !== "fournitures") d.type = "fournitures";
+  if (d.delaiValidite == null) d.delaiValidite = 90;
+  if (d.modePassation == null) d.modePassation = "";
+  if (d.delaiExec == null) d.delaiExec = "";
+  if (d.garantieSoumission == null) d.garantieSoumission = 0;
+  if (d.lieuDepot == null) d.lieuDepot = "";
+  if (d.heureLimite == null) d.heureLimite = "";
+  return d;
+}
+
+function lotChapitres(lot) { return (lot && lot.chapitres) || []; }
+function lotLignes(lot) { return lotChapitres(lot).reduce((a, c) => a.concat(c.lignes), []); }
+function getActiveLot(d) { return d ? (d.lots.find(l => l.id === d.activeLotId) || d.lots[0]) : null; }
+function getActiveChapitre(d) {
+  const lot = getActiveLot(d);
+  if (!lot) return null;
+  return lot.chapitres.find(c => c.id === d.activeChapitreId) || lot.chapitres[0];
+}
+function chapTotalHT(c) { return (c.lignes || []).reduce((s, l) => s + (Number(l.qte) || 0) * (Number(l.puht) || 0), 0); }
+function lotTotalsHT(lot) { return lotChapitres(lot).reduce((s, c) => s + chapTotalHT(c), 0); }
+function dossierTotalsHT(d) { return (d.lots || []).reduce((s, lot) => s + lotTotalsHT(lot), 0); }
+function dossierLignesCount(d) { return (d.lots || []).reduce((s, lot) => s + lotLignes(lot).length, 0); }
+
+// Retrouve une ligne (et son contexte) n'importe où dans le dossier.
+function findLigne(d, id) {
+  for (const lot of d.lots) {
+    for (const c of lotChapitres(lot)) {
+      const l = c.lignes.find(x => x.id === id);
+      if (l) return { lot, chap: c, ligne: l };
+    }
+  }
+  return null;
+}
+
+// Numérotation : libre si saisie, sinon "chapitre.ligne" quand le lot a des chapitres nommés.
+function chapitresNommes(lot) { return lotChapitres(lot).filter(c => String(c.nom || "").trim()).length; }
+function numeroAuto(lot, chapIdx, idx) {
+  return (lotChapitres(lot).length > 1 || chapitresNommes(lot) > 0)
+    ? (chapIdx + 1) + "." + (idx + 1)
+    : String(idx + 1);
+}
+function ligneNumero(lot, chapIdx, idx, l) {
+  const libre = String(l.numero || "").trim();
+  return libre || numeroAuto(lot, chapIdx, idx);
+}
+
+// ---------- Persistance ----------
+/* Les dossiers vivent dans la ligne de réglages « marches » du comptoir
+   actif : ils suivent donc l'appareil comme le reste, et un dossier commencé
+   au bureau se reprend au téléphone. */
+function etatMarches() { return Store.un("reglages", "marches") || {}; }
+function loadDossiers() {
+  const l = etatMarches().dossiers;
+  return Array.isArray(l) ? l.map(migrateDossier) : [];
+}
+var minuteurMarches = null;
+function saveDossiers(list) {
+  /* Une frappe dans un prix appelle persistDossiers : sans ce délai, chaque
+     caractère partirait au serveur. */
+  clearTimeout(minuteurMarches);
+  minuteurMarches = setTimeout(function () {
+    Store.poser("reglages", { id: "marches", dossiers: list, profil: PROFILE });
+  }, 900);
+}
+function getActiveId() { return localStorage.getItem(LS_ACTIVE) || null; }
+function setActiveId(id) { id ? localStorage.setItem(LS_ACTIVE, id) : localStorage.removeItem(LS_ACTIVE); }
+
+// Profil vierge : aucune identité n'est livrée avec l'application.
+// Elle est saisie par l'utilisateur au premier lancement (voir modalSetup).
+function defaultProfile() {
+  return {
+    nomCourt: "",
+    raisonSociale: "",
+    formeJuridique: "",
+    capital: "",
+    rccm: "",
+    ifu: "",
+    tel: "",
+    email: "",
+    adresse: "",
+    representant: "",
+    banque: "",
+    rib: "",
+    references: [],
+    personnel: [],
+    materiel: [],
+  };
+}
+// Le profil est considéré configuré dès que la raison sociale est renseignée.
+function profilConfigure(p) { return !!String((p || {}).raisonSociale || "").trim(); }
+/* L'identité part de celle du comptoir actif : on ne la ressaisit pas. Ce que
+   les marchés publics demandent en plus — références, personnel, matériel —
+   reste propre au module. */
+function loadProfile() {
+  var r = reglages(), enregistre = etatMarches().profil || {};
+  var p = Object.assign(defaultProfile(), {
+    raisonSociale: r.forme || r.nom || "",
+    rccm: r.rccm || "", ifu: r.ifu || "",
+    tel: r.tel || "", email: r.email || "",
+    representant: [r.signataire, r.fonction].filter(Boolean).join(" — ")
+  }, enregistre);
+  ["references", "personnel", "materiel"].forEach(function (k) { if (!Array.isArray(p[k])) p[k] = []; });
+  return p;
+}
+function saveProfile(p) {
+  PROFILE = p;
+  Store.poser("reglages", { id: "marches", dossiers: DOSSIERS, profil: p });
+}
+
+let DOSSIERS = loadDossiers();
+let ACTIVE_ID = getActiveId();
+let PROFILE = loadProfile();
+
+function getActiveDossier() { return DOSSIERS.find(d => d.id === ACTIVE_ID) || null; }
+function persistDossiers() { saveDossiers(DOSSIERS); }
+function touch(d) { d.updatedAt = Date.now(); }
+
+// ---------- Navigation ----------
+const views = document.querySelectorAll(".view");
+const tabButtons = document.querySelectorAll("nav.tabs button");
+
+function showView(name) {
+  views.forEach(v => v.classList.toggle("active", v.id === "view-" + name));
+  tabButtons.forEach(b => b.setAttribute("aria-current", String(b.dataset.view === name)));
+  if (name === "repertoire") {
+    const active = getActiveDossier();
+    document.getElementById("repTravauxNotice").hidden = !active || active.type !== "travaux";
+    if (!REP_LOADED) loadRepertoire();
+  }
+  if (name === "bordereau") renderBordereau();
+  if (name === "documents") renderDocumentsView();
+  if (name === "checklist") renderChecklist();
+}
+tabButtons.forEach(b => b.addEventListener("click", () => {
+  if (b.disabled) return;
+  showView(b.dataset.view);
+}));
+
+function refreshTabsState() {
+  const active = getActiveDossier();
+  document.getElementById("tabBordereau").disabled = !active;
+  document.getElementById("tabDocuments").disabled = !active;
+  document.getElementById("tabChecklist").disabled = !active;
+  const pill = document.getElementById("activeDossierPill");
+  if (active) {
+    pill.hidden = false;
+    pill.textContent = "📁 " + (active.objet || "Dossier sans nom");
+  } else {
+    pill.hidden = true;
+  }
+}
+document.getElementById("activeDossierPill").addEventListener("click", () => showView("dossiers"));
+
+// ============================================================
+// VUE DOSSIERS
+// ============================================================
+function renderDossiers() {
+  const wrap = document.getElementById("dossierList");
+  renderBackupNudge();
+  if (!DOSSIERS.length) {
+    wrap.innerHTML = `<div class="empty-state">Aucun dossier pour l'instant.<br>Créez-en un pour commencer à préparer une réponse à un DAO.</div>`;
+    return;
+  }
+  // L'urgence commande l'ordre : un dossier échu ou proche passe devant.
+  const sorted = [...DOSSIERS].sort((a, b) => {
+    const ua = joursRestants(a.dateLimite), ub = joursRestants(b.dateLimite);
+    if (ua === null && ub === null) return b.updatedAt - a.updatedAt;
+    if (ua === null) return 1;
+    if (ub === null) return -1;
+    return ua - ub;
+  });
+  wrap.innerHTML = sorted.map(d => {
+    const nbPieces = checklistBlocsFor(d).reduce((s, b) => s + b.pieces.length, 0);
+    const nbDone = Object.values(d.checklist || {}).filter(v => v && v.done).length;
+    const pct = nbPieces ? Math.round((nbDone / nbPieces) * 100) : 0;
+    const total = dossierTotalsHT(d);
+    const nbLots = d.lots.length;
+    const ech = echeanceHtml(d);
+    const typeBadge = d.type === "travaux"
+      ? `<span class="badge" style="background:var(--gold-soft);color:var(--gold);">Travaux (BTP)</span>`
+      : `<span class="badge" style="background:var(--surface-2);color:var(--ink-soft);">Fournitures</span>`;
+    return `<div class="card dossier-card ${ech.classe}" data-id="${d.id}">
+      <div class="row between" style="align-items:flex-start;gap:14px;">
+        <div style="min-width:0;">
+          <div class="title">${esc(d.objet) || "Dossier sans nom"} ${typeBadge}</div>
+          <div class="meta-grid">
+            <span class="meta-item"><span class="k">Réf.</span><span class="tab-num">${esc(d.reference) || "non renseignée"}</span></span>
+            <span class="meta-item"><span class="k">Autorité</span>${esc(d.autorite) || "non renseignée"}</span>
+          </div>
+          <div class="meta-grid">
+            <span class="meta-item"><span class="k">Dépôt</span>${fmtDate(d.dateLimite)}${d.heureLimite ? " à " + esc(d.heureLimite) : ""}</span>
+            <span class="meta-item"><span class="k">Montant HT</span><span class="tab-num">${fmtInt(total)} FCFA</span></span>
+            <span class="meta-item"><span class="k">Contenu</span><span class="tab-num">${nbLots}</span> lot${nbLots > 1 ? "s" : ""}, <span class="tab-num">${dossierLignesCount(d)}</span> ligne${dossierLignesCount(d) > 1 ? "s" : ""}</span>
+          </div>
+        </div>
+        <div style="text-align:right;min-width:104px;">
+          ${ech.html}
+          <div class="badge ${pct === 100 ? "ok" : "warn"}" style="margin-top:8px;">${nbDone}/${nbPieces} pièces</div>
+          <div class="progress" style="margin-top:6px;"><span style="width:${pct}%"></span></div>
+        </div>
+      </div>
+      <div class="row no-print" style="margin-top:12px;">
+        <button class="btn sm" data-action="open" data-id="${d.id}">Ouvrir</button>
+        <button class="btn sm ghost" data-action="duplicate" data-id="${d.id}">Dupliquer</button>
+        <button class="btn sm ghost" data-action="edit" data-id="${d.id}">Modifier</button>
+        <button class="btn sm danger" data-action="delete" data-id="${d.id}">Supprimer</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function joursRestants(dateLimite) {
+  if (!dateLimite) return null;
+  const auj = new Date(); auj.setHours(0, 0, 0, 0);
+  const dl = new Date(dateLimite + "T00:00:00");
+  if (isNaN(dl)) return null;
+  return Math.round((dl - auj) / 86400000);
+}
+
+// Dans la commande publique, dépasser la date n'est pas une pénalité : c'est l'élimination.
+// L'échéance mérite donc le plus gros caractère de la carte.
+function echeanceHtml(d) {
+  const j = joursRestants(d.dateLimite);
+  if (j === null) return { classe: "", html: `<div class="faint" style="font-size:12.5px;">Sans échéance</div>` };
+  if (j < 0) return { classe: "urgent", html: `<div class="echeance echu"><span class="n">Échu</span></div>` };
+  if (j === 0) return { classe: "urgent", html: `<div class="echeance urgent"><span class="n">0</span><span class="u">jour — c'est aujourd'hui</span></div>` };
+  const classe = j <= 3 ? "urgent" : j <= 10 ? "proche" : "";
+  return {
+    classe,
+    html: `<div class="echeance ${classe}"><span class="n">${j}</span><span class="u">jour${j > 1 ? "s" : ""} restant${j > 1 ? "s" : ""}</span></div>`,
+  };
+}
+
+function renderBackupNudge() {
+  const el = document.getElementById("backupNudge");
+  if (!DOSSIERS.length) { el.hidden = true; return; }
+  const last = Number(localStorage.getItem(LS_LASTBACKUP) || 0);
+  const jours = last ? Math.floor((Date.now() - last) / 86400000) : null;
+  if (jours !== null && jours < BACKUP_RAPPEL_JOURS) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = jours === null
+    ? `<strong>Vos dossiers ne sont stockés que sur cet appareil.</strong> Vous n'avez encore jamais exporté de sauvegarde. Un nettoyage du navigateur les effacerait définitivement. → Profil entreprise ⚙︎ › Sauvegarde.`
+    : `<strong>Dernière sauvegarde il y a ${jours} jours.</strong> Exportez votre base pour ne rien perdre. → Profil entreprise ⚙︎ › Sauvegarde.`;
+}
+
+document.getElementById("dossierList").addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-action]");
+  if (!btn) {
+    const card = e.target.closest(".dossier-card");
+    if (card) openDossier(card.dataset.id);
+    return;
+  }
+  const id = btn.dataset.id;
+  if (btn.dataset.action === "open") openDossier(id);
+  if (btn.dataset.action === "edit") openDossierModal(id);
+  if (btn.dataset.action === "delete") deleteDossier(id);
+  if (btn.dataset.action === "duplicate") duplicateDossier(id);
+});
+
+function openDossier(id) {
+  ACTIVE_ID = id;
+  setActiveId(id);
+  refreshTabsState();
+  showView("bordereau");
+}
+function deleteDossier(id) {
+  const d = DOSSIERS.find(x => x.id === id);
+  if (!d) return;
+  if (!confirm(`Supprimer le dossier « ${d.objet || "sans nom"} » ? Cette action est irréversible.`)) return;
+  DOSSIERS = DOSSIERS.filter(x => x.id !== id);
+  persistDossiers();
+  if (ACTIVE_ID === id) { ACTIVE_ID = null; setActiveId(null); }
+  refreshTabsState();
+  renderDossiers();
+  toast("Dossier supprimé");
+}
+function duplicateDossier(id) {
+  const src = DOSSIERS.find(x => x.id === id);
+  if (!src) return;
+  const copy = JSON.parse(JSON.stringify(src));
+  copy.id = uid();
+  copy.objet = src.objet + " (copie)";
+  copy.dateLimite = "";
+  copy.heureLimite = "";
+  copy.checklist = {};
+  copy.lots = copy.lots.map(lot => ({
+    ...lot, id: uid(),
+    chapitres: lot.chapitres.map(c => ({ ...c, id: uid(), lignes: c.lignes.map(l => ({ ...l, id: uid() })) })),
+    services: (lot.services || []).map(s => ({ ...s, id: uid() })),
+  }));
+  copy.activeLotId = copy.lots[0].id;
+  copy.activeChapitreId = copy.lots[0].chapitres[0].id;
+  copy.createdAt = Date.now();
+  copy.updatedAt = Date.now();
+  DOSSIERS.push(copy);
+  persistDossiers();
+  renderDossiers();
+  toast("Dossier dupliqué (échéance et checklist réinitialisées)");
+}
+
+// ---- modal nouveau/edit dossier ----
+const modalDossier = document.getElementById("modalDossier");
+let editingDossierId = null;
+function openDossierModal(id) {
+  editingDossierId = id || null;
+  const d = id ? DOSSIERS.find(x => x.id === id) : null;
+  document.getElementById("modalDossierTitle").textContent = d ? "Modifier le dossier" : "Nouveau dossier";
+  document.getElementById("fType").value = d ? d.type : "fournitures";
+  document.getElementById("fObjet").value = d ? d.objet : "";
+  document.getElementById("fReference").value = d ? d.reference : "";
+  document.getElementById("fAutorite").value = d ? d.autorite : "";
+  document.getElementById("fMode").value = d ? (d.modePassation || "") : "";
+  document.getElementById("fDateLimite").value = d ? d.dateLimite : "";
+  document.getElementById("fHeureLimite").value = d ? (d.heureLimite || "") : "";
+  document.getElementById("fValidite").value = d ? (d.delaiValidite ?? 90) : 90;
+  document.getElementById("fDelaiExec").value = d ? (d.delaiExec || "") : "";
+  document.getElementById("fGarantie").value = d && d.garantieSoumission ? fmtInt(d.garantieSoumission) : "";
+  document.getElementById("fLieuDepot").value = d ? (d.lieuDepot || "") : "";
+  const selPolice = document.getElementById("fPolice");
+  selPolice.innerHTML = Object.entries(POLICES_DOC)
+    .map(([cle, p]) => `<option value="${cle}">${esc(p.label)}</option>`).join("");
+  selPolice.value = d && POLICES_DOC[d.police] ? d.police : "systeme";
+  modalDossier.hidden = false;
+  document.getElementById("fObjet").focus();
+}
+document.getElementById("btnNewDossier").addEventListener("click", () => openDossierModal(null));
+document.getElementById("btnCancelDossier").addEventListener("click", () => modalDossier.hidden = true);
+modalDossier.addEventListener("click", (e) => { if (e.target === modalDossier) modalDossier.hidden = true; });
+document.getElementById("btnSaveDossier").addEventListener("click", () => {
+  const objet = document.getElementById("fObjet").value.trim();
+  if (!objet) { toast("L'objet du marché est requis"); return; }
+  const type = document.getElementById("fType").value === "travaux" ? "travaux" : "fournitures";
+  let d;
+  if (editingDossierId) {
+    d = DOSSIERS.find(x => x.id === editingDossierId);
+  } else {
+    d = newDossier(type);
+    DOSSIERS.push(d);
+  }
+  d.type = type;
+  d.objet = objet;
+  d.reference = document.getElementById("fReference").value.trim();
+  d.autorite = document.getElementById("fAutorite").value.trim();
+  d.modePassation = document.getElementById("fMode").value;
+  d.dateLimite = document.getElementById("fDateLimite").value;
+  d.heureLimite = document.getElementById("fHeureLimite").value;
+  d.delaiValidite = Number(document.getElementById("fValidite").value) || 0;
+  d.delaiExec = document.getElementById("fDelaiExec").value.trim();
+  d.garantieSoumission = parseNum(document.getElementById("fGarantie").value);
+  d.lieuDepot = document.getElementById("fLieuDepot").value.trim();
+  d.police = document.getElementById("fPolice").value;
+  touch(d);
+  persistDossiers();
+  modalDossier.hidden = true;
+  renderDossiers();
+  refreshTabsState();
+  toast("Dossier enregistré");
+  if (!editingDossierId) openDossier(d.id);
+});
+
+// ============================================================
+// VUE REPERTOIRE
+// ============================================================
+let REP_LOADED = false;
+let REP_CATS = [];
+let REP_ROWS = [];        // [code, catIdx, famille, designation, unite, bi, bs]
+let REP_HAY = [];         // index de recherche pré-calculé
+let REP_FILTERED = [];
+let REP_ACTIVE_CATS = new Set();
+
+function norm(s) { return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+
+/* Les 10 050 lignes ne sont plus embarquées : elles sont en base et se
+   cherchent. Deux mégaoctets de moins dans la page, une seule source de
+   vérité, et une nouvelle édition se charge sans republier l'application. */
+async function loadRepertoire() {
+  REP_LOADED = true;
+  REP_CATS = [];
+  document.getElementById("repCount").textContent = "10 050 articles";
+  document.getElementById("repList").innerHTML =
+    `<div class="empty-state">Tapez au moins trois lettres pour chercher dans le Répertoire de l'État.</div>`;
+}
+
+function renderRepCats() {
+  const wrap = document.getElementById("repCats");
+  wrap.innerHTML = REP_CATS.map((c, i) =>
+    `<button class="chip" data-cat="${i}" aria-pressed="false">${esc(c)}</button>`
+  ).join("");
+  wrap.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const idx = Number(chip.dataset.cat);
+      if (REP_ACTIVE_CATS.has(idx)) { REP_ACTIVE_CATS.delete(idx); chip.setAttribute("aria-pressed", "false"); }
+      else { REP_ACTIVE_CATS.add(idx); chip.setAttribute("aria-pressed", "true"); }
+      applyRepFilter();
+    });
+  });
+}
+
+/* La recherche part au serveur, qui classe par pertinence. Le rendu des
+   lignes, lui, ne change pas : on lui donne la même forme de données. */
+function applyRepFilter() {
+  const champ = document.getElementById("repSearch");
+  const q = String(champ ? champ.value : "").trim();
+  const liste = document.getElementById("repList");
+  if (q.length < 3) {
+    REP_ROWS = []; REP_FILTERED = [];
+    if (liste) liste.innerHTML = `<div class="empty-state">Tapez au moins trois lettres pour chercher dans le Répertoire de l'État.</div>`;
+    return;
+  }
+  if (liste) liste.innerHTML = `<div class="empty-state">Recherche…</div>`;
+  chercherRepertoire(q).then(function (res) {
+    REP_ROWS = res.map(function (a) {
+      return [a.code, 0, a.famille || "", a.d, a.u || "", a.bi, a.bs, a.specs || ""];
+    });
+    REP_FILTERED = REP_ROWS.map(function (_, i) { return i; });
+    document.getElementById("repCount").textContent =
+      res.length + " résultat" + (res.length > 1 ? "s" : "") + " sur 10 050";
+    renderRepList();
+  });
+}
+document.getElementById("repSearch").addEventListener("input", () => {
+  clearTimeout(applyRepFilter._t);
+  applyRepFilter._t = setTimeout(applyRepFilter, 300);
+});
+
+function fmtMoney(n) { return (Number(n) || 0).toLocaleString("fr-FR") + " FCFA"; }
+
+// Rendu virtualisé (fenêtre de lignes visibles) pour supporter les recherches larges.
+const REP_ROW_H = 78;
+
+function renderRepList() {
+  const wrap = document.getElementById("repList");
+  if (!REP_FILTERED.length) {
+    wrap.innerHTML = `<div class="empty-state">Aucun article ne correspond à la recherche.</div>`;
+    return;
+  }
+  wrap.innerHTML = `<div id="repScroller" style="max-height:70vh;overflow-y:auto;position:relative;">
+    <div id="repSpacer" style="height:${REP_FILTERED.length * REP_ROW_H}px;position:relative;">
+      <div id="repRowsAbs" style="position:absolute;top:0;left:0;right:0;"></div>
+    </div>
+  </div>`;
+  const scroller = document.getElementById("repScroller");
+  renderRepVisible();
+  let raf = null;
+  scroller.addEventListener("scroll", () => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => { renderRepVisible(); raf = null; });
+  });
+}
+
+function renderRepVisible() {
+  const scroller = document.getElementById("repScroller");
+  if (!scroller) return;
+  const rowsAbs = document.getElementById("repRowsAbs");
+  const scrollTop = scroller.scrollTop;
+  const viewH = scroller.clientHeight || 600;
+  const first = Math.max(0, Math.floor(scrollTop / REP_ROW_H) - 4);
+  const last = Math.min(REP_FILTERED.length, Math.ceil((scrollTop + viewH) / REP_ROW_H) + 4);
+  let html = "";
+  for (let pos = first; pos < last; pos++) {
+    const i = REP_FILTERED[pos];
+    const [code, catIdx, famille, designation, unite, bi, bs] = REP_ROWS[i];
+    // 52 articles du répertoire n'ont pas de borne inférieure publiée.
+    const fourchette = (bi === null || bi === undefined)
+      ? `borne basse n.c. — jusqu'à ${fmtMoney(bs)}`
+      : `${fmtMoney(bi)} – ${fmtMoney(bs)}`;
+    html += `<div class="rep-item" style="position:absolute;top:${pos * REP_ROW_H}px;left:0;right:0;">
+      <div class="info">
+        <div class="desig">${esc(designation.slice(0, 140))}${designation.length > 140 ? "…" : ""}</div>
+        <div class="sub"><span class="tab-num">${esc(code)}</span>&nbsp;&nbsp;<span style="opacity:.75;">${esc(famille)}</span>&nbsp;&nbsp;Unité ${esc(unite || "—")}</div>
+      </div>
+      <div class="price">
+        <div class="price-range">${fourchette}</div>
+        <button class="btn sm primary no-print" style="margin-top:6px;" data-add="${i}">+ Ajouter</button>
+      </div>
+    </div>`;
+  }
+  rowsAbs.innerHTML = html;
+}
+
+document.getElementById("repList").addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-add]");
+  if (!btn) return;
+  const r = REP_ROWS[Number(btn.dataset.add)];
+  const active = getActiveDossier();
+  if (!active) { toast("Ouvrez ou créez un dossier avant d'ajouter un article"); return; }
+  const chap = getActiveChapitre(active);
+  const lot = getActiveLot(active);
+  const bi = r[5], bs = r[6];
+  // Sans borne basse publiée, on pré-remplit avec la borne haute plutôt qu'avec 0.
+  // Et comme ces bornes sont TTC, on en dégage le hors taxes : la colonne PU
+  // tient un prix HT, y poser une borne telle quelle la sous-évaluait de 18 %.
+  const borne = (bi === null || bi === undefined) ? (bs || 0) : bi;
+  const pu = money(borne / (1 + TVA_RATE));
+  chap.lignes.push(normalizeLigne({
+    id: uid(), designation: r[3], unite: r[4] || "", dateLivraison: "", qte: 1,
+    puht: money(pu), refBI: bi || 0, refBS: bs || 0, descriptionDetaillee: r[7] || r[3],
+  }));
+  touch(active);
+  persistDossiers();
+  const où = String(chap.nom || "").trim() ? `${lot.nom} › ${chap.nom}` : lot.nom;
+  toast(`Article ajouté — ${où}`);
+});
+
+// ============================================================
+// VUE BORDEREAU
+// ============================================================
+const EXPANDED_ROWS = new Set();
+
+function priceInputValue(l, mode) {
+  const ht = money(l.puht);
+  return mode === "TTC" ? money(ht * (1 + TVA_RATE)) : ht;
+}
+function setPriceFromInput(l, mode, val) {
+  const v = parseNum(val);
+  l.puht = money(mode === "TTC" ? v / (1 + TVA_RATE) : v);
+}
+
+// ── Les bornes du Répertoire sont des prix TTC ──────────────────────────
+// C'est ce que l'acheteur public débourse. Confronter le PU hors taxes à ces
+// bornes laissait passer un dépassement de 18 % sans rien dire : à 136 000 HT
+// pour un plafond de 136 125 TTC, la jauge s'affichait en vert alors que
+// l'acheteur payait 160 480, soit 24 355 de trop. Offre écartée.
+// Tout ce qui touche aux bornes se compare donc en TTC.
+function prixPayeTTC(l) { return money((Number(l.puht) || 0) * (1 + TVA_RATE)); }
+function plafondHT(l) {
+  const bs = Number(l.refBS) || 0;
+  return bs ? money(bs / (1 + TVA_RATE)) : 0;
+}
+function horsFourchette(l) {
+  const paye = prixPayeTTC(l);
+  const bi = Number(l.refBI) || 0, bs = Number(l.refBS) || 0;
+  return Boolean((bs && paye > bs) || (bi && paye > 0 && paye < bi));
+}
+
+function renderLotControls(d) {
+  const lot = getActiveLot(d);
+  const sel = document.getElementById("lotSelect");
+  sel.innerHTML = d.lots.map(l => `<option value="${l.id}">${esc(l.nom)}</option>`).join("");
+  sel.value = d.activeLotId;
+  document.getElementById("lotNameInput").value = lot.nom;
+  document.getElementById("btnDeleteLot").disabled = d.lots.length <= 1;
+
+  const chap = getActiveChapitre(d);
+  const csel = document.getElementById("chapSelect");
+  csel.innerHTML = lotChapitres(lot).map((c, i) =>
+    `<option value="${c.id}">${esc(String(c.nom || "").trim() || "Chapitre " + (i + 1) + " (sans titre)")}</option>`
+  ).join("");
+  csel.value = chap.id;
+  document.getElementById("chapNameInput").value = chap.nom || "";
+  document.getElementById("btnDeleteChap").disabled = lotChapitres(lot).length <= 1;
+
+  document.querySelectorAll('#priceModeToggle button').forEach(b => {
+    b.setAttribute("aria-pressed", String(b.dataset.mode === d.priceMode));
+  });
+
+  const isTravaux = d.type === "travaux";
+  const cdmSelect = document.getElementById("corpsMetierSelect");
+  cdmSelect.hidden = !isTravaux;
+  if (isTravaux && !cdmSelect.dataset.filled) {
+    cdmSelect.innerHTML = `<option value="">+ Corps de métier standard…</option>` +
+      CORPS_DE_METIER_STANDARD.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+    cdmSelect.dataset.filled = "1";
+  }
+
+  majZoneLots(d);
+}
+
+// La plupart des marchés n'ont qu'un lot : on n'impose la barre de gestion
+// des lots et chapitres que lorsqu'elle sert vraiment.
+let LOT_ZONE_FORCEE = false;
+function structureSimple(d) {
+  return d.lots.length === 1 && lotChapitres(d.lots[0]).length === 1;
+}
+function majZoneLots(d) {
+  const zone = document.getElementById("lotZone");
+  const bouton = document.getElementById("btnLotToggle");
+  const resume = document.getElementById("lotResume");
+  const simple = structureSimple(d);
+  const ouverte = !simple || LOT_ZONE_FORCEE;
+
+  zone.hidden = !ouverte;
+  bouton.textContent = ouverte
+    ? (simple ? "Masquer" : "Masquer la gestion des lots")
+    : "Ce marché est alloti ?";
+  bouton.hidden = !simple && ouverte;   // structure déjà complexe : le repli n'a plus de sens
+
+  if (simple) {
+    resume.innerHTML = `<strong>Marché à lot unique</strong> <span class="faint">— ${lotLignes(d.lots[0]).length} ligne(s)</span>`;
+  } else {
+    const lot = getActiveLot(d);
+    const nbChap = lotChapitres(lot).length;
+    resume.innerHTML = `<strong>${esc(lot.nom)}</strong> <span class="faint">— ${d.lots.length} lots`
+      + (nbChap > 1 ? `, ${nbChap} chapitres` : "") + `</span>`;
+  }
+}
+document.getElementById("btnLotToggle").addEventListener("click", () => {
+  LOT_ZONE_FORCEE = !LOT_ZONE_FORCEE;
+  const d = getActiveDossier();
+  if (d) majZoneLots(d);
+});
+
+function renderBordereau() {
+  const d = getActiveDossier();
+  const body = document.getElementById("bordereauBody");
+  if (!d) { body.innerHTML = ""; return; }
+  renderLotControls(d);
+  const lot = getActiveLot(d);
+  const mode = d.priceMode;
+  document.getElementById("puColHeader").textContent = mode === "TTC" ? "PU TTC (FCFA)" : "PU HT (FCFA)";
+
+  let html = "";
+  lotChapitres(lot).forEach((c, ci) => {
+    const titre = String(c.nom || "").trim();
+    if (lotChapitres(lot).length > 1 || titre) {
+      html += `<tr class="chap-head"><td colspan="8">${esc(titre || "Chapitre " + (ci + 1) + " — sans titre")}<span class="faint" style="font-weight:400;"> — ${fmtInt(chapTotalHT(c))} FCFA HT</span></td></tr>`;
+    }
+    if (!c.lignes.length) {
+      html += `<tr><td colspan="8" class="faint" style="padding:10px 8px;">Chapitre vide.</td></tr>`;
+    }
+    c.lignes.forEach((l, idx) => { html += ligneRowHtml(d, lot, c, ci, l, idx, mode); });
+  });
+  body.innerHTML = html;
+  refreshTotals(d);
+}
+
+// Situe le prix saisi par rapport aux bornes du répertoire ARMP.
+// Une barre remplace la phrase : on voit de combien on dépasse, pas seulement qu'on dépasse.
+const JAUGE_W = 128, JAUGE_H = 14;
+function jaugeFourchette(l) {
+  const bi = Number(l.refBI) || 0;
+  const bs = Number(l.refBS) || 0;
+  /* Les bornes sont TTC : on situe donc le prix PAYÉ, pas le prix hors taxes. */
+  const pu = prixPayeTTC(l);
+  if (!bi && !bs) return "";
+
+  const bas = bi || Math.round(bs * 0.7);
+  const haut = bs || Math.round(bi * 1.3);
+  const largeurBande = Math.max(haut - bas, 1);
+  // On étend le domaine de part et d'autre pour que la bande ne touche jamais les bords,
+  // et on l'élargit encore si le prix saisi sort du cadre.
+  const marge = Math.max(largeurBande * 0.55, 1);
+  const min = Math.min(bas - marge, pu > 0 ? pu - marge * 0.25 : Infinity);
+  const max = Math.max(haut + marge, pu > 0 ? pu + marge * 0.25 : -Infinity);
+  const etendue = Math.max(max - min, 1);
+  const x = v => Math.round(((v - min) / etendue) * JAUGE_W * 10) / 10;
+
+  const sous = bi && pu > 0 && pu < bi;
+  const dessus = bs && pu > bs;
+  const dehors = sous || dessus;
+  const couleur = dehors ? "var(--red)" : "var(--accent)";
+
+  const curseur = pu > 0 ? `
+    <line x1="${x(pu)}" y1="1" x2="${x(pu)}" y2="${JAUGE_H - 1}" stroke="${couleur}" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="${x(pu)}" cy="2.5" r="2.5" fill="${couleur}"/>` : "";
+
+  /* Le plafond hors taxes est le chiffre utile : c'est jusque-là qu'on chiffre. */
+  const maxHT = plafondHT(l);
+  const legende = (!bi
+    ? `borne basse n.c. · jusqu'à ${fmtInt(bs)} TTC`
+    : `${fmtInt(bi)} – ${fmtInt(bs)} TTC`)
+    + (maxHT ? ` · ${fmtInt(maxHT)} HT au plus` : "");
+  const alerte = sous ? " · sous la borne" : dessus ? " · au-dessus de la borne" : "";
+
+  return `<svg class="jauge" width="${JAUGE_W}" height="${JAUGE_H}" viewBox="0 0 ${JAUGE_W} ${JAUGE_H}" role="img" aria-label="Prix ${fmtInt(pu)} FCFA pour une fourchette de ${legende}">
+      <rect x="0" y="${JAUGE_H / 2 - 3}" width="${JAUGE_W}" height="6" rx="3" fill="var(--surface-2)"/>
+      <rect x="${x(bas)}" y="${JAUGE_H / 2 - 3}" width="${Math.max(x(haut) - x(bas), 2)}" height="6" rx="3" fill="var(--accent-soft)"/>
+      ${curseur}
+    </svg>
+    <div class="jauge-legende${dehors ? " dehors" : ""}">${legende}${alerte}</div>`;
+}
+
+function ligneRowHtml(d, lot, c, ci, l, idx, mode) {
+  const total = (Number(l.qte) || 0) * (Number(l.puht) || 0);
+  const outOfRange = horsFourchette(l);
+  const rangeHint = `<span data-cell="jauge">${jaugeFourchette(l)}</span>`;
+  const expanded = EXPANDED_ROWS.has(l.id);
+  const mainRow = `<tr data-id="${l.id}">
+    <td><input type="text" data-field="numero" value="${esc(l.numero || "")}" placeholder="${esc(numeroAuto(lot, ci, idx))}" style="width:52px;" title="Laissez vide pour la numérotation automatique"></td>
+    <td><input type="text" data-field="designation" value="${esc(l.designation)}" placeholder="Désignation">${rangeHint}
+      <button class="btn sm ghost no-print" data-expand="${l.id}" style="margin-top:4px;padding:2px 8px;font-size:11px;">${expanded ? "▴ Masquer les détails" : "▾ Détails (origine, description, site)"}</button>
+    </td>
+    <td><input type="text" data-field="unite" value="${esc(l.unite)}" placeholder="U"></td>
+    <td><input type="date" data-field="dateLivraison" value="${esc(l.dateLivraison || "")}"></td>
+    <td class="num"><input type="text" inputmode="numeric" class="num-fmt" data-field="qte" value="${fmtInt(l.qte)}"></td>
+    <td class="num"><input type="text" inputmode="numeric" class="num-fmt" data-field="pu" value="${fmtInt(priceInputValue(l, mode))}" style="${outOfRange ? "color:var(--red);font-weight:700;" : ""}"></td>
+    <td class="num" data-cell="total">${fmtInt(total)}</td>
+    <td class="no-print"><div class="row-tools">
+      <button data-move="up" data-id="${l.id}" title="Monter" ${idx === 0 ? "disabled" : ""}>▲</button>
+      <button data-move="down" data-id="${l.id}" title="Descendre" ${idx === c.lignes.length - 1 ? "disabled" : ""}>▼</button>
+      <button class="rm-btn" data-rm="${l.id}" title="Supprimer">✕</button>
+    </div></td>
+  </tr>`;
+  if (!expanded) return mainRow;
+  const detailRow = `<tr class="ligne-detail no-print" data-detail-id="${l.id}">
+    <td></td>
+    <td colspan="7">
+      <div class="grid2" style="gap:8px;">
+        <label class="field" style="margin:0;">Origine de la fourniture
+          <select data-detail-field="origine">
+            ${Object.entries(ORIGINES).map(([k, v]) => `<option value="${k}" ${l.origine === k ? "selected" : ""}>${esc(v)}</option>`).join("")}
+          </select>
+        </label>
+        <label class="field" style="margin:0;">Site / lieu de destination
+          <input type="text" data-detail-field="site" value="${esc(l.site || "")}" placeholder="Ex. Cotonou, siège">
+        </label>
+        <label class="field" style="margin:0;grid-column:1/-1;">Description détaillée (caractéristiques techniques)
+          <textarea data-detail-field="descriptionDetaillee" rows="2" style="width:100%;resize:vertical;">${esc(l.descriptionDetaillee || "")}</textarea>
+        </label>
+        ${l.origine === "a_importer" ? `
+        <label class="field" style="margin:0;">Incoterm
+          <input type="text" data-detail-field="incoterm" value="${esc(l.incoterm || "")}" placeholder="Ex. CIP Cotonou">
+        </label>
+        <label class="field" style="margin:0;">Coût main-d'œuvre locale (%)
+          <input type="number" min="0" max="100" data-detail-field="tauxMainOeuvre" value="${l.tauxMainOeuvre || 0}">
+        </label>` : ""}
+        ${l.origine === "deja_importee" ? `
+        <label class="field" style="margin:0;">Pays d'origine
+          <input type="text" data-detail-field="paysOrigine" value="${esc(l.paysOrigine || "")}">
+        </label>
+        <label class="field" style="margin:0;">Incoterm / date de livraison
+          <input type="text" data-detail-field="incoterm" value="${esc(l.incoterm || "")}">
+        </label>
+        <label class="field" style="margin:0;">Droits de douane (FCFA, unitaire)
+          <input type="text" inputmode="numeric" class="num-fmt" data-detail-field="droitsDouane" value="${fmtInt(l.droitsDouane || 0)}">
+        </label>
+        <label class="field" style="margin:0;">Transport terrestre unitaire (FCFA)
+          <input type="text" inputmode="numeric" class="num-fmt" data-detail-field="transportTerrestre" value="${fmtInt(l.transportTerrestre || 0)}">
+        </label>
+        <label class="field" style="margin:0;">Taxes de vente (FCFA)
+          <input type="text" inputmode="numeric" class="num-fmt" data-detail-field="taxeVente" value="${fmtInt(l.taxeVente || 0)}">
+        </label>` : ""}
+        ${l.origine === "fabriquee_benin" ? `
+        <label class="field" style="margin:0;">Transport terrestre unitaire (FCFA)
+          <input type="text" inputmode="numeric" class="num-fmt" data-detail-field="transportTerrestre" value="${fmtInt(l.transportTerrestre || 0)}">
+        </label>
+        <label class="field" style="margin:0;">Coût main-d'œuvre locale (%)
+          <input type="number" min="0" max="100" data-detail-field="tauxMainOeuvre" value="${l.tauxMainOeuvre || 0}">
+        </label>
+        <label class="field" style="margin:0;">Taxe de vente (FCFA)
+          <input type="text" inputmode="numeric" class="num-fmt" data-detail-field="taxeVente" value="${fmtInt(l.taxeVente || 0)}">
+        </label>` : ""}
+      </div>
+    </td>
+  </tr>`;
+  return mainRow + detailRow;
+}
+
+// Met à jour les totaux SANS reconstruire le tableau : le champ en cours de saisie garde le focus.
+function refreshTotals(d) {
+  const lot = getActiveLot(d);
+  const chap = getActiveChapitre(d);
+  const totalHT = lotTotalsHT(lot);
+  const plusieursChap = lotChapitres(lot).length > 1;
+  document.getElementById("rowChapTotal").hidden = !plusieursChap;
+  document.getElementById("footChapLabel").textContent =
+    `Sous-total — ${String(chap.nom || "").trim() || "chapitre sans titre"}`;
+  document.getElementById("totalChap").textContent = fmtInt(chapTotalHT(chap));
+  document.getElementById("totalHT").textContent = fmtInt(totalHT);
+  document.getElementById("totalTVA").textContent = fmtInt(money(totalHT * TVA_RATE));
+  document.getElementById("totalTTC").textContent = fmtInt(money(totalHT * (1 + TVA_RATE)));
+  const hint = document.getElementById("dossierTotalHint");
+  hint.textContent = d.lots.length > 1
+    ? `Récapitulatif interne : ${fmtInt(dossierTotalsHT(d))} FCFA HT sur l'ensemble des ${d.lots.length} lots. Chaque lot fait l'objet d'une offre financière séparée — ce cumul ne figure sur aucun document imprimé.`
+    : "";
+  if (d.priceMode === "TTC") {
+    hint.textContent += (hint.textContent ? " " : "") + "Saisie en TTC : le prix est converti et stocké en HT entier, un écart d'arrondi de 1 FCFA est possible.";
+  }
+}
+
+document.getElementById("bordereauBody").addEventListener("input", (e) => {
+  const d = getActiveDossier();
+  if (!d) return;
+
+  const detailTr = e.target.closest("tr[data-detail-id]");
+  if (detailTr) {
+    const found = findLigne(d, detailTr.dataset.detailId);
+    if (!found) return;
+    const field = e.target.dataset.detailField;
+    if (!field) return;
+    found.ligne[field] = valeurChamp(e.target);
+    touch(d);
+    persistDossiers();
+    if (field === "origine") renderBordereau();  // change la structure du formulaire : re-render assumé
+    return;
+  }
+
+  const tr = e.target.closest("tr[data-id]");
+  if (!tr) return;
+  const found = findLigne(d, tr.dataset.id);
+  if (!found) return;
+  const line = found.ligne;
+  const field = e.target.dataset.field;
+  if (!field) return;
+
+  if (field === "pu") setPriceFromInput(line, d.priceMode, e.target.value);
+  else line[field] = valeurChamp(e.target);
+
+  touch(d);
+  persistDossiers();
+
+  if (field === "qte" || field === "pu") {
+    // On ne touche qu'aux cellules de résultat, jamais au champ actif.
+    const cell = tr.querySelector('[data-cell="total"]');
+    if (cell) cell.textContent = fmtInt((Number(line.qte) || 0) * (Number(line.puht) || 0));
+    if (field === "pu") {
+      // La jauge est un frère du champ, jamais son parent : le focus est préservé.
+      const jauge = tr.querySelector('[data-cell="jauge"]');
+      if (jauge) jauge.innerHTML = jaugeFourchette(line);
+      const hors = (line.refBS && Number(line.puht) > Number(line.refBS))
+        || (line.refBI && Number(line.puht) > 0 && Number(line.puht) < Number(line.refBI));
+      e.target.style.color = hors ? "var(--red)" : "";
+      e.target.style.fontWeight = hors ? "700" : "";
+    }
+    refreshTotals(d);
+  }
+});
+
+document.getElementById("bordereauBody").addEventListener("click", (e) => {
+  const d = getActiveDossier();
+  if (!d) return;
+
+  const expandBtn = e.target.closest("[data-expand]");
+  if (expandBtn) {
+    const id = expandBtn.dataset.expand;
+    if (EXPANDED_ROWS.has(id)) EXPANDED_ROWS.delete(id); else EXPANDED_ROWS.add(id);
+    renderBordereau();
+    return;
+  }
+
+  const moveBtn = e.target.closest("[data-move]");
+  if (moveBtn) {
+    const found = findLigne(d, moveBtn.dataset.id);
+    if (!found) return;
+    const arr = found.chap.lignes;
+    const i = arr.indexOf(found.ligne);
+    const j = moveBtn.dataset.move === "up" ? i - 1 : i + 1;
+    if (j < 0 || j >= arr.length) return;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    touch(d);
+    persistDossiers();
+    renderBordereau();
+    return;
+  }
+
+  const rmBtn = e.target.closest("[data-rm]");
+  if (rmBtn) {
+    // Le bouton porte data-rm (et non data-id) : c'est cette clé qu'il faut lire.
+    const idLigne = rmBtn.dataset.rm;
+    const found = findLigne(d, idLigne);
+    if (!found) return;
+    found.chap.lignes = found.chap.lignes.filter(l => l.id !== idLigne);
+    touch(d);
+    persistDossiers();
+    renderBordereau();
+  }
+});
+
+document.getElementById("btnAddLigne").addEventListener("click", () => {
+  const d = getActiveDossier();
+  if (!d) return;
+  getActiveChapitre(d).lignes.push(normalizeLigne({
+    id: uid(), designation: "", unite: "", dateLivraison: "", qte: 1, puht: 0, refBI: 0, refBS: 0,
+  }));
+  touch(d);
+  persistDossiers();
+  renderBordereau();
+});
+
+// ---- gestion des lots ----
+document.getElementById("lotSelect").addEventListener("change", (e) => {
+  const d = getActiveDossier();
+  if (!d) return;
+  d.activeLotId = e.target.value;
+  d.activeChapitreId = getActiveLot(d).chapitres[0].id;
+  persistDossiers();
+  renderBordereau();
+});
+document.getElementById("lotNameInput").addEventListener("change", (e) => {
+  const d = getActiveDossier();
+  if (!d) return;
+  const lot = getActiveLot(d);
+  lot.nom = e.target.value.trim() || lot.nom;
+  touch(d);
+  persistDossiers();
+  renderLotControls(d);
+});
+document.getElementById("btnAddLot").addEventListener("click", () => {
+  const d = getActiveDossier();
+  if (!d) return;
+  const lot = newLot("Lot " + (d.lots.length + 1));
+  d.lots.push(lot);
+  d.activeLotId = lot.id;
+  d.activeChapitreId = lot.chapitres[0].id;
+  touch(d);
+  persistDossiers();
+  renderBordereau();
+  toast("Nouveau lot créé — il donnera lieu à une offre financière séparée");
+});
+document.getElementById("btnDeleteLot").addEventListener("click", () => {
+  const d = getActiveDossier();
+  if (!d || d.lots.length <= 1) return;
+  const lot = getActiveLot(d);
+  if (!confirm(`Supprimer « ${lot.nom} », ses ${lotChapitres(lot).length} chapitre(s) et ses ${lotLignes(lot).length} ligne(s) ?`)) return;
+  d.lots = d.lots.filter(l => l.id !== lot.id);
+  d.activeLotId = d.lots[0].id;
+  d.activeChapitreId = d.lots[0].chapitres[0].id;
+  touch(d);
+  persistDossiers();
+  renderBordereau();
+  toast("Lot supprimé");
+});
+
+// ---- gestion des chapitres ----
+document.getElementById("chapSelect").addEventListener("change", (e) => {
+  const d = getActiveDossier();
+  if (!d) return;
+  d.activeChapitreId = e.target.value;
+  persistDossiers();
+  renderBordereau();
+});
+document.getElementById("chapNameInput").addEventListener("change", (e) => {
+  const d = getActiveDossier();
+  if (!d) return;
+  getActiveChapitre(d).nom = e.target.value.trim();
+  touch(d);
+  persistDossiers();
+  renderBordereau();
+});
+document.getElementById("btnAddChap").addEventListener("click", () => {
+  const d = getActiveDossier();
+  if (!d) return;
+  const lot = getActiveLot(d);
+  const c = newChapitre("");
+  lot.chapitres.push(c);
+  d.activeChapitreId = c.id;
+  touch(d);
+  persistDossiers();
+  renderBordereau();
+  toast("Chapitre ajouté au lot");
+});
+document.getElementById("corpsMetierSelect").addEventListener("change", (e) => {
+  const nom = e.target.value;
+  e.target.value = "";
+  if (!nom) return;
+  const d = getActiveDossier();
+  if (!d) return;
+  const lot = getActiveLot(d);
+  const c = newChapitre(nom);
+  lot.chapitres.push(c);
+  d.activeChapitreId = c.id;
+  touch(d);
+  persistDossiers();
+  renderBordereau();
+  toast(`Chapitre « ${nom} » ajouté à ${lot.nom}`);
+});
+document.getElementById("btnDeleteChap").addEventListener("click", () => {
+  const d = getActiveDossier();
+  if (!d) return;
+  const lot = getActiveLot(d);
+  if (lot.chapitres.length <= 1) return;
+  const c = getActiveChapitre(d);
+  if (!confirm(`Supprimer le chapitre « ${String(c.nom || "").trim() || "sans titre"} » et ses ${c.lignes.length} ligne(s) ?`)) return;
+  lot.chapitres = lot.chapitres.filter(x => x.id !== c.id);
+  d.activeChapitreId = lot.chapitres[0].id;
+  touch(d);
+  persistDossiers();
+  renderBordereau();
+  toast("Chapitre supprimé");
+});
+
+document.querySelectorAll('#priceModeToggle button').forEach(btn => {
+  btn.addEventListener("click", () => {
+    const d = getActiveDossier();
+    if (!d) return;
+    d.priceMode = btn.dataset.mode;
+    touch(d);
+    persistDossiers();
+    renderBordereau();
+  });
+});
+
+// ============================================================
+// CONTRÔLE AVANT IMPRESSION
+// ============================================================
+function auditDossier(d) {
+  const pbs = [];
+  d.lots.forEach(lot => {
+    if (!lotLignes(lot).length) { pbs.push(`${lot.nom} : aucune ligne saisie`); return; }
+    lotChapitres(lot).forEach((c, ci) => {
+      c.lignes.forEach((l, i) => {
+        const ref = `${lot.nom} · ligne ${ligneNumero(lot, ci, i, l)}`;
+        if (!String(l.designation || "").trim()) pbs.push(`${ref} : désignation vide`);
+        if (!(Number(l.qte) > 0)) pbs.push(`${ref} : quantité nulle`);
+        if (!(Number(l.puht) > 0)) pbs.push(`${ref} : prix unitaire nul`);
+        else {
+          const paye = prixPayeTTC(l);
+          if (l.refBS && paye > Number(l.refBS)) {
+            pbs.push(`${ref} : l'acheteur paierait ${fmtInt(paye)} TTC, soit ${fmtInt(paye - Number(l.refBS))} au-dessus de la borne ARMP (${fmtInt(plafondHT(l))} HT au plus)`);
+          }
+          if (l.refBI && paye < Number(l.refBI)) {
+            pbs.push(`${ref} : l'acheteur paierait ${fmtInt(paye)} TTC, soit sous la borne basse ARMP`);
+          }
+        }
+      });
+    });
+  });
+  return pbs;
+}
+
+function confirmerAvantImpression(d) {
+  const pbs = auditDossier(d);
+  if (!pbs.length) return true;
+  const apercu = pbs.slice(0, 12).join("\n• ");
+  const reste = pbs.length > 12 ? `\n… et ${pbs.length - 12} autre(s).` : "";
+  return confirm(
+    `${pbs.length} point(s) à vérifier avant impression :\n\n• ${apercu}${reste}\n\n` +
+    `Une ligne à prix ou quantité nulle rend l'offre incomplète et peut entraîner son rejet.\n\n` +
+    `Imprimer quand même ?`
+  );
+}
+
+// ============================================================
+// IMPRESSION DU BORDEREAU — un lot = ses propres pages
+// ============================================================
+function enteteEntrepriseHtml() {
+  const p = PROFILE;
+  const coord = [
+    p.rccm ? "RCCM : " + p.rccm : "",
+    p.ifu ? "IFU : " + p.ifu : "",
+    p.tel, p.email, p.adresse,
+  ].filter(Boolean).map(esc).join(" · ");
+  return `<div class="print-entreprise">
+    <div class="rs">${esc(p.raisonSociale)}</div>
+    <div class="coord">${coord}</div>
+  </div>`;
+}
+
+function signatureHtml(lieuLabel) {
+  return `<div class="signature-bloc"><div>
+    <div>${esc(lieuLabel || "Fait à Cotonou")}, le ${today()}</div>
+    <div class="sig-space"></div>
+    <div><strong>${esc(PROFILE.representant || "Le représentant habilité")}</strong></div>
+  </div></div>`;
+}
+
+function buildPrintAllLotsHtml(d) {
+  let html = "";
+  d.lots.forEach(lot => {
+    const totalHT = lotTotalsHT(lot);
+    const tva = money(totalHT * TVA_RATE);
+    const plusieursChap = lotChapitres(lot).length > 1;
+    html += `<div class="print-lot">
+      ${enteteEntrepriseHtml()}
+      <div class="print-header">
+        <h2>${esc(d.objet) || "Dossier sans nom"} — ${esc(lot.nom)}</h2>
+        <div class="meta">${esc(d.reference) || "Référence non renseignée"} · ${esc(d.autorite) || "Autorité non renseignée"}${d.modePassation ? " · " + esc(d.modePassation) : ""} · Date limite : ${fmtDate(d.dateLimite)}</div>
+      </div>`;
+
+    lotChapitres(lot).forEach((c, ci) => {
+      const titre = String(c.nom || "").trim();
+      if (plusieursChap || titre) {
+        html += `<div class="print-chap">${esc(titre || "Chapitre " + (ci + 1))}</div>`;
+      }
+      html += `<table class="bordereau-table">
+        <thead><tr>
+          <th style="width:48px;">N°</th><th>Désignation</th><th style="width:60px;">Unité</th>
+          <th style="width:100px;">Date livr.</th><th style="width:60px;">Qté</th>
+          <th style="width:100px;">PU HT</th><th style="width:110px;">Total HT</th>
+        </tr></thead>
+        <tbody>
+          ${c.lignes.map((l, i) => `<tr>
+            <td>${esc(ligneNumero(lot, ci, i, l))}</td><td>${esc(l.designation)}</td><td>${esc(l.unite)}</td>
+            <td>${fmtDate(l.dateLivraison)}</td><td class="num">${fmtInt(l.qte)}</td>
+            <td class="num">${fmtInt(l.puht)}</td><td class="num">${fmtInt((Number(l.qte) || 0) * (Number(l.puht) || 0))}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>`;
+      if (plusieursChap || titre) {
+        html += `<div class="print-chap-total">Sous-total ${esc(titre || "chapitre " + (ci + 1))} : ${fmtInt(chapTotalHT(c))} FCFA HT</div>`;
+      }
+    });
+
+    html += `<table class="bordereau-table"><tbody>
+        <tr><td style="text-align:right;">Total HTVA — ${esc(lot.nom)}</td><td class="num" style="width:120px;">${fmtInt(totalHT)}</td></tr>
+        <tr><td style="text-align:right;">TVA (18%)</td><td class="num">${fmtInt(tva)}</td></tr>
+        <tr><td style="text-align:right;"><strong>TOTAL TTC — ${esc(lot.nom)}</strong></td><td class="num"><strong>${fmtInt(totalHT + tva)}</strong></td></tr>
+      </tbody></table>
+      <p style="font-size:12px;margin-top:8px;">Arrêté le présent bordereau à la somme de <strong>${esc(capitalize(nombreEnLettresFr(totalHT + tva)))} francs CFA TTC</strong>.</p>
+      ${signatureHtml()}
+    </div>`;
+  });
+  return html;
+}
+
+document.getElementById("btnPrint").addEventListener("click", () => {
+  const d = getActiveDossier();
+  if (!d) return;
+  if (!confirmerAvantImpression(d)) return;
+  appliquerPoliceImpression(d);
+  imprimerParLeComptoir(buildPrintAllLotsHtml(d));
+});
+
+document.getElementById("btnExportCsv").addEventListener("click", () => {
+  const d = getActiveDossier();
+  if (!d) return;
+  const rows = [
+    [PROFILE.raisonSociale], [`RCCM : ${PROFILE.rccm} · IFU : ${PROFILE.ifu} · ${PROFILE.tel}`], [],
+    ["Objet", d.objet], ["Référence", d.reference], ["Autorité contractante", d.autorite],
+    ["Date limite", fmtDate(d.dateLimite)], [],
+    ["Lot", "Chapitre", "N°", "Désignation", "Unité", "Date de livraison", "Quantité", "Prix Unitaire HT", "Prix Total HT"],
+  ];
+  d.lots.forEach(lot => {
+    lotChapitres(lot).forEach((c, ci) => {
+      const titre = String(c.nom || "").trim() || "—";
+      c.lignes.forEach((l, i) => rows.push([
+        lot.nom, titre, ligneNumero(lot, ci, i, l), l.designation, l.unite, l.dateLivraison, l.qte, l.puht,
+        (Number(l.qte) || 0) * (Number(l.puht) || 0),
+      ]));
+      if (lotChapitres(lot).length > 1) rows.push(["", "", "", "", "", "", "", `Sous-total ${titre}`, chapTotalHT(c)]);
+    });
+    const totalHT = lotTotalsHT(lot);
+    rows.push(["", "", "", "", "", "", "", `Total HTVA — ${lot.nom}`, totalHT]);
+    rows.push(["", "", "", "", "", "", "", "TVA (18%)", money(totalHT * TVA_RATE)]);
+    rows.push(["", "", "", "", "", "", "", `Total TTC — ${lot.nom}`, money(totalHT * (1 + TVA_RATE))]);
+    rows.push([]);
+  });
+  if (d.lots.length > 1) {
+    rows.push(["Récapitulatif interne — chaque lot fait l'objet d'une offre séparée, ne pas joindre à l'offre"]);
+    rows.push(["", "", "", "", "", "", "", "Cumul HTVA tous lots", dossierTotalsHT(d)]);
+  }
+  telechargerCsv(rows, "Bordereau_" + (d.reference || d.objet || "dossier"));
+});
+
+function telechargerCsv(rows, nom) {
+  const csv = rows.map(r => r.map(v => {
+    const s = String(v ?? "");
+    return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }).join(";")).join("\n");
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = nom.replace(/[^\w-]+/g, "_") + ".csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ============================================================
+// VUE DOCUMENTS
+// ============================================================
+
+function nombreEnLettresFr(n) {
+  n = Math.round(Number(n) || 0);
+  if (n === 0) return "zéro";
+  if (n < 0) return "moins " + nombreEnLettresFr(-n);
+
+  const UNITES = ["", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix",
+    "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf"];
+  const DIZAINES = ["", "", "vingt", "trente", "quarante", "cinquante", "soixante"];
+
+  function deuxChiffres(n, isFinal) {
+    if (n < 20) return UNITES[n];
+    if (n < 70) {
+      const d = Math.floor(n / 10), u = n % 10;
+      if (u === 0) return DIZAINES[d];
+      if (u === 1) return DIZAINES[d] + " et un";
+      return DIZAINES[d] + "-" + UNITES[u];
+    }
+    if (n < 80) {
+      const u = n - 60;
+      if (u === 11) return "soixante et onze";
+      return "soixante-" + UNITES[u];
+    }
+    const u = n - 80;
+    if (u === 0) return isFinal ? "quatre-vingts" : "quatre-vingt";
+    return "quatre-vingt-" + UNITES[u];
+  }
+
+  function troisChiffres(n, isFinal) {
+    const c = Math.floor(n / 100), r = n % 100;
+    let s = "";
+    if (c > 0) {
+      s += (c === 1 ? "cent" : UNITES[c] + " cent");
+      if (r === 0) {
+        if (c > 1 && isFinal) s += "s";
+      } else {
+        s += " ";
+      }
+    }
+    if (r > 0) s += deuxChiffres(r, isFinal);
+    return s;
+  }
+
+  const groupes = [
+    { valeur: 1000000000, nomSing: "milliard", nomPlur: "milliards" },
+    { valeur: 1000000, nomSing: "million", nomPlur: "millions" },
+    { valeur: 1000, nomSing: "mille", nomPlur: "mille" },
+  ];
+
+  let reste = n;
+  let parts = [];
+  for (const g of groupes) {
+    const count = Math.floor(reste / g.valeur);
+    if (count > 0) {
+      if (g.valeur === 1000 && count === 1) {
+        parts.push("mille");
+      } else {
+        parts.push(troisChiffres(count, false) + " " + (count > 1 ? g.nomPlur : g.nomSing));
+      }
+      reste -= count * g.valeur;
+    }
+  }
+  if (reste > 0 || parts.length === 0) {
+    parts.push(troisChiffres(reste, true));
+  }
+  return parts.join(" ").replace(/\s+/g, " ").trim();
+}
+
+function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+const DOC_TYPES = [
+  { id: "lettre", label: "Lettre de soumission", groupe: "Formulaires", generique: true },
+  { id: "renseignements", label: "Renseignements sur le candidat", groupe: "Formulaires", generique: true },
+  { id: "habilitation", label: "Habilitation du signataire", groupe: "Formulaires", generique: true },
+  { id: "ethique", label: "Engagement éthique", groupe: "Formulaires", generique: true },
+  { id: "bpu", label: "BPU (prix unitaires)", groupe: "Offre financière" },
+  { id: "import", label: "Fournitures à importer", groupe: "Offre financière" },
+  { id: "deja_importee", label: "Fournitures déjà importées", groupe: "Offre financière" },
+  { id: "fabrique_benin", label: "Fabriquées au Bénin", groupe: "Offre financière" },
+  { id: "services", label: "Services connexes", groupe: "Offre financière" },
+  { id: "calendrier", label: "Calendrier de livraison", groupe: "Offre technique" },
+  { id: "description", label: "Description technique", groupe: "Offre technique" },
+  { id: "references", label: "Références de marchés similaires", groupe: "Capacité", generique: true },
+  { id: "personnel", label: "Liste du personnel clé", groupe: "Capacité", generique: true },
+  { id: "materiel", label: "Liste du matériel", groupe: "Capacité", generique: true },
+];
+let DOC_ACTIVE_TYPE = "bpu";
+
+function docEmptyState(msg) { return `<div class="empty-state">${esc(msg)}</div>`; }
+
+function docBPU(d, lot) {
+  const lignes = lotLignes(lot);
+  if (!lignes.length) return docEmptyState("Aucune ligne dans ce lot. Ajoutez des articles depuis le Bordereau.");
+  let rows = "";
+  lotChapitres(lot).forEach((c, ci) => {
+    c.lignes.forEach((l, i) => {
+      rows += `<tr>
+        <td>${esc(ligneNumero(lot, ci, i, l))}</td>
+        <td>${esc(l.designation) || "—"}</td>
+        <td>${esc(capitalize(nombreEnLettresFr(l.puht)))} francs CFA</td>
+        <td class="num">${fmtInt(l.puht)}</td>
+      </tr>`;
+    });
+  });
+  return `<table class="bordereau-table"><thead><tr>
+      <th style="width:60px;">N° de prix</th><th>Désignation des produits / prestations</th>
+      <th>Prix unitaire en lettres</th><th style="width:150px;">Prix unitaire en chiffres (FCFA)</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function docCalendrier(d, lot) {
+  const lignes = lotLignes(lot);
+  if (!lignes.length) return docEmptyState("Aucune ligne dans ce lot.");
+  let rows = "";
+  lotChapitres(lot).forEach((c, ci) => {
+    c.lignes.forEach((l, i) => {
+      rows += `<tr>
+        <td>${esc(ligneNumero(lot, ci, i, l))}</td><td>${esc(l.designation) || "—"}</td><td>${esc(l.unite) || "—"}</td>
+        <td class="num">${fmtInt(l.qte)}</td><td>${esc(l.site) || "—"}</td><td>${fmtDate(l.dateLivraison)}</td>
+      </tr>`;
+    });
+  });
+  return `<table class="bordereau-table"><thead><tr>
+      <th style="width:50px;">Article</th><th>Description des fournitures</th><th style="width:70px;">Unité</th>
+      <th style="width:70px;">Qté</th><th>Site / destination finale</th><th style="width:120px;">Date de livraison</th>
+    </tr></thead><tbody>${rows}</tbody></table>
+    ${d.delaiExec ? `<p class="faint" style="margin-top:8px;">Délai global d'exécution annoncé : <strong>${esc(d.delaiExec)}</strong>.</p>` : ""}`;
+}
+
+function docDescriptionTechnique(d, lot) {
+  const lignes = lotLignes(lot);
+  if (!lignes.length) return docEmptyState("Aucune ligne dans ce lot.");
+  let rows = "";
+  lotChapitres(lot).forEach((c, ci) => {
+    c.lignes.forEach((l, i) => {
+      rows += `<tr>
+        <td>${esc(ligneNumero(lot, ci, i, l))}</td><td>${esc(l.designation) || "—"}</td>
+        <td>${esc(l.descriptionDetaillee || l.designation) || "—"}</td><td class="num">${fmtInt(l.qte)}</td>
+      </tr>`;
+    });
+  });
+  return `<table class="bordereau-table"><thead><tr>
+      <th style="width:40px;">N°</th><th style="width:220px;">Désignation</th>
+      <th>Description détaillée (caractéristiques techniques)</th><th style="width:70px;">Qté</th>
+    </tr></thead><tbody>${rows}</tbody></table>
+    <p class="faint no-print" style="margin-top:8px;">La description détaillée provient du champ « Détails » de chaque ligne du Bordereau (ou de la fiche du Répertoire des prix si l'article en vient).</p>`;
+}
+
+function docFournitures(d, lot, origine, titre) {
+  const lignes = lotLignes(lot).filter(l => l.origine === origine);
+  if (!lignes.length) {
+    return docEmptyState(`Aucun article marqué « ${titre} ». Dans le Bordereau, dépliez « ▾ Détails » sur une ligne et choisissez son origine pour qu'elle apparaisse ici.`);
+  }
+  if (origine === "a_importer") {
+    const rows = lignes.map((l, i) => `<tr>
+      <td>${i + 1}</td><td>${esc(l.designation) || "—"}</td><td>${esc(l.incoterm) || "—"} · ${fmtDate(l.dateLivraison)}</td>
+      <td class="num">${fmtInt(l.qte)}</td><td class="num">${fmtInt(l.puht)}</td>
+      <td class="num">${fmtInt((Number(l.qte) || 0) * (Number(l.puht) || 0))}</td><td class="num">${l.tauxMainOeuvre || 0}%</td>
+    </tr>`).join("");
+    return `<table class="bordereau-table"><thead><tr>
+        <th style="width:40px;">Article</th><th>Description</th><th style="width:150px;">Date de livraison (Incoterm)</th>
+        <th style="width:60px;">Qté</th><th style="width:100px;">Prix unitaire</th><th style="width:110px;">Prix total</th>
+        <th style="width:90px;">Main-d'œuvre locale</th>
+      </tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  if (origine === "deja_importee") {
+    const rows = lignes.map((l, i) => {
+      const prixNet = money(l.puht) - money(l.droitsDouane);
+      const total = (prixNet + money(l.transportTerrestre)) * (Number(l.qte) || 0) + money(l.taxeVente);
+      return `<tr>
+        <td>${i + 1}</td><td>${esc(l.designation) || "—"}</td><td>${esc(l.paysOrigine) || "—"}</td>
+        <td>${esc(l.incoterm) || "—"}</td><td class="num">${fmtInt(l.qte)}</td>
+        <td class="num">${fmtInt(l.puht)}</td><td class="num">${fmtInt(l.droitsDouane)}</td>
+        <td class="num">${fmtInt(prixNet)}</td><td class="num">${fmtInt(l.transportTerrestre)}</td>
+        <td class="num">${fmtInt(l.taxeVente)}</td><td class="num">${fmtInt(total)}</td>
+      </tr>`;
+    }).join("");
+    return `<table class="bordereau-table"><thead><tr>
+        <th style="width:34px;">N°</th><th>Description</th><th style="width:90px;">Pays d'origine</th>
+        <th style="width:100px;">Incoterm</th><th style="width:50px;">Qté</th>
+        <th style="width:90px;">PU incl. droits</th><th style="width:90px;">Droits de douane</th>
+        <th style="width:90px;">PU net</th><th style="width:90px;">Transport terrestre</th>
+        <th style="width:80px;">Taxe vente</th><th style="width:100px;">Total</th>
+      </tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  const rows = lignes.map((l, i) => {
+    const total = (money(l.puht) + money(l.transportTerrestre)) * (Number(l.qte) || 0) + money(l.taxeVente);
+    return `<tr>
+      <td>${i + 1}</td><td>${esc(l.designation) || "—"}</td><td>${fmtDate(l.dateLivraison)}</td>
+      <td class="num">${fmtInt(l.qte)}</td><td class="num">${fmtInt(l.puht)}</td>
+      <td class="num">${fmtInt(l.transportTerrestre)}</td><td class="num">${l.tauxMainOeuvre || 0}%</td>
+      <td class="num">${fmtInt(l.taxeVente)}</td><td class="num">${fmtInt(total)}</td>
+    </tr>`;
+  }).join("");
+  return `<table class="bordereau-table"><thead><tr>
+      <th style="width:34px;">Article</th><th>Description</th><th style="width:100px;">Date livraison</th>
+      <th style="width:50px;">Qté</th><th style="width:90px;">PU</th><th style="width:90px;">Transport terrestre</th>
+      <th style="width:80px;">M.O. locale</th><th style="width:80px;">Taxe vente</th><th style="width:100px;">Total</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function docServices(d, lot) {
+  const services = lot.services || [];
+  const rows = services.map((s, i) => {
+    const total = (Number(s.qte) || 0) * (Number(s.pu) || 0);
+    return `<tr data-svc-id="${s.id}">
+      <td>${i + 1}</td>
+      <td><input type="text" data-svc-field="article" value="${esc(s.article)}" placeholder="Article"></td>
+      <td><input type="text" data-svc-field="description" value="${esc(s.description)}" placeholder="Description du service"></td>
+      <td><input type="date" data-svc-field="dateRealisation" value="${esc(s.dateRealisation || "")}"></td>
+      <td class="num"><input type="text" inputmode="numeric" class="num-fmt" data-svc-field="qte" value="${fmtInt(s.qte)}"></td>
+      <td class="num"><input type="text" inputmode="numeric" class="num-fmt" data-svc-field="pu" value="${fmtInt(s.pu)}"></td>
+      <td class="num" data-cell="svc-total">${fmtInt(total)}</td>
+      <td class="no-print"><button class="btn sm ghost" data-svc-rm="${s.id}">✕</button></td>
+    </tr>`;
+  }).join("");
+  const totalHT = services.reduce((s, x) => s + (Number(x.qte) || 0) * (Number(x.pu) || 0), 0);
+  return `<table class="bordereau-table"><thead><tr>
+      <th style="width:34px;">N°</th><th style="width:120px;">Article</th><th>Description du service</th>
+      <th style="width:110px;">Date de réalisation</th><th style="width:60px;">Qté</th>
+      <th style="width:100px;">PU (FCFA)</th><th style="width:110px;">Total (FCFA)</th><th class="no-print" style="width:34px;"></th>
+    </tr></thead><tbody>${rows}</tbody>
+    <tfoot><tr><td colspan="6" style="text-align:right;">Total</td><td class="num" id="svcTotal">${fmtInt(totalHT)}</td><td class="no-print"></td></tr></tfoot>
+    </table>
+    <div class="no-print" style="margin-top:10px;"><button class="btn sm" id="btnAddService">+ Service connexe</button></div>`;
+}
+
+// ---- Formulaires générés (structure ARMP/UEMOA générique) ----
+function adresseAutoriteHtml(d) {
+  return `<div class="adresse-bloc">
+    <p>À l'attention de<br><strong>${esc(d.autorite) || "[Autorité contractante]"}</strong>${d.lieuDepot ? "<br>" + esc(d.lieuDepot) : ""}</p>
+  </div>`;
+}
+
+function docLettreSoumission(d, lot) {
+  const totalHT = lotTotalsHT(lot);
+  const tva = money(totalHT * TVA_RATE);
+  const ttc = totalHT + tva;
+  const plusieursLots = d.lots.length > 1;
+  return `<div class="doc-prose">
+    <h3>Lettre de soumission</h3>
+    ${adresseAutoriteHtml(d)}
+    <p class="objet">Objet : soumission à ${esc(d.reference) || "[référence du DAO/DRP]"}${plusieursLots ? " — " + esc(lot.nom) : ""}<br>
+    ${esc(d.objet) || "[objet du marché]"}</p>
+
+    <p>Madame, Monsieur,</p>
+
+    <p>Après avoir pris connaissance de l'ensemble des pièces du dossier ${d.modePassation ? "de " + esc(d.modePassation) : "d'appel d'offres"} cité en objet, et après nous être personnellement rendu compte de la nature et de l'étendue des prestations à réaliser, nous, soussignés <strong>${esc(PROFILE.raisonSociale)}</strong>${PROFILE.formeJuridique ? ", " + esc(PROFILE.formeJuridique) : ""}${PROFILE.rccm ? ", immatriculée au RCCM sous le numéro " + esc(PROFILE.rccm) : ""}${PROFILE.ifu ? " et titulaire de l'IFU n° " + esc(PROFILE.ifu) : ""}, dont le siège est sis ${esc(PROFILE.adresse) || "[adresse]"}, nous engageons à exécuter les prestations objet du présent marché${plusieursLots ? " au titre du " + esc(lot.nom) : ""}.</p>
+
+    <p>Le montant de notre offre s'établit ainsi qu'il suit :</p>
+    <ul>
+      <li>Montant hors TVA : <strong>${fmtInt(totalHT)} FCFA</strong> (${esc(capitalize(nombreEnLettresFr(totalHT)))} francs CFA)</li>
+      <li>TVA (18 %) : <strong>${fmtInt(tva)} FCFA</strong></li>
+      <li>Montant toutes taxes comprises : <strong>${fmtInt(ttc)} FCFA</strong> (${esc(capitalize(nombreEnLettresFr(ttc)))} francs CFA)</li>
+    </ul>
+
+    <p>Nous nous engageons à exécuter les prestations dans un délai de <strong>${esc(d.delaiExec) || "[délai à préciser]"}</strong> à compter de la notification de l'ordre de service.</p>
+
+    <p>Nous nous engageons à maintenir la présente offre pour une durée de <strong>${d.delaiValidite || "[…]"} jours</strong> à compter de la date limite de dépôt fixée au ${fmtDate(d.dateLimite)}${d.heureLimite ? " à " + esc(d.heureLimite) : ""}, et à ne pas la modifier pendant cette période.</p>
+
+    ${d.garantieSoumission ? `<p>Notre offre est accompagnée d'une garantie de soumission d'un montant de <strong>${fmtInt(d.garantieSoumission)} FCFA</strong>.</p>` : ""}
+
+    <p>Si notre offre est retenue, nous nous engageons à fournir la garantie de bonne exécution prévue au dossier et à signer le marché dans les délais impartis.</p>
+
+    <p>Nous certifions n'être frappés d'aucune des mesures d'exclusion de la commande publique et ne pas nous trouver en situation de conflit d'intérêts.</p>
+
+    <p>Veuillez agréer, Madame, Monsieur, l'expression de notre considération distinguée.</p>
+    ${signatureHtml()}
+  </div>`;
+}
+
+function docRenseignements(d) {
+  const p = PROFILE;
+  const l = [
+    ["Raison sociale", p.raisonSociale], ["Forme juridique", p.formeJuridique], ["Capital social", p.capital],
+    ["Adresse du siège", p.adresse], ["Téléphone", p.tel], ["Adresse électronique", p.email],
+    ["Numéro RCCM", p.rccm], ["Numéro IFU", p.ifu],
+    ["Représentant habilité", p.representant], ["Banque", p.banque], ["Compte bancaire (RIB)", p.rib],
+  ];
+  return `<div class="doc-prose"><h3>Renseignements sur le candidat</h3></div>
+    <table class="bordereau-table"><tbody>
+      ${l.map(([k, v]) => `<tr><td style="width:38%;font-weight:600;">${esc(k)}</td><td>${esc(v) || "—"}</td></tr>`).join("")}
+    </tbody></table>
+    <div class="doc-prose">${signatureHtml()}</div>`;
+}
+
+function docHabilitation(d) {
+  return `<div class="doc-prose">
+    <h3>Confirmation d'habilitation du signataire</h3>
+    ${adresseAutoriteHtml(d)}
+    <p class="objet">Objet : ${esc(d.reference) || "[référence du DAO/DRP]"} — ${esc(d.objet) || "[objet du marché]"}</p>
+    <p>Je soussigné(e), agissant au nom et pour le compte de <strong>${esc(PROFILE.raisonSociale)}</strong>, certifie que <strong>${esc(PROFILE.representant) || "[nom et qualité]"}</strong> dispose de tous pouvoirs à l'effet de signer l'offre relative au marché cité en objet, ainsi que tout document s'y rapportant, et d'engager valablement l'entreprise dans le cadre de son exécution.</p>
+    <p>La présente habilitation demeure valable pendant toute la durée de la procédure et, le cas échéant, de l'exécution du marché.</p>
+    ${signatureHtml()}
+  </div>`;
+}
+
+function docEthique(d) {
+  return `<div class="doc-prose">
+    <h3>Engagement du soumissionnaire — éthique</h3>
+    ${adresseAutoriteHtml(d)}
+    <p class="objet">Objet : ${esc(d.reference) || "[référence du DAO/DRP]"} — ${esc(d.objet) || "[objet du marché]"}</p>
+    <p>Dans le cadre de la procédure citée en objet, <strong>${esc(PROFILE.raisonSociale)}</strong> déclare et s'engage à ce qui suit :</p>
+    <ul>
+      <li>n'avoir pas offert, donné ou promis, directement ou indirectement, un avantage quelconque en vue d'influencer la procédure de passation ou l'exécution du marché ;</li>
+      <li>n'avoir conclu aucune entente, convention ou arrangement avec d'autres candidats en vue de fausser le jeu de la concurrence ;</li>
+      <li>n'avoir pas dénaturé les faits ni dissimulé d'information dans le but d'influencer la procédure ;</li>
+      <li>ne se trouver dans aucune situation de conflit d'intérêts avec l'autorité contractante ni avec les personnes intervenant dans la procédure ;</li>
+      <li>s'abstenir de toute pratique frauduleuse, collusoire, coercitive ou obstructive pendant toute la durée de la procédure et de l'exécution du marché ;</li>
+      <li>accepter que la violation du présent engagement entraîne le rejet de l'offre ou la résiliation du marché, sans préjudice des sanctions prévues par la réglementation.</li>
+    </ul>
+    ${signatureHtml()}
+  </div>`;
+}
+
+function docReferences() {
+  const r = PROFILE.references || [];
+  if (!r.length) return docEmptyState("Aucune référence enregistrée. Renseignez-les une fois pour toutes dans ⚙︎ Profil entreprise › Références.");
+  return `<div class="doc-prose"><h3>Références de marchés similaires</h3></div>
+    <table class="bordereau-table"><thead><tr>
+      <th style="width:34px;">N°</th><th>Objet du marché</th><th style="width:160px;">Maître d'ouvrage</th>
+      <th style="width:70px;">Année</th><th style="width:120px;">Montant (FCFA)</th><th style="width:130px;">Attestation</th>
+    </tr></thead><tbody>
+      ${r.map((x, i) => `<tr><td>${i + 1}</td><td>${esc(x.objet) || "—"}</td><td>${esc(x.client) || "—"}</td>
+        <td>${esc(x.annee) || "—"}</td><td class="num">${fmtInt(x.montant)}</td><td>${esc(x.attestation) || "—"}</td></tr>`).join("")}
+    </tbody></table>
+    <div class="doc-prose">${signatureHtml()}</div>`;
+}
+
+function docPersonnel() {
+  const p = PROFILE.personnel || [];
+  if (!p.length) return docEmptyState("Aucun personnel enregistré. Renseignez-le dans ⚙︎ Profil entreprise › Personnel.");
+  return `<div class="doc-prose"><h3>Liste du personnel clé</h3></div>
+    <table class="bordereau-table"><thead><tr>
+      <th style="width:34px;">N°</th><th style="width:180px;">Nom et prénoms</th><th style="width:170px;">Poste sur le marché</th>
+      <th>Qualification / diplôme</th><th style="width:110px;">Expérience</th>
+    </tr></thead><tbody>
+      ${p.map((x, i) => `<tr><td>${i + 1}</td><td>${esc(x.nom) || "—"}</td><td>${esc(x.poste) || "—"}</td>
+        <td>${esc(x.qualification) || "—"}</td><td>${esc(x.experience) || "—"}</td></tr>`).join("")}
+    </tbody></table>
+    <div class="doc-prose">${signatureHtml()}</div>`;
+}
+
+function docMateriel() {
+  const m = PROFILE.materiel || [];
+  if (!m.length) return docEmptyState("Aucun matériel enregistré. Renseignez-le dans ⚙︎ Profil entreprise › Matériel.");
+  return `<div class="doc-prose"><h3>Liste du matériel</h3></div>
+    <table class="bordereau-table"><thead><tr>
+      <th style="width:34px;">N°</th><th>Désignation du matériel</th><th style="width:80px;">Quantité</th>
+      <th style="width:120px;">État</th><th style="width:150px;">Propriété / location</th>
+    </tr></thead><tbody>
+      ${m.map((x, i) => `<tr><td>${i + 1}</td><td>${esc(x.designation) || "—"}</td><td class="num">${esc(x.quantite) || "—"}</td>
+        <td>${esc(x.etat) || "—"}</td><td>${esc(x.propriete) || "—"}</td></tr>`).join("")}
+    </tbody></table>
+    <div class="doc-prose">${signatureHtml()}</div>`;
+}
+
+function buildDocHtml(d, lot, type) {
+  switch (type) {
+    case "lettre": return docLettreSoumission(d, lot);
+    case "renseignements": return docRenseignements(d);
+    case "habilitation": return docHabilitation(d);
+    case "ethique": return docEthique(d);
+    case "bpu": return docBPU(d, lot);
+    case "calendrier": return docCalendrier(d, lot);
+    case "description": return docDescriptionTechnique(d, lot);
+    case "services": return docServices(d, lot);
+    case "import": return docFournitures(d, lot, "a_importer", "à importer");
+    case "deja_importee": return docFournitures(d, lot, "deja_importee", "déjà importée");
+    case "fabrique_benin": return docFournitures(d, lot, "fabriquee_benin", "fabriquée au Bénin");
+    case "references": return docReferences();
+    case "personnel": return docPersonnel();
+    case "materiel": return docMateriel();
+    default: return "";
+  }
+}
+
+function renderDocumentsView() {
+  const d = getActiveDossier();
+  if (!d) return;
+  const sel = document.getElementById("docLotSelect");
+  sel.innerHTML = d.lots.map(l => `<option value="${l.id}">${esc(l.nom)}</option>`).join("");
+  sel.value = d.activeLotId;
+
+  const groupes = [...new Set(DOC_TYPES.map(t => t.groupe))];
+  document.getElementById("docTypeChips").innerHTML = groupes.map(g =>
+    `<div style="width:100%;margin:6px 0 2px;"><span class="faint" style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;">${esc(g)}</span></div>` +
+    DOC_TYPES.filter(t => t.groupe === g).map(t =>
+      `<button class="chip" data-doctype="${t.id}" aria-pressed="${String(t.id === DOC_ACTIVE_TYPE)}">${esc(t.label)}</button>`
+    ).join("")
+  ).join("");
+  renderDocContent();
+}
+
+function renderDocContent() {
+  const d = getActiveDossier();
+  const wrap = document.getElementById("docContent");
+  if (!d) { wrap.innerHTML = ""; return; }
+  const lot = getActiveLot(d);
+  const meta = DOC_TYPES.find(t => t.id === DOC_ACTIVE_TYPE);
+
+  const disc = document.getElementById("docDisclaimer");
+  if (meta && meta.generique) {
+    disc.hidden = false;
+    disc.innerHTML = "⚠ Modèle générique bâti sur la structure ARMP/UEMOA. <strong>Comparez-le au formulaire fourni dans le DAO avant dépôt</strong> : si l'autorité contractante impose son propre imprimé, c'est le sien qui fait foi.";
+  } else {
+    disc.hidden = true;
+  }
+
+  // Les formulaires d'entreprise ne dépendent pas du lot.
+  const sansLot = ["renseignements", "habilitation", "ethique", "references", "personnel", "materiel"];
+  document.getElementById("docPrintHead").innerHTML = enteteEntrepriseHtml();
+  document.getElementById("docPrintFoot").innerHTML = "";
+  wrap.innerHTML = buildDocHtml(d, lot, DOC_ACTIVE_TYPE);
+  document.getElementById("docLotSelect").closest("label").style.opacity = sansLot.includes(DOC_ACTIVE_TYPE) ? ".4" : "1";
+}
+
+document.getElementById("docLotSelect").addEventListener("change", (e) => {
+  const d = getActiveDossier();
+  if (!d) return;
+  d.activeLotId = e.target.value;
+  d.activeChapitreId = getActiveLot(d).chapitres[0].id;
+  persistDossiers();
+  renderDocumentsView();
+});
+document.getElementById("docTypeChips").addEventListener("click", (e) => {
+  const chip = e.target.closest("[data-doctype]");
+  if (!chip) return;
+  DOC_ACTIVE_TYPE = chip.dataset.doctype;
+  renderDocumentsView();
+});
+document.getElementById("docContent").addEventListener("click", (e) => {
+  const d = getActiveDossier();
+  if (!d) return;
+  const lot = getActiveLot(d);
+  if (e.target.closest("#btnAddService")) {
+    lot.services = lot.services || [];
+    lot.services.push({ id: uid(), article: "", description: "", dateRealisation: "", qte: 1, pu: 0 });
+    touch(d);
+    persistDossiers();
+    renderDocContent();
+    return;
+  }
+  const rmBtn = e.target.closest("[data-svc-rm]");
+  if (rmBtn) {
+    lot.services = (lot.services || []).filter(s => s.id !== rmBtn.dataset.svcRm);
+    touch(d);
+    persistDossiers();
+    renderDocContent();
+  }
+});
+document.getElementById("docContent").addEventListener("input", (e) => {
+  const tr = e.target.closest("tr[data-svc-id]");
+  if (!tr) return;
+  const d = getActiveDossier();
+  if (!d) return;
+  const lot = getActiveLot(d);
+  const svc = (lot.services || []).find(s => s.id === tr.dataset.svcId);
+  if (!svc) return;
+  const field = e.target.dataset.svcField;
+  svc[field] = valeurChamp(e.target);
+  touch(d);
+  persistDossiers();
+  if (field === "qte" || field === "pu") {
+    // Même règle que le bordereau : on met à jour les totaux, pas le champ actif.
+    const cell = tr.querySelector('[data-cell="svc-total"]');
+    if (cell) cell.textContent = fmtInt((Number(svc.qte) || 0) * (Number(svc.pu) || 0));
+    const tot = (lot.services || []).reduce((s, x) => s + (Number(x.qte) || 0) * (Number(x.pu) || 0), 0);
+    const totEl = document.getElementById("svcTotal");
+    if (totEl) totEl.textContent = fmtInt(tot);
+  }
+});
+
+document.getElementById("btnDocPrint").addEventListener("click", () => {
+  appliquerPoliceImpression(getActiveDossier());
+  imprimerParLeComptoir(["docPrintHead", "docContent", "docPrintFoot"]
+    .map(function (id) { var e = document.getElementById(id); return e ? e.innerHTML : ""; })
+    .join(""));
+});
+document.getElementById("btnDocExportCsv").addEventListener("click", () => {
+  const d = getActiveDossier();
+  if (!d) return;
+  const lot = getActiveLot(d);
+  const docLabel = DOC_TYPES.find(t => t.id === DOC_ACTIVE_TYPE)?.label || DOC_ACTIVE_TYPE;
+  let rows = [[PROFILE.raisonSociale], [docLabel + " — " + (d.reference || d.objet)], []];
+  const chapLignes = [];
+  lotChapitres(lot).forEach((c, ci) => c.lignes.forEach((l, i) => chapLignes.push({ n: ligneNumero(lot, ci, i, l), l })));
+
+  if (DOC_ACTIVE_TYPE === "bpu") {
+    rows.push(["N° de prix", "Désignation", "Prix unitaire en lettres", "Prix unitaire en chiffres"]);
+    chapLignes.forEach(({ n, l }) => rows.push([n, l.designation, capitalize(nombreEnLettresFr(l.puht)) + " francs CFA", l.puht]));
+  } else if (DOC_ACTIVE_TYPE === "calendrier") {
+    rows.push(["Article", "Description", "Unité", "Quantité", "Site", "Date de livraison"]);
+    chapLignes.forEach(({ n, l }) => rows.push([n, l.designation, l.unite, l.qte, l.site, l.dateLivraison]));
+  } else if (DOC_ACTIVE_TYPE === "description") {
+    rows.push(["N°", "Désignation", "Description détaillée", "Quantité"]);
+    chapLignes.forEach(({ n, l }) => rows.push([n, l.designation, l.descriptionDetaillee || l.designation, l.qte]));
+  } else if (DOC_ACTIVE_TYPE === "services") {
+    rows.push(["Article", "Description", "Date de réalisation", "Quantité", "Prix unitaire", "Prix total"]);
+    (lot.services || []).forEach((s, i) => rows.push([i + 1, s.article, s.description, s.dateRealisation, s.qte, s.pu, (Number(s.qte) || 0) * (Number(s.pu) || 0)]));
+  } else if (DOC_ACTIVE_TYPE === "references") {
+    rows.push(["N°", "Objet", "Maître d'ouvrage", "Année", "Montant", "Attestation"]);
+    (PROFILE.references || []).forEach((x, i) => rows.push([i + 1, x.objet, x.client, x.annee, x.montant, x.attestation]));
+  } else if (DOC_ACTIVE_TYPE === "personnel") {
+    rows.push(["N°", "Nom", "Poste", "Qualification", "Expérience"]);
+    (PROFILE.personnel || []).forEach((x, i) => rows.push([i + 1, x.nom, x.poste, x.qualification, x.experience]));
+  } else if (DOC_ACTIVE_TYPE === "materiel") {
+    rows.push(["N°", "Désignation", "Quantité", "État", "Propriété / location"]);
+    (PROFILE.materiel || []).forEach((x, i) => rows.push([i + 1, x.designation, x.quantite, x.etat, x.propriete]));
+  } else if (["import", "deja_importee", "fabrique_benin"].includes(DOC_ACTIVE_TYPE)) {
+    const origine = DOC_ACTIVE_TYPE === "import" ? "a_importer" : DOC_ACTIVE_TYPE === "deja_importee" ? "deja_importee" : "fabriquee_benin";
+    rows.push(["N°", "Désignation", "Pays d'origine", "Incoterm", "Date de livraison", "Quantité", "Prix unitaire", "Droits de douane", "Transport terrestre", "Main-d'œuvre locale (%)", "Taxe de vente"]);
+    lotLignes(lot).filter(l => l.origine === origine).forEach((l, i) =>
+      rows.push([i + 1, l.designation, l.paysOrigine, l.incoterm, l.dateLivraison, l.qte, l.puht, l.droitsDouane, l.transportTerrestre, l.tauxMainOeuvre, l.taxeVente]));
+  } else {
+    toast("Ce document est un courrier : utilisez « Imprimer » plutôt que l'export CSV.");
+    return;
+  }
+  telechargerCsv(rows, docLabel + "_" + (d.reference || d.objet || "dossier"));
+});
+
+// ============================================================
+// VUE CHECKLIST
+// ============================================================
+function renderChecklist() {
+  const d = getActiveDossier();
+  const wrap = document.getElementById("checklistBlocs");
+  if (!d) { wrap.innerHTML = ""; return; }
+  d.checklist = d.checklist || {};
+  document.getElementById("checklistDisclaimer").hidden = d.type !== "travaux";
+  let totalPieces = 0, totalDone = 0;
+  wrap.innerHTML = checklistBlocsFor(d).map(bloc => {
+    const doneInBloc = bloc.pieces.filter(p => d.checklist[p.id] && d.checklist[p.id].done).length;
+    totalPieces += bloc.pieces.length;
+    totalDone += doneInBloc;
+    const niv = NIVEAUX_BLOCS[bloc.id];
+    return `<div class="bloc">
+      <div class="bloc-head">
+        <h3>${esc(bloc.label)}</h3>
+        ${niv ? `<span class="niveau ${niv.cle}">${esc(niv.label)}</span>` : ""}
+        <span class="faint" style="margin-left:auto;">${doneInBloc}/${bloc.pieces.length}</span>
+      </div>
+      <div class="card" style="padding:4px 12px;">
+        ${bloc.pieces.map(p => {
+          const state = d.checklist[p.id] || { done: false, note: "" };
+          const gen = PIECES_GENEREES[p.id];
+          return `<div class="piece-row">
+            <input type="checkbox" data-piece="${p.id}" ${state.done ? "checked" : ""}>
+            <div class="label ${state.done ? "done" : ""}">${esc(p.label)}
+              ${gen ? `<button class="btn sm ghost no-print" data-goto-doc="${gen}" style="margin-left:6px;padding:1px 7px;font-size:11px;">Générer</button>` : ""}
+            </div>
+            <div class="note no-print"><input type="text" placeholder="Note (optionnel)" data-note="${p.id}" value="${esc(state.note || "")}"></div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+  }).join("");
+  const pct = totalPieces ? Math.round((totalDone / totalPieces) * 100) : 0;
+  document.getElementById("checklistProgressLabel").textContent = `${totalDone} / ${totalPieces} pièces réunies`;
+  document.getElementById("checklistProgressBar").style.width = pct + "%";
+}
+
+// Relie une pièce de la checklist au document que l'application sait produire.
+const PIECES_GENEREES = {
+  lettre_soumission: "lettre",
+  renseignements_candidat: "renseignements",
+  habilitation_signataire: "habilitation",
+  engagement_ethique: "ethique",
+  liste_fournitures_calendrier: "calendrier",
+  description_technique: "description",
+  description_technique_cctp: "description",
+  bordereau_services_connexes: "services",
+  bordereau_prix_services: "services",
+  bordereau_prix_fournitures: "import",
+  bpu_secs: "bpu",
+  dqe_corps_metier: "bpu",
+  references_similaires: "references",
+  references_travaux_similaires: "references",
+  personnel_affecte: "personnel",
+  personnel_cle: "personnel",
+  cv_personnel_technique: "personnel",
+  materiel: "materiel",
+  liste_materiel_chantier: "materiel",
+  materiel_chantier: "materiel",
+  personnel_technique: "personnel",
+};
+
+document.getElementById("checklistBlocs").addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-goto-doc]");
+  if (!btn) return;
+  DOC_ACTIVE_TYPE = btn.dataset.gotoDoc;
+  showView("documents");
+});
+document.getElementById("checklistBlocs").addEventListener("change", (e) => {
+  const d = getActiveDossier();
+  if (!d || !e.target.dataset.piece) return;
+  const id = e.target.dataset.piece;
+  d.checklist[id] = d.checklist[id] || { done: false, note: "" };
+  d.checklist[id].done = e.target.checked;
+  touch(d);
+  persistDossiers();
+  renderChecklist();
+});
+document.getElementById("checklistBlocs").addEventListener("input", (e) => {
+  if (!e.target.dataset.note) return;
+  const d = getActiveDossier();
+  if (!d) return;
+  const id = e.target.dataset.note;
+  d.checklist[id] = d.checklist[id] || { done: false, note: "" };
+  d.checklist[id].note = e.target.value;
+  touch(d);
+  persistDossiers();
+});
+
+// ============================================================
+// PROFIL ENTREPRISE
+// ============================================================
+const modalSettings = document.getElementById("modalSettings");
+const CHAMPS_PROFIL = {
+  sRaisonSociale: "raisonSociale", sNomCourt: "nomCourt",
+  sFormeJuridique: "formeJuridique", sCapital: "capital",
+  sRccm: "rccm", sIfu: "ifu", sTel: "tel", sEmail: "email", sAdresse: "adresse",
+  sRepresentant: "representant", sBanque: "banque", sRib: "rib",
+};
+
+const FICHE_DEFS = {
+  references: {
+    listId: "refList", vide: "Aucune référence. Ajoutez vos marchés similaires déjà exécutés.",
+    champs: [["objet", "Objet du marché", "text"], ["client", "Maître d'ouvrage", "text"],
+             ["annee", "Année", "text"], ["montant", "Montant (FCFA)", "number"],
+             ["attestation", "Attestation de bonne fin", "text"]],
+  },
+  personnel: {
+    listId: "persList", vide: "Aucune personne enregistrée.",
+    champs: [["nom", "Nom et prénoms", "text"], ["poste", "Poste sur le marché", "text"],
+             ["qualification", "Qualification / diplôme", "text"], ["experience", "Expérience", "text"]],
+  },
+  materiel: {
+    listId: "matList", vide: "Aucun matériel enregistré.",
+    champs: [["designation", "Désignation", "text"], ["quantite", "Quantité", "text"],
+             ["etat", "État", "text"], ["propriete", "Propriété ou location", "text"]],
+  },
+};
+
+function renderFiches(cle) {
+  const def = FICHE_DEFS[cle];
+  const wrap = document.getElementById(def.listId);
+  const arr = PROFILE[cle] || [];
+  if (!arr.length) { wrap.innerHTML = `<div class="empty-fiche">${esc(def.vide)}</div>`; return; }
+  wrap.innerHTML = arr.map((item, i) => `<div class="fiche" data-fiche="${cle}" data-idx="${i}">
+    <div class="fiche-head">
+      <span>${i + 1}</span>
+      <button class="btn sm ghost danger" data-fiche-rm="${cle}" data-idx="${i}">Retirer</button>
+    </div>
+    <div class="grid2">
+      ${def.champs.map(([k, label, type]) => `<label class="field" style="margin:0;">${esc(label)}
+        ${type === "number"
+          ? `<input type="text" inputmode="numeric" class="num-fmt" data-fiche-field="${k}" value="${item[k] ? fmtInt(item[k]) : ""}">`
+          : `<input type="text" data-fiche-field="${k}" value="${esc(item[k] ?? "")}">`}
+      </label>`).join("")}
+    </div>
+  </div>`).join("");
+}
+
+function renderAllFiches() { Object.keys(FICHE_DEFS).forEach(renderFiches); }
+
+document.getElementById("settingsTabs").addEventListener("click", (e) => {
+  const chip = e.target.closest("[data-stab]");
+  if (!chip) return;
+  const cible = chip.dataset.stab;
+  document.querySelectorAll("#settingsTabs .chip").forEach(c =>
+    c.setAttribute("aria-pressed", String(c.dataset.stab === cible)));
+  document.querySelectorAll(".stab").forEach(p => { p.hidden = p.dataset.stabPanel !== cible; });
+});
+
+document.getElementById("modalSettings").addEventListener("input", (e) => {
+  const fiche = e.target.closest("[data-fiche]");
+  if (!fiche) return;
+  const cle = fiche.dataset.fiche, idx = Number(fiche.dataset.idx);
+  const champ = e.target.dataset.ficheField;
+  if (!champ) return;
+  PROFILE[cle][idx][champ] = valeurChamp(e.target);
+});
+document.getElementById("modalSettings").addEventListener("click", (e) => {
+  const rm = e.target.closest("[data-fiche-rm]");
+  if (!rm) return;
+  const cle = rm.dataset.ficheRm;
+  PROFILE[cle].splice(Number(rm.dataset.idx), 1);
+  renderFiches(cle);
+});
+document.getElementById("btnAddRef").addEventListener("click", () => {
+  PROFILE.references.push({ objet: "", client: "", annee: "", montant: 0, attestation: "" });
+  renderFiches("references");
+});
+document.getElementById("btnAddPers").addEventListener("click", () => {
+  PROFILE.personnel.push({ nom: "", poste: "", qualification: "", experience: "" });
+  renderFiches("personnel");
+});
+document.getElementById("btnAddMat").addEventListener("click", () => {
+  PROFILE.materiel.push({ designation: "", quantite: "", etat: "", propriete: "" });
+  renderFiches("materiel");
+});
+
+document.getElementById("btnSettings").addEventListener("click", () => {
+  Object.entries(CHAMPS_PROFIL).forEach(([id, k]) => { document.getElementById(id).value = PROFILE[k] || ""; });
+  renderAllFiches();
+  const last = Number(localStorage.getItem(LS_LASTBACKUP) || 0);
+  document.getElementById("lastBackupInfo").textContent = last
+    ? `Dernière sauvegarde exportée le ${new Date(last).toLocaleDateString("fr-FR")}.`
+    : "Aucune sauvegarde exportée pour l'instant.";
+  modalSettings.hidden = false;
+});
+document.getElementById("btnCancelSettings").addEventListener("click", () => {
+  PROFILE = loadProfile();   // on abandonne les modifications non enregistrées
+  modalSettings.hidden = true;
+});
+modalSettings.addEventListener("click", (e) => { if (e.target === modalSettings) { PROFILE = loadProfile(); modalSettings.hidden = true; } });
+document.getElementById("btnSaveSettings").addEventListener("click", () => {
+  Object.entries(CHAMPS_PROFIL).forEach(([id, k]) => { PROFILE[k] = document.getElementById(id).value.trim(); });
+  saveProfile(PROFILE);
+  majEnteteMarque();
+  modalSettings.hidden = true;
+  toast("Profil enregistré");
+});
+
+// ============================================================
+// SAUVEGARDE / RESTAURATION
+// ============================================================
+document.getElementById("btnExportBackup").addEventListener("click", () => {
+  const payload = {
+    app: "dsn-marches-publics", version: APP_DATA_VERSION, exportedAt: new Date().toISOString(),
+    profile: PROFILE, dossiers: DOSSIERS,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.href = URL.createObjectURL(blob);
+  a.download = `Sauvegarde_${(PROFILE.nomCourt || "Marches").replace(/[^\w-]+/g, "")}_${stamp}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  localStorage.setItem(LS_LASTBACKUP, String(Date.now()));
+  renderBackupNudge();
+  document.getElementById("lastBackupInfo").textContent = `Dernière sauvegarde exportée le ${new Date().toLocaleDateString("fr-FR")}.`;
+  toast("Sauvegarde exportée");
+});
+
+document.getElementById("btnImportBackup").addEventListener("click", () => {
+  document.getElementById("importFileInput").click();
+});
+document.getElementById("importFileInput").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  try {
+    const payload = JSON.parse(await file.text());
+    if (!payload || payload.app !== "dsn-marches-publics" || !Array.isArray(payload.dossiers)) {
+      throw new Error("ce fichier n'est pas une sauvegarde DSN Marchés Publics");
+    }
+    if (Number(payload.version) > APP_DATA_VERSION) {
+      throw new Error(`sauvegarde en version ${payload.version}, cette application gère jusqu'à la version ${APP_DATA_VERSION}`);
+    }
+    const incoming = payload.dossiers.map(migrateDossier);
+    let added = 0, updated = 0, kept = 0;
+    incoming.forEach(inc => {
+      const idx = DOSSIERS.findIndex(d => d.id === inc.id);
+      if (idx === -1) { DOSSIERS.push(inc); added++; }
+      else if ((inc.updatedAt || 0) > (DOSSIERS[idx].updatedAt || 0)) { DOSSIERS[idx] = inc; updated++; }
+      else kept++;
+    });
+    persistDossiers();
+    if (payload.profile && confirm("Importer aussi le profil entreprise (identité, références, personnel, matériel) ?")) {
+      PROFILE = { ...defaultProfile(), ...payload.profile };
+      ["references", "personnel", "materiel"].forEach(k => { if (!Array.isArray(PROFILE[k])) PROFILE[k] = []; });
+      saveProfile(PROFILE);
+      majEnteteMarque();
+      renderAllFiches();
+    }
+    renderDossiers();
+    refreshTabsState();
+    toast(`Import terminé : ${added} ajouté(s), ${updated} mis à jour, ${kept} conservé(s)`);
+  } catch (err) {
+    alert("Import impossible : " + err.message);
+  }
+});
+
+// ============================================================
+// PREMIER LANCEMENT & IDENTITÉ AFFICHÉE
+// ============================================================
+
+// L'en-tête porte l'identité de la société qui utilise l'application.
+function majEnteteMarque() {
+  const sigle = String(PROFILE.nomCourt || "").trim();
+  const rs = String(PROFILE.raisonSociale || "").trim();
+  const auto = rs ? rs.replace(/[^A-Za-zÀ-ÿ ]/g, " ").trim().split(/\s+/)
+    .filter(m => m.length > 2).slice(0, 3).map(m => m[0].toUpperCase()).join("") : "";
+  document.getElementById("brandMark").textContent = (sigle || auto || "—").slice(0, 5);
+  document.getElementById("brandNom").textContent = "Marchés Publics";
+  document.title = (sigle || rs || "Marchés Publics") + " — Marchés Publics";
+}
+
+const modalSetup = document.getElementById("modalSetup");
+const CHAMPS_SETUP = {
+  uRaisonSociale: "raisonSociale", uNomCourt: "nomCourt", uFormeJuridique: "formeJuridique",
+  uRccm: "rccm", uIfu: "ifu", uTel: "tel", uEmail: "email",
+  uAdresse: "adresse", uRepresentant: "representant",
+};
+
+function ouvrirSetup() {
+  Object.keys(CHAMPS_SETUP).forEach(id => { document.getElementById(id).value = ""; });
+  document.getElementById("setupErr").hidden = true;
+  modalSetup.hidden = false;
+  document.getElementById("uRaisonSociale").focus();
+}
+
+// Proposition de sigle dès que la raison sociale est saisie — modifiable librement.
+document.getElementById("uRaisonSociale").addEventListener("input", (e) => {
+  const champSigle = document.getElementById("uNomCourt");
+  if (champSigle.dataset.touche) return;
+  const mots = e.target.value.replace(/[^A-Za-zÀ-ÿ ]/g, " ").trim().split(/\s+/).filter(m => m.length > 2);
+  champSigle.value = mots.slice(0, 3).map(m => m[0].toUpperCase()).join("").slice(0, 5);
+});
+document.getElementById("uNomCourt").addEventListener("input", (e) => { e.target.dataset.touche = "1"; });
+
+document.getElementById("btnSetupSave").addEventListener("click", () => {
+  const rs = document.getElementById("uRaisonSociale").value.trim();
+  const sigle = document.getElementById("uNomCourt").value.trim();
+  const err = document.getElementById("setupErr");
+  if (!rs || !sigle) {
+    err.textContent = !rs
+      ? "La raison sociale est nécessaire : elle figure sur tous les documents produits."
+      : "Indiquez un sigle de 1 à 5 caractères pour l'en-tête.";
+    err.hidden = false;
+    return;
+  }
+  Object.entries(CHAMPS_SETUP).forEach(([id, cle]) => {
+    PROFILE[cle] = document.getElementById(id).value.trim();
+  });
+  saveProfile(PROFILE);
+  majEnteteMarque();
+  modalSetup.hidden = true;
+  toast("Bienvenue, " + sigle + " — vous pouvez créer votre premier dossier");
+});
+
+// Restaurer une sauvegarde plutôt que tout ressaisir.
+document.getElementById("btnSetupImport").addEventListener("click", () => {
+  document.getElementById("setupFileInput").click();
+});
+document.getElementById("setupFileInput").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  const err = document.getElementById("setupErr");
+  try {
+    const payload = JSON.parse(await file.text());
+    if (!payload || payload.app !== "dsn-marches-publics" || !Array.isArray(payload.dossiers)) {
+      throw new Error("ce fichier n'est pas une sauvegarde de cette application");
+    }
+    if (Number(payload.version) > APP_DATA_VERSION) {
+      throw new Error(`sauvegarde en version ${payload.version}, cette application gère jusqu'à la version ${APP_DATA_VERSION}`);
+    }
+    if (!payload.profile || !profilConfigure(payload.profile)) {
+      throw new Error("cette sauvegarde ne contient pas de profil entreprise");
+    }
+    PROFILE = { ...defaultProfile(), ...payload.profile };
+    ["references", "personnel", "materiel"].forEach(k => { if (!Array.isArray(PROFILE[k])) PROFILE[k] = []; });
+    saveProfile(PROFILE);
+    DOSSIERS = payload.dossiers.map(migrateDossier);
+    persistDossiers();
+    majEnteteMarque();
+    modalSetup.hidden = true;
+    refreshTabsState();
+    renderDossiers();
+    toast(`Sauvegarde restaurée : ${DOSSIERS.length} dossier(s)`);
+  } catch (ex) {
+    err.textContent = "Import impossible : " + ex.message;
+    err.hidden = false;
+  }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+rafraichirMarches = function(){
+  DOSSIERS = loadDossiers();
+  PROFILE = loadProfile();
+  majEnteteMarque();
+  refreshTabsState();
+  renderDossiers();
+};
+
+majEnteteMarque();
+refreshTabsState();
+renderDossiers();
+if (!profilConfigure(PROFILE)) {
+  // Première utilisation : on demande l'identité avant toute chose.
+  showView("dossiers");
+  ouvrirSetup();
+} else if (ACTIVE_ID && getActiveDossier()) {
+  showView("bordereau");
+} else {
+  showView("dossiers");
+}
+
+
 }
 
 /* ======================= rendu ======================= */
@@ -902,6 +3880,13 @@ function rendre(forcer){
   else if(vue === "catalogue") el.innerHTML = vueCatalogue();
   else if(vue === "reglages")  el.innerHTML = vueReglages();
   else if(vue === "editeur"){  el.innerHTML = vueEditeur(); majRPR(); majApercu(); }
+  else if(vue === "marches")   el.innerHTML = "";
+
+  /* Le module Marchés publics n'est pas rendu ici : il a son propre DOM, monté
+     une seule fois. Le réécrire à chaque rendu emporterait ses écouteurs et la
+     saisie en cours — on se contente de le montrer ou de le cacher. */
+  var mp = document.getElementById("marches");
+  if(mp) mp.hidden = (vue !== "marches");
 }
 
 /* ---------- tableau de bord ---------- */
