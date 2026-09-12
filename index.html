@@ -4664,8 +4664,13 @@ function cachetRond(r){
      texte tombe alors en haut, à l'endroit. */
   var anneau = "M 210," + (210 + RAYON) + " A " + RAYON + "," + RAYON + " 0 1 1 210.01," + (210 + RAYON);
 
+  /* Le logo porte sa propre couronne de mentions : à 33 mm elle devient une
+     frise illisible au centre du cachet. On l'agrandit et on le détoure au
+     cercle intérieur, ce qui ne laisse que le monogramme. */
   var centre = r.logo
-    ? '<image href="' + echap(r.logo) + '" x="92" y="92" width="236" height="236" preserveAspectRatio="xMidYMid meet"/>'
+    ? '<clipPath id="coeur-cachet"><circle cx="210" cy="210" r="140"/></clipPath>' +
+      '<g clip-path="url(#coeur-cachet)"><image href="' + echap(r.logo) +
+      '" x="22" y="22" width="376" height="376" preserveAspectRatio="xMidYMid slice"/></g>'
     : '<text x="210" y="234" text-anchor="middle" font-family="Poppins,sans-serif" font-size="86" font-weight="700" fill="' +
       marque + '">' + echap(String(r.nom || "").slice(0, 3).toUpperCase()) + "</text>";
 
