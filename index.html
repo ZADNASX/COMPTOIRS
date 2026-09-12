@@ -1527,10 +1527,12 @@ function statutDoc(d){
   if((Number(d.regle)||0) > 0)             return {cle:"partiel", libelle:"Partiel"};
   return {cle:"impaye", libelle:"Impayé"};
 }
-function prochainNumero(type){
-  var aujourdhui = new Date();
-  var an = aujourdhui.getFullYear();
-  var mois = String(aujourdhui.getMonth() + 1).padStart(2, "0");
+function prochainNumero(type, dateIso){
+  /* Midi, pour qu'aucun fuseau ne fasse basculer la date d'un jour. */
+  var reference = dateIso ? new Date(String(dateIso) + "T12:00:00") : new Date();
+  if(isNaN(reference.getTime())) reference = new Date();
+  var an = reference.getFullYear();
+  var mois = String(reference.getMonth() + 1).padStart(2, "0");
   var m = maquetteCourante();
   /* DSN porte le mois dans son numéro : son compteur repart à 0001 chaque
      mois, sinon 0008/10-2026 succéderait à 0007/09-2026 et le mois ne
@@ -4315,7 +4317,7 @@ function champCert(d, cle, lib){
     '<input id="c-' + cle + '" data-cert="' + cle + '" value="' + echap(c[cle] || "") + '"></div>';
 }
 function nouveauDoc(type){
-  var n = prochainNumero(type);
+  var n = prochainNumero(type, auj());
   brouillon = {id:null, type:type, seq:n.seq, annee:n.annee, mois:n.mois, numero:n.numero, date:auj(),
     echeance: TYPES[type].reglement ? new Date(Date.now() + 30*864e5).toISOString().slice(0,10) : "",
     clientId:"", client:{nom:"",adresse:"",ifu:"",tel:""},
@@ -4337,7 +4339,7 @@ function ouvrirDoc(id){
   vue = "editeur"; aConfirmer = null; rendre(true);
 }
 function convertir(type){
-  var src = brouillon, n = prochainNumero(type);
+  var src = brouillon, n = prochainNumero(type, (src && src.date) || auj());
   brouillon = Object.assign({}, JSON.parse(JSON.stringify(src)), {
     id:null, type:type, seq:n.seq, annee:n.annee, mois:n.mois, numero:n.numero, date:auj(),
     statut:"brouillon", regle:0, source:src.numero,
@@ -5577,7 +5579,7 @@ document.addEventListener("click", function(e){
       /* un autre appareil a pu prendre ce numéro entre-temps */
       var pris = Store.tout("documents").some(function(x){ return x.numero === d.numero; });
       if(pris){
-        var n = prochainNumero(d.type);
+        var n = prochainNumero(d.type, d.date);
         d.seq = n.seq; d.annee = n.annee; d.mois = n.mois; d.numero = n.numero;
         signal("Numéro déjà pris ailleurs — renuméroté en " + d.numero);
       }
@@ -5746,6 +5748,24 @@ document.addEventListener("input", function(e){
       brouillon.aib = t.value; rendre(true); return;
     } else if(ch === "remise" || ch === "regle"){
       brouillon[ch] = Number(t.value) || 0; majSommes(); return;
+    } else if(ch === "date"){
+      brouillon.date = t.value;
+      /* Le numéro suit la date — mais seulement tant que la pièce n'a jamais
+         été enregistrée. Après, elle est peut-être déjà partie chez le
+         client, et renuméroter ferait diverger son exemplaire du nôtre. */
+      if(!brouillon.id && t.value){
+        var nd = prochainNumero(brouillon.type, t.value);
+        brouillon.seq = nd.seq; brouillon.annee = nd.annee;
+        brouillon.mois = nd.mois; brouillon.numero = nd.numero;
+        /* rendre() reconstruit l'éditeur : on rend la main au champ quitté,
+           qu'il s'agisse d'une pièce commerciale ou d'un courrier. */
+        var quelChamp = t.id;
+        rendre(true);
+        var revenu = quelChamp && document.getElementById(quelChamp);
+        if(revenu) revenu.focus();
+        return;
+      }
+      majApercu(); return;
     } else brouillon[ch] = t.value;
     majApercu();
   }
