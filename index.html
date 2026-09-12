@@ -289,6 +289,7 @@ table.lignes input.ref-rpr{margin-top:4px;padding:4px 8px;font-size:11.5px;
    se marcheraient dessus, les deux partageant les mêmes noms de classes. */
 .feuille.nassra{width:210mm;min-height:297mm;background:#fff;color:#241A14;padding:16mm 18mm 26mm;position:relative;
   font-family:"Public Sans",sans-serif;font-size:10.5pt;line-height:1.5;box-shadow:0 2px 14px rgba(0,0,0,.12)}
+.feuille .logo-comptoir,.feuille-mini .logo-comptoir{width:auto;max-width:72mm;object-fit:contain}
 .feuille.nassra .marque-bloc{display:flex;align-items:flex-start;justify-content:space-between;gap:14mm}
 .feuille.nassra .filet{height:1mm;display:flex;margin-top:5mm}
 .feuille.nassra .filet i{display:block;height:100%}
@@ -4123,7 +4124,8 @@ function vueReglages(){
           ">" + m[1] + "</option>";
       }).join("") + "</select></div>" +
       ch("rccm","RCCM") + ch("ifu","IFU") +
-      ch("tel","Téléphone") + ch("email","E-mail") + ch("ville","Ville d'émission") + "</div>" +
+      ch("tel","Téléphone") + ch("email","E-mail") + ch("ville","Ville d'émission") +
+      ch("logo","Logo — adresse du fichier") + "</div>" +
       '<div style="margin-top:12px">' + ch("adresse","Adresse") + "</div></div>" +
     '<div class="carte"><h3>Encaissement</h3><div class="grille">' +
       ch("banque","Banque") + ch("compte","N° de compte") + ch("momo","Mobile Money") + "</div></div>" +
@@ -4438,11 +4440,12 @@ function cachetSVG(r){
 function enteteLettre(r, d, maquette){
   if(maquette === "nassra"){
     return '<div class="marque-bloc">' +
-      '<svg viewBox="0 0 300 110" width="185" height="68" role="img" aria-label="' + echap(r.nom) + '">' +
+      (logoComptoir(r, "16mm") ||
+     ('<svg viewBox="0 0 300 110" width="185" height="68" role="img" aria-label="' + echap(r.nom) + '">' +
       '<path d="M22 74 V44 a38 38 0 0 1 76 0 v30 h-13 V44 a25 25 0 0 0 -50 0 v30 z" fill="#5A2E1E"/>' +
       '<rect x="22" y="80" width="76" height="7" rx="3.5" fill="#C98A3C"/>' +
       '<text x="118" y="58" font-family="Poppins,sans-serif" font-size="27" font-weight="700" letter-spacing="4" fill="#5A2E1E">' + echap(r.nom) + "</text>" +
-      '<text x="120" y="76" font-family="Poppins,sans-serif" font-size="7.5" letter-spacing="1.3" fill="#8A7F73">' + echap(r.activite) + "</text></svg>" +
+      '<text x="120" y="76" font-family="Poppins,sans-serif" font-size="7.5" letter-spacing="1.3" fill="#8A7F73">' + echap(r.activite) + "</text></svg>")) +
       '<div class="meta">' + echap(r.adresse).replace(/ \u2014 /g, "<br>") + "<br>" +
       echap(r.tel) + "<br>" + echap(r.email) + "</div></div>" +
       '<div class="filet"><i class="a"></i><i class="b"></i></div>';
@@ -4633,11 +4636,12 @@ function feuilleNassra(d){
     ? '<div class="notes">Règlement : ' + moyens + "</div>" : "";
 
   return '<div class="feuille nassra"><div class="marque-bloc">' +
-    '<svg viewBox="0 0 300 110" width="185" height="68" role="img" aria-label="' + echap(r.nom) + '">' +
+    (logoComptoir(r, "16mm") ||
+     ('<svg viewBox="0 0 300 110" width="185" height="68" role="img" aria-label="' + echap(r.nom) + '">' +
     '<path d="M22 74 V44 a38 38 0 0 1 76 0 v30 h-13 V44 a25 25 0 0 0 -50 0 v30 z" fill="#5A2E1E"/>' +
     '<rect x="22" y="80" width="76" height="7" rx="3.5" fill="#C98A3C"/>' +
     '<text x="118" y="58" font-family="Poppins,sans-serif" font-size="27" font-weight="700" letter-spacing="4" fill="#5A2E1E">' + echap(r.nom) + "</text>" +
-    '<text x="120" y="76" font-family="Poppins,sans-serif" font-size="7.5" letter-spacing="1.3" fill="#8A7F73">' + echap(r.activite) + "</text></svg>" +
+    '<text x="120" y="76" font-family="Poppins,sans-serif" font-size="7.5" letter-spacing="1.3" fill="#8A7F73">' + echap(r.activite) + "</text></svg>")) +
     '<div class="meta"><b>' + T.label.toUpperCase() + "</b><br>N° " + echap(d.numero) +
     "<br>" + echap(r.ville || "") + ", le " + dateFr(d.date) + "</div></div>" +
     '<div class="filet"><i class="a"></i><i class="b"></i></div>' +
@@ -4681,7 +4685,19 @@ function feuilleHTML(d){
   return maquetteCourante() === "nassra" ? feuilleNassra(d) : feuilleZadna(d);
 }
 /* ---------- la feuille ZADNA ---------- */
+/* Le logo d'un comptoir, s'il en a un : une image, indifféremment un fichier
+   déposé à côté de l'application ou une donnée intégrée. Vide, on retombe sur
+   la marque dessinée de la maquette. */
+function logoComptoir(r, hauteur){
+  var src = String((r && r.logo) || "").trim();
+  if(!src) return "";
+  return '<img class="logo-comptoir" src="' + echap(src) + '" alt="' + echap(r.nom || "") +
+    '" style="height:' + hauteur + '">';
+}
+
 function marqueSVG(r){
+  var propre = logoComptoir(r, "17mm");
+  if(propre) return propre;
   return '<svg viewBox="0 0 340 110" width="206" height="67" role="img" aria-label="' + echap(r.nom) + '">' +
     '<g transform="translate(4,14) scale(0.7)">' +
     '<g stroke="#0A0A0A" stroke-width="5" stroke-linecap="round">' +
