@@ -4664,15 +4664,18 @@ function cachetRond(r){
      texte tombe alors en haut, à l'endroit. */
   var anneau = "M 210," + (210 + RAYON) + " A " + RAYON + "," + RAYON + " 0 1 1 210.01," + (210 + RAYON);
 
-  /* Le logo porte sa propre couronne de mentions : à 33 mm elle devient une
-     frise illisible au centre du cachet. On l'agrandit et on le détoure au
-     cercle intérieur, ce qui ne laisse que le monogramme. */
-  var centre = r.logo
+  /* Le centre porte un sigle dessiné. On n'y met le logo de la maison que
+     s'il est fourni NU (`cachetMonogramme`) : celui d'Ets DSN porte sa propre
+     couronne de mentions, qui devenait une frise illisible sous celle du
+     cachet. Un cachet doit d'abord se lire. */
+  var sigle = String(r.cachetSigle || "").trim() ||
+    String(r.nom || "").replace(/[^A-Za-z\u00C0-\u024F]/g, "").slice(0, 3).toUpperCase();
+  var centre = r.cachetMonogramme
     ? '<clipPath id="coeur-cachet"><circle cx="210" cy="210" r="140"/></clipPath>' +
-      '<g clip-path="url(#coeur-cachet)"><image href="' + echap(r.logo) +
-      '" x="22" y="22" width="376" height="376" preserveAspectRatio="xMidYMid slice"/></g>'
-    : '<text x="210" y="234" text-anchor="middle" font-family="Poppins,sans-serif" font-size="86" font-weight="700" fill="' +
-      marque + '">' + echap(String(r.nom || "").slice(0, 3).toUpperCase()) + "</text>";
+      '<g clip-path="url(#coeur-cachet)"><image href="' + echap(r.cachetMonogramme) +
+      '" x="76" y="76" width="268" height="268" preserveAspectRatio="xMidYMid meet"/></g>'
+    : '<text x="210" y="245" text-anchor="middle" font-family="Poppins,sans-serif" font-size="98" ' +
+      'font-weight="700" letter-spacing="3" fill="' + marque + '">' + echap(sigle) + "</text>";
 
   return '<svg class="cachet" viewBox="0 0 420 420" aria-hidden="true">' +
     '<defs><path id="anneau-cachet" d="' + anneau + '" fill="none"/></defs>' +
