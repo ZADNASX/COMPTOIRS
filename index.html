@@ -338,6 +338,62 @@ table.lignes input.ref-rpr{margin-top:4px;padding:4px 8px;font-size:11.5px;
   text-align:center;font-size:7.5pt;color:#6F6157;line-height:1.6}
 .feuille.nassra .pied b{color:#5A2E1E}
 
+/* ═══ la feuille d'Ets DSN, d'après son en-tête ═══
+   Structure administrative, couleurs et typographie propres : la palette
+   n'habille que l'interface, une feuille porte ses teintes en dur. */
+.feuille.dsn{width:210mm;min-height:297mm;background:#fff;color:#12203A;padding:16mm 18mm 26mm;position:relative;
+.feuille.dsn .marque-bloc{display:flex;align-items:flex-start;justify-content:space-between;gap:14mm}
+.feuille.dsn .filet{height:1mm;display:flex;margin-top:5mm}
+.feuille.dsn .filet i{display:block;height:100%}
+.feuille.dsn .filet .a{flex:1;background:#291DB2}
+.feuille.dsn .filet .b{width:30mm;background:#4E7FD6}
+.feuille.dsn .meta{text-align:right;font-size:9pt;color:#595959;line-height:1.6;white-space:nowrap}
+.feuille.dsn .meta b{font-family:"Times New Roman",Times,serif;font-size:12pt;color:#291DB2;letter-spacing:.02em}
+.feuille.dsn .parties{display:flex;gap:8mm;margin-top:6mm;align-items:flex-start}
+.feuille.dsn .parties .gauche{flex:1;font-size:9pt;color:#595959;line-height:1.65}
+.feuille.dsn .parties .boite{width:78mm;background:#EDF3FC;padding:4mm;font-size:9pt;line-height:1.6}
+.feuille.dsn .parties strong{display:block;color:#291DB2;font-size:8.5pt;letter-spacing:.07em;text-transform:uppercase;margin-bottom:2mm}
+.feuille.dsn table.art{width:100%;border-collapse:collapse;margin-top:7mm;font-size:9.5pt}
+.feuille.dsn table.art th{background:#291DB2;color:#fff;font-size:8.5pt;font-weight:600;text-align:left;padding:2.4mm 2.6mm;letter-spacing:.03em}
+.feuille.dsn table.art th.d{text-align:right}
+.feuille.dsn table.art td{border-bottom:.3mm solid #D8E4F3;padding:2.4mm 2.6mm;vertical-align:top}
+.feuille.dsn table.art td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.feuille.dsn .totaux{margin-top:6mm;display:flex;justify-content:flex-end}
+.feuille.dsn .totaux table{border-collapse:collapse;min-width:88mm}
+.feuille.dsn .totaux td{padding:2.2mm 3mm;border-bottom:.3mm solid #D8E4F3;font-size:9.5pt}
+.feuille.dsn .totaux td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.feuille.dsn .totaux tr.net td{background:#291DB2;color:#fff;font-weight:700;font-family:"Times New Roman",Times,serif;border:0}
+.feuille.dsn .lettres{margin-top:5mm;font-size:9.5pt}
+.feuille.dsn .notes{margin-top:4mm;font-size:8.5pt;color:#595959;white-space:pre-wrap}
+.feuille.dsn .certif{margin-top:6mm;border:.3mm solid #B6C9E2;background:#F7FAFF;
+.feuille.dsn .certif .qr{flex:none;width:21mm;height:21mm;background:#fff}
+.feuille.dsn .certif .qr img{width:100%;height:100%;display:block;image-rendering:pixelated}
+.feuille.dsn .certif .corps{flex:1;min-width:0}
+.feuille.dsn .certif .titre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:6.6pt;
+.feuille.dsn .certif dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:1mm 4mm;
+.feuille.dsn .certif dt{color:#8592A6;letter-spacing:.09em;text-transform:uppercase;font-size:6.4pt;
+.feuille.dsn .certif dd{margin:0;font-weight:500;word-break:break-all;font-variant-numeric:tabular-nums}
+.feuille.dsn .paraphes{display:flex;justify-content:space-between;gap:10mm;margin-top:12mm;font-size:9pt;color:#595959}
+.feuille.dsn .paraphes b{display:block;color:#12203A;margin-bottom:14mm;font-size:9pt}
+.feuille.dsn .sig-g{position:relative;flex:1}
+.feuille.dsn .paraphes .qui{display:block;color:#12203A;font-weight:600;margin-top:14mm}
+.feuille.dsn .cachet{position:absolute;left:1mm;top:0;width:33mm;height:33mm;transform:rotate(-9deg);opacity:.92;pointer-events:none}
+.feuille.dsn .paraphes .droite{text-align:right}
+.feuille.dsn .pied{position:absolute;left:18mm;right:18mm;bottom:10mm;border-top:.3mm solid #D8E4F3;padding-top:2.5mm;
+.feuille.dsn .pied b{color:#291DB2}
+.feuille.dsn .tete-dsn{display:flex;align-items:flex-start;justify-content:space-between;gap:10mm}
+.feuille.dsn .tete-dsn .ident{text-align:right;font-family:"Times New Roman",Times,serif;color:#595959;line-height:1.35}
+.feuille.dsn .tete-dsn .rs{font-size:13pt;font-weight:700;color:#291DB2;letter-spacing:.01em}
+.feuille.dsn .tete-dsn .act{font-size:11.5pt}
+.feuille.dsn .tete-dsn .men{font-size:9pt}
+.feuille.dsn .tete-dsn .adr{font-size:8pt;margin-top:.6mm}
+.feuille.dsn .tete-dsn .logo-comptoir{max-width:34mm}
+.feuille.dsn .filet-dsn{height:.35mm;background:#291DB2;margin-top:3.5mm}
+.feuille.dsn .repere-dsn{display:flex;justify-content:space-between;align-items:baseline;
+  margin-top:5mm;font-family:"Times New Roman",Times,serif}
+.feuille.dsn .repere-dsn b{font-size:12pt;color:#291DB2;letter-spacing:.04em;text-transform:uppercase}
+.feuille.dsn .repere-dsn span{font-size:9pt;color:#595959}
+
 /* ---------- typographie ZADNA : les labels techniques passent en mono ---------- */
 .sceau .sous,.bloc h2,.carte h3,.liste th,.champ label,.chiffre .lib,.chiffre .val,.puce,.ref,
 table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{font-family:var(--mono)}
@@ -1465,7 +1521,8 @@ function prochainNumero(type){
   /* Deux formats sans ressemblance : NASSRA numérote à la manière
      administrative (N°, quatre chiffres, barres obliques), ZADNA à la
      manière technique (code, année, tirets). */
-  var numero = maquetteCourante() === "nassra"
+  var administrative = maquetteCourante() !== "zadna";
+  var numero = administrative
     ? "N° " + String(seq).padStart(4,"0") + "/" + code + "/" + an
     : code + "-" + an + "-" + String(seq).padStart(3,"0");
   return {seq:seq, annee:an, numero:numero};
@@ -4561,6 +4618,121 @@ function bandeCertif(d){
     "</dl></div></div>";
 }
 
+function feuilleDsn(d){
+  var T = TYPES[d.type], r = reglages(), cli = d.client || {};
+  var net = netAPayer(d), brut = totalLignes(d), reste = resteDu(d);
+  var certifiable = estCertifiable(d);
+  var cert = d.cert || {};
+  var grpDefaut = r.groupeDefaut || "E";
+
+  var gauche = [];
+  gauche.push("<strong>" + (d.objet ? "Objet" : "Références") + "</strong>");
+  if(d.objet) gauche.push(echap(d.objet));
+  if(d.source) gauche.push((T.avoir ? "Avoir sur la facture " : "Établi d'après ") + echap(d.source));
+  if(T.validite) gauche.push("Validité de l'offre : " + echap(r.validite));
+  if(T.reglement && d.echeance) gauche.push("Échéance : " + dateFr(d.echeance));
+  if(!d.objet && !d.source && !T.validite && !d.echeance) gauche.push("…");
+
+  var colGr = certifiable ? '<th class="d" style="width:11mm">Gr.</th>' : "";
+  var cols = T.prix
+    ? '<th style="width:8mm">N°</th><th>Désignation</th><th class="d" style="width:16mm">Qté</th>' +
+      '<th class="d" style="width:26mm">P.U.' + (d.saisieTTC ? " TTC" : "") + '</th>' +
+      '<th class="d" style="width:30mm">Montant' + (d.saisieTTC ? " TTC" : "") + "</th>" + colGr
+    : '<th style="width:8mm">N°</th><th>Désignation</th><th class="d" style="width:26mm">Qté commandée</th>' +
+      '<th class="d" style="width:26mm">Qté livrée</th>';
+
+  var utiles = (d.lignes||[]).filter(function(l){
+    return String(l.d||"").trim() || Number(l.q) || Number(l.pu) || Number(l.ttc);
+  });
+  if(!utiles.length) utiles = [{d:"…", q:"", pu:0}];
+  var corps = utiles.map(function(l,i){
+    return "<tr><td>" + (i+1) + "</td><td>" + echap(l.d) +
+      (l.code ? '<span style="display:block;font-size:8pt;color:#6b6b6b;letter-spacing:.02em">Réf. ' + echap(l.code) + "</span>" : "") +
+      '</td><td class="d">' + echap(l.q) + "</td>" +
+      (T.prix ? '<td class="d">' + nombre(prixLigne(d,l)) + '</td><td class="d">' + nombre((Number(l.q)||0) * prixLigne(d,l)) + "</td>"
+              : '<td class="d"></td>') +
+      (certifiable ? '<td class="d">' + echap(l.g || grpDefaut) + "</td>" : "") + "</tr>";
+  }).join("");
+
+  var totaux = "";
+  if(T.prix){
+    var tx = tauxTva(d);
+    totaux = '<div class="totaux"><table>' +
+      (Number(d.remise) ? "<tr><td>Sous-total" + (d.saisieTTC ? " TTC" : "") + '</td><td class="d">' + nombre(brut) + "</td></tr>" +
+        '<tr><td>Remise</td><td class="d">− ' + nombre(d.remise) + "</td></tr>" : "") +
+      (tx ? (d.saisieTTC
+              ? '<tr><td>Montant TTC</td><td class="d">' + nombre(montantHT(d) + montantTVA(d)) + "</td></tr>" +
+                '<tr><td>dont TVA ' + tx + ' %</td><td class="d">' + nombre(montantTVA(d)) + "</td></tr>" +
+                '<tr><td>Montant HT</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>"
+              : '<tr><td>Montant HT</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>" +
+                '<tr><td>TVA ' + tx + ' %</td><td class="d">' + nombre(montantTVA(d)) + "</td></tr>")
+          : (tauxAib(d) ? '<tr><td>Montant HT</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>" : "")) +
+      (tauxAib(d) ? '<tr><td>AIB ' + tauxAib(d) + ' %</td><td class="d">' + nombre(montantAIB(d)) + "</td></tr>" : "") +
+      '<tr class="net"><td>' + (T.avoir ? "MONTANT DE L'AVOIR" : T.recu ? "MONTANT REÇU" : "NET À PAYER" + (tx ? " TTC" : "")) + ' (F CFA)</td><td class="d">' +
+      nombre(T.recu ? (Number(d.regle) || net) : net) + "</td></tr>" +
+      (T.reglement && !T.recu && Number(d.regle) > 0 ?
+        '<tr><td>Déjà réglé</td><td class="d">' + nombre(d.regle) + "</td></tr>" +
+        '<tr><td><b>Reste dû</b></td><td class="d"><b>' + nombre(reste) + "</b></td></tr>" : "") +
+      "</table></div>";
+  }
+
+  var somme = T.recu ? (Number(d.regle) || net) : net;
+  var intro = T.avoir ? "Arrêté le présent avoir à la somme de : "
+    : T.recu ? "Reçu la somme de : "
+    : (d.type === "devis" ? "Arrêté le présent devis à la somme de : "
+    : "Arrêtée la présente " + (d.type === "proforma" ? "facture pro forma" : "facture") + " à la somme de : ");
+  var mots = enLettres(somme);
+  /* million et milliard sont des noms : ils appellent « de » quand le compte tombe rond */
+  var liaison = /milli(on|ard)s?$/.test(mots) ? " de francs CFA" : " francs CFA";
+  var lettres = T.prix ? '<div class="lettres">' + intro + mots + liaison +
+    (d.tva ? " toutes taxes comprises" : "") + ".</div>" : "";
+
+  var moyens = [r.banque && ("banque " + r.banque), r.compte && ("compte " + r.compte),
+                r.momo && ("Mobile Money " + r.momo)].filter(Boolean).map(echap).join("  ·  ");
+  var encaissement = (d.type === "facture" || d.type === "recu") && moyens
+    ? '<div class="notes">Règlement : ' + moyens + "</div>" : "";
+
+  /* L'en-tête est celui de l'entreprise : logo à gauche, mentions alignées
+     à droite en Times, un filet d'un point dessous. Relevé sur ENTETE DSN.docx. */
+  return '<div class="feuille dsn"><div class="tete-dsn">' +
+    '<div class="marque">' + (logoComptoir(r, "22mm") || marqueSVG(r)) + "</div>" +
+    '<div class="ident">' +
+      '<div class="rs">' + echap(r.forme || r.nom) + "</div>" +
+      (r.activite ? '<div class="act">' + echap(r.activite) + "</div>" : "") +
+      '<div class="men">RCCM : ' + echap(r.rccm) + "  -  IFU : " + echap(r.ifu) + "</div>" +
+      '<div class="men">Tél : ' + echap(r.tel) + "  -  " + echap(r.email) + "</div>" +
+      (r.adresse ? '<div class="adr">' + echap(r.adresse) + "</div>" : "") +
+    "</div></div>" +
+    '<div class="filet-dsn"></div>' +
+    '<div class="repere-dsn"><b>' + T.label + '</b><span>N° ' + echap(d.numero) +
+    "  ·  " + echap(r.ville || "") + ", le " + dateFr(d.date) + "</span></div>" +
+    '<div class="parties"><div class="gauche">' + gauche.join("<br>") + "</div>" +
+    '<div class="boite"><strong>' + (d.type === "recu" ? "Reçu de" : d.type === "bl" ? "Livré à" : "Client") + "</strong>" +
+    echap(cli.nom || "…") + "<br>" + echap(cli.adresse || "…") + "<br>IFU : " + echap(cli.ifu || "…") +
+    "  ·  Tél. : " + echap(cli.tel || "…") + "</div></div>" +
+    '<table class="art"><thead><tr>' + cols + "</tr></thead><tbody>" + corps + "</tbody></table>" +
+    totaux + lettres + encaissement +
+    (d.notes ? '<div class="notes">' + echap(d.notes) + "</div>" : "") +
+    /* La note « Montants exprimés en francs CFA… » a été retirée : le taux
+       figure déjà dans la bande des totaux et la monnaie dans l'intitulé du
+       net. Hors TVA en revanche, la mention de régime est obligatoire. */
+    (T.prix && !d.tva && String(r.mention || "").trim()
+      ? '<div class="notes">' + echap(r.mention) + "</div>" : "") +
+    (d.type === "bl" ? '<div class="notes">Le client reconnaît avoir reçu les articles ci-dessus en bon état et en bonne quantité.</div>' : "") +
+    bandeCertif(d) +
+    '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? cachetNassra(r) : "") +
+    '<span class="qui">' + echap(r.signataire) + "</span>" + echap(r.fonction) + "</div>" +
+    /* La livraison se fait contresigner, et le devis se fait accepter. */
+    (d.type === "bl"
+      ? '<div class="droite"><b>Cachet et signature du client</b>Date, signature, cachet</div>'
+      : d.type === "devis"
+      ? '<div class="droite"><b>Bon pour accord du client</b>Date, signature, cachet</div>'
+      : "") + "</div>" +
+    '<div class="pied"><b>' + echap(r.nom) + "</b> — " + echap(r.forme || "") + "<br>RCCM : " + echap(r.rccm) +
+    "  ·  IFU : " + echap(r.ifu) + "  ·  Tél. : " + echap(r.tel) + "  ·  " + echap(r.email) + "<br>" +
+    echap(r.adresse) + "</div></div>";
+}
+
 function feuilleNassra(d){
   var T = TYPES[d.type], r = reglages(), cli = d.client || {};
   var net = netAPayer(d), brut = totalLignes(d), reste = resteDu(d);
@@ -4677,12 +4849,14 @@ function feuilleNassra(d){
    À défaut de réglage, la charte ouverte décide. */
 function maquetteCourante(){
   var m = reglages().maquette;
-  if(m === "nassra" || m === "zadna") return m;
+  if(m === "nassra" || m === "zadna" || m === "dsn") return m;
   return charteCourante === "nassra" ? "nassra" : "zadna";
 }
 function feuilleHTML(d){
   if(TYPES[d.type] && TYPES[d.type].lettre) return feuilleCourrier(d);
-  return maquetteCourante() === "nassra" ? feuilleNassra(d) : feuilleZadna(d);
+  var m = maquetteCourante();
+  if(m === "dsn") return feuilleDsn(d);
+  return m === "nassra" ? feuilleNassra(d) : feuilleZadna(d);
 }
 /* ---------- la feuille ZADNA ---------- */
 /* Le logo d'un comptoir, s'il en a un : une image, indifféremment un fichier
