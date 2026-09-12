@@ -1892,8 +1892,9 @@ var rprMinuteur = null;
 function chercherRepertoire(q){
   var t = String(q || "").trim().replace(/[%_]/g, " ");
   if(!sb || t.length < 3) return Promise.resolve([]);
-  return sb.from("repertoire").select("code,d,famille,u,bi,bs")
-    .ilike("d", "%" + t + "%").order("d").limit(30)
+  /* Le classement se fait côté serveur : une recherche alphabétique
+     remontait « ANALYSEUR … AVEC ONDULEUR » avant « ONDULEUR APC 800 VA ». */
+  return sb.rpc("chercher_repertoire", {q:t, lim:30})
     .then(function(r){
       if(r.error){ console.warn("répertoire", r.error.message); return []; }
       return r.data || [];
