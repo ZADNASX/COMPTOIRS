@@ -328,6 +328,9 @@ table.lignes input.ref-rpr{margin-top:4px;padding:4px 8px;font-size:11.5px;
 .feuille.nassra .paraphes{display:flex;justify-content:space-between;gap:10mm;margin-top:12mm;font-size:9pt;color:#6F6157}
 .feuille.nassra .paraphes b{display:block;color:#241A14;margin-bottom:14mm;font-size:9pt}
 .feuille.nassra .sig-g{position:relative;flex:1}
+/* Le blanc de signature vivait sous « Pour NASSRA ». Cette mention retirée,
+   c'est le nom qui le porte. */
+.feuille.nassra .paraphes .qui{display:block;color:#241A14;font-weight:600;margin-top:14mm}
 .feuille.nassra .cachet{position:absolute;left:1mm;top:0;width:33mm;height:33mm;transform:rotate(-9deg);opacity:.92;pointer-events:none}
 .feuille.nassra .paraphes .droite{text-align:right}
 .feuille.nassra .pied{position:absolute;left:18mm;right:18mm;bottom:10mm;border-top:.3mm solid #E5DACA;padding-top:2.5mm;
@@ -1507,7 +1510,7 @@ function feuilleCourrier(d){
 
   var signature = m === "nassra"
     ? '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? cachetNassra(r) : "") +
-      "<b>Pour " + echap(r.nom) + "</b>" + echap(r.signataire) + "<br>" + echap(r.fonction) + "</div></div>"
+      '<span class="qui">' + echap(r.signataire) + "</span>" + echap(r.fonction) + "</div></div>"
     : '<div class="paraphes"><div class="sig-d">' + (d.cachet !== false ? cachetSVG(r) : "") +
       "<b>Pour " + echap(r.nom) + "</b>" +
       '<span class="qui">' + echap(r.signataire) + "</span><br>" + echap(r.fonction) + "</div></div>";
@@ -1668,7 +1671,7 @@ function feuilleNassra(d){
     (d.type === "bl" ? '<div class="notes">Le client reconnaît avoir reçu les articles ci-dessus en bon état et en bonne quantité.</div>' : "") +
     bandeCertif(d) +
     '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? cachetNassra(r) : "") +
-    "<b>Pour " + echap(r.nom) + "</b>" + echap(r.signataire) + "<br>" + echap(r.fonction) + "</div>" +
+    '<span class="qui">' + echap(r.signataire) + "</span>" + echap(r.fonction) + "</div>" +
     /* La livraison se fait contresigner, et le devis se fait accepter. */
     (d.type === "bl"
       ? '<div class="droite"><b>Cachet et signature du client</b>Date, signature, cachet</div>'
