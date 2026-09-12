@@ -4710,7 +4710,10 @@ function feuilleDsn(d){
       (r.adresse ? '<div class="adr">' + echap(r.adresse) + "</div>" : "") +
     "</div></div>" +
     '<div class="filet-dsn"></div>' +
-    '<div class="repere-dsn"><b>' + T.label + '</b><span>N° ' + echap(d.numero) +
+    /* La numérotation administrative porte déjà son « N° » : le répéter
+           donnait « N° N° 0007/FAC/2026 ». */
+        '<div class="repere-dsn"><b>' + T.label + '</b><span>' +
+        (String(d.numero || "").trim().indexOf("N°") === 0 ? "" : "N° ") + echap(d.numero) +
     "  ·  " + echap(r.ville || "") + ", le " + dateFr(d.date) + "</span></div>" +
     '<div class="parties"><div class="gauche">' + gauche.join("<br>") + "</div>" +
     '<div class="boite"><strong>' + (d.type === "recu" ? "Reçu de" : d.type === "bl" ? "Livré à" : "Client") + "</strong>" +
