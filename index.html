@@ -843,7 +843,14 @@ function prochainNumero(type){
   var an = new Date().getFullYear();
   var seq = Store.tout("documents").filter(function(d){ return d.type === type && d.annee === an; })
     .reduce(function(m,d){ return Math.max(m, d.seq || 0); }, 0) + 1;
-  return {seq:seq, annee:an, numero: TYPES[type].code + "-" + an + "-" + String(seq).padStart(3,"0")};
+  var code = TYPES[type].code;
+  /* Deux formats sans ressemblance : NASSRA numérote à la manière
+     administrative (N°, quatre chiffres, barres obliques), ZADNA à la
+     manière technique (code, année, tirets). */
+  var numero = maquetteCourante() === "nassra"
+    ? "N° " + String(seq).padStart(4,"0") + "/" + code + "/" + an
+    : code + "-" + an + "-" + String(seq).padStart(3,"0");
+  return {seq:seq, annee:an, numero:numero};
 }
 
 /* ======================= état d'écran ======================= */
