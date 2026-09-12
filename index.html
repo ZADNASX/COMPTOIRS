@@ -647,9 +647,19 @@ var Store = {
     var self = this;
     var cibles = col ? [col] : COLS;
     return Promise.all(cibles.map(function(c){
-      return sb.from(c).select("*").eq("comptoir", self.comptoir).then(function(r){
-        if(r.error) throw r.error;
-        self.data[c] = (r.data || []).map(function(ligne){
+      /* L'API borne le nombre de lignes rendues (mille par défaut). Sans
+         pagination, un catalogue volumineux serait tronqué EN SILENCE : pas
+         d'erreur, juste des articles absents. */
+      return (function page(de, acc){
+        return sb.from(c).select("*").eq("comptoir", self.comptoir)
+          .order(cleDe(c)).range(de, de + 999).then(function(r){
+            if(r.error) throw r.error;
+            var lot = r.data || [];
+            acc = acc.concat(lot);
+            return lot.length < 1000 ? acc : page(de + 1000, acc);
+          });
+      })(0, []).then(function(tout){
+        self.data[c] = tout.map(function(ligne){
           var o = Object.assign({}, ligne.donnees || {});
           o.id = ligne[cleDe(c)];
           return o;
@@ -1045,7 +1055,7 @@ function vueCatalogue(){
   var tous = Store.tout("articles").slice().sort(function(a,b){ return (a.d||"").localeCompare(b.d||""); });
   var arts = tous;
   if(filtreCat.source === "mien") arts = arts.filter(function(a){ return !a.ref; });
-  if(filtreCat.source === "ref")  arts = arts.filter(function(a){ return !!a.ref; });
+  /* Le Répertoire ne vit plus dans le catalogue : il se cherche, plus bas. */
   if(filtreCat.famille) arts = arts.filter(function(a){ return a.famille === filtreCat.famille; });
   if(filtreCat.texte){
     var q = filtreCat.texte.toLowerCase();
@@ -1067,14 +1077,14 @@ function vueCatalogue(){
   }).join("");
   var fams = famillesConnues();
   return '<div class="entete-vue"><div><h1>Catalogue</h1>' +
-    '<p class="sous-titre">Vos articles, et les fourchettes TTC du Répertoire des Prix de Référence de l\'État</p></div>' +
+    '<p class="sous-titre">Vos articles. Le Répertoire de l\'État se cherche dans la carte du bas.</p></div>' +
     '<button class="btn principal" data-form-neuf="articles">+ Nouvel article</button></div>' +
     panneauFormulaire() +
     '<div class="filtres">' +
     '<input type="search" id="c-texte" placeholder="Rechercher un article…" value="' + echap(filtreCat.texte) + '">' +
     '<select id="c-source"><option value="">Tout le catalogue</option>' +
       '<option value="mien"' + (filtreCat.source === "mien" ? " selected" : "") + ">Mes articles</option>" +
-      '<option value="ref"' + (filtreCat.source === "ref" ? " selected" : "") + ">Répertoire de l'État</option></select>" +
+      "</select>" +
     (fams.length ? '<select id="c-famille"><option value="">Toutes les familles</option>' +
       fams.map(function(f){
         return '<option value="' + echap(f) + '"' + (filtreCat.famille === f ? " selected" : "") + ">" + echap(f) + "</option>";
@@ -1085,7 +1095,16 @@ function vueCatalogue(){
       '<table class="liste"><thead><tr><th>Désignation</th><th>Unité</th><th class="num">Mon prix</th>' +
       '<th class="num">Répertoire (TTC)</th><th></th></tr></thead><tbody>' + corps + "</tbody></table>" :
       '<div class="vide"><p>Aucun article ne correspond.</p><button class="btn principal" data-form-neuf="articles">Ajouter un article</button></div>') +
-    "</div>";
+    "</div>" +
+    '<div class="carte" style="margin-top:18px"><h3>Répertoire des Prix de Référence de l\'État</h3>' +
+    '<p style="color:var(--doux);margin:0 0 10px;font-size:12.5px">Dix mille articles : ils ne sont pas chargés dans ' +
+    "l'application, ils s'y cherchent. Les fourchettes sont des prix TTC.</p>" +
+    '<input type="search" id="rpr-cat-q" placeholder="Chercher au Répertoire — trois lettres suffisent">' +
+    '<div id="rpr-cat-res"></div>' +
+    '<div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">' +
+    '<button class="btn" id="rpr-import">Importer le Répertoire</button>' +
+    '<span style="color:var(--tres-doux);font-size:12px">à faire une fois, et à chaque nouvelle édition</span>' +
+    "</div></div>";
 }
 
 /* ---------- réglages ---------- */
@@ -1342,6 +1361,7 @@ function vueEditeur(){
         '<datalist id="cat">' + arts.map(function(a){ return '<option value="' + echap(a.d) + '">'; }).join("") + "</datalist>" +
         '<button class="btn discret" id="ajout-ligne" style="margin-top:8px">+ Ajouter une ligne</button>' +
         '<div id="rpr-info"></div>' + sommes + "</div>") +
+      (T.prix && !T.lettre ? carteRepertoire() : "") +
       (certifiable ? '<div class="carte"><h3>Certification e-MECeF</h3><div class="grille">' +
         '<div class="champ"><label for="e-typeMecef">Type de pièce</label>' +
         '<select id="e-typeMecef" data-champ="typeMecef">' +
@@ -1861,6 +1881,83 @@ function feuilleZadna(d){
     bande + paraphes + pied + "</div>";
 }
 
+/* ---------- le Répertoire des Prix de Référence ----------
+   10 050 lignes : on ne les charge pas, on les interroge. Les garder en
+   mémoire, dans la liste de suggestions du champ Désignation et dans le
+   miroir hors ligne coûterait deux mégaoctets et une liste inutilisable,
+   pour un document qu'on ne consulte que ponctuellement. */
+var rprResultats = [];
+var rprMinuteur = null;
+
+function chercherRepertoire(q){
+  var t = String(q || "").trim().replace(/[%_]/g, " ");
+  if(!sb || t.length < 3) return Promise.resolve([]);
+  return sb.from("repertoire").select("code,d,famille,u,bi,bs")
+    .ilike("d", "%" + t + "%").order("d").limit(30)
+    .then(function(r){
+      if(r.error){ console.warn("répertoire", r.error.message); return []; }
+      return r.data || [];
+    });
+}
+
+function rprHTML(liste, avecAjout){
+  if(!liste.length) return '<p style="color:var(--doux);font-size:12.5px;margin:12px 0 0">Aucun article du Répertoire ne correspond.</p>';
+  return '<div class="bloc" style="margin-top:10px"><table class="liste"><thead><tr>' +
+    "<th>Désignation</th><th>Unité</th><th class=\"num\">Fourchette TTC</th>" +
+    (avecAjout ? "<th></th>" : "") + "</tr></thead><tbody>" +
+    liste.map(function(a, i){
+      return "<tr><td>" + echap(a.d) +
+        '<div style="color:var(--tres-doux);font-size:11.5px;font-family:var(--mono)">' + echap(a.code) + "</div></td>" +
+        '<td data-lib="Unité">' + echap(a.u || "—") + "</td>" +
+        '<td class="num" data-lib="Fourchette TTC">' +
+        (a.bi ? nombre(a.bi) + " – " : "jusqu'à ") + nombre(a.bs) + "</td>" +
+        (avecAjout ? '<td class="act"><button class="btn" data-rpr-ajout="' + i + '">Ajouter</button></td>' : "") +
+        "</tr>";
+    }).join("") + "</tbody></table></div>";
+}
+
+function carteRepertoire(){
+  return '<div class="carte"><h3>Répertoire des Prix de Référence</h3>' +
+    '<p style="color:var(--doux);margin:0 0 10px;font-size:12.5px">Cherchez un article du Répertoire de l\'État : ' +
+    "la ligne est ajoutée avec sa référence et sa fourchette TTC.</p>" +
+    '<input type="search" id="rpr-q" placeholder="Trois lettres suffisent — onduleur, agrafe, ciment…">' +
+    '<div id="rpr-res"></div></div>';
+}
+
+/* L'import lit le fichier déposé à côté de l'application : le Répertoire est
+   un document public, il voyage avec le code plutôt que dans une base à part.
+   Une nouvelle édition se charge en remplaçant ce fichier. */
+function importerRepertoire(bouton){
+  if(!sb){ signal("Connexion requise pour importer"); return; }
+  var libelle = bouton.textContent;
+  bouton.disabled = true; bouton.textContent = "Lecture…";
+  fetch("./repertoire-26.2.json").then(function(r){
+    if(!r.ok) throw new Error("fichier introuvable (" + r.status + ")");
+    return r.json();
+  }).then(function(j){
+    var fiches = j.fiches || [], lots = [], fait = 0;
+    for(var i = 0; i < fiches.length; i += 500) lots.push(fiches.slice(i, i + 500));
+    return lots.reduce(function(chaine, lot){
+      return chaine.then(function(){
+        return sb.from("repertoire").upsert(lot.map(function(a){
+          return {code:a.code, d:a.d, famille:a.famille, u:a.u,
+                  bi:a.bi, bs:a.bs, specs:a.specs, edition:j.edition};
+        }), {onConflict:"code"}).then(function(r){
+          if(r.error) throw r.error;
+          fait += lot.length;
+          bouton.textContent = fait + " / " + fiches.length;
+        });
+      });
+    }, Promise.resolve()).then(function(){
+      signal(fait + " articles du Répertoire importés (édition " + j.edition + ")");
+      bouton.disabled = false; bouton.textContent = libelle;
+    });
+  }).catch(function(e){
+    signal("Import impossible : " + (e && e.message));
+    bouton.disabled = false; bouton.textContent = libelle;
+  });
+}
+
 function refArticle(designation){
   var q = String(designation || "").trim().toLowerCase();
   if(!q) return null;
@@ -1875,7 +1972,12 @@ function majRPR(){
   if(!zone || !brouillon) return;
   var lignes = [];
   brouillon.lignes.forEach(function(l,i){
-    var a = refArticle(l.d);
+    /* La fourchette voyage avec la ligne dès qu'elle vient du Répertoire :
+       c'est un instantané, et c'est ce qu'il faut — le Répertoire change
+       d'édition, un devis déjà remis ne doit pas changer de plafond. */
+    var a = Number(l.bs)
+      ? {d:l.d, bi:Number(l.bi) || 0, bs:Number(l.bs)}
+      : refArticle(l.d);
     if(!a) return;
     /* Les bornes du Répertoire sont TTC. Sous TPS, le prix facturé est déjà
        le prix payé : on compare directement. Au réel, c'est le P.U. majoré
@@ -2205,6 +2307,18 @@ document.addEventListener("click", function(e){
 
   if((el = c("[data-ouvrir]"))){ ouvrirDoc(el.dataset.ouvrir); return; }
 
+  if((el = c("[data-rpr-ajout]"))){
+    var choisi = rprResultats[Number(el.dataset.rprAjout)];
+    if(!choisi || !brouillon) return;
+    var ligneRpr = {d:choisi.d, q:1, pu:0, code:choisi.code, bi:choisi.bi, bs:choisi.bs};
+    if(brouillon.saisieTTC) ligneRpr.ttc = "";
+    var premiereVide = brouillon.lignes.length === 1 && !String(brouillon.lignes[0].d || "").trim();
+    if(premiereVide) brouillon.lignes[0] = ligneRpr; else brouillon.lignes.push(ligneRpr);
+    rendre(true);
+    signal("Ajouté — plafond " + nombre(choisi.bs) + " F TTC");
+    return;
+  }
+  if((el = c("#rpr-import"))){ importerRepertoire(el); return; }
   if(c("#ajout-ligne")){ brouillon.lignes.push({d:"",q:1,pu:0}); rendre(true); return; }
   if((el = c("[data-suppr-ligne]"))){
     brouillon.lignes.splice(Number(el.dataset.supprLigne), 1);
@@ -2293,6 +2407,23 @@ document.addEventListener("input", function(e){
     rendre(true);
     var n = document.getElementById("f-texte");
     if(n){ n.focus(); try { n.setSelectionRange(pos, pos); } catch(err){} }
+    return;
+  }
+  if(t.id === "rpr-q" || t.id === "rpr-cat-q"){
+    /* On attend une pause de frappe : sans cela chaque lettre partirait au
+       serveur, et les réponses reviendraient dans le désordre. */
+    var zoneRpr = document.getElementById(t.id === "rpr-q" ? "rpr-res" : "rpr-cat-res");
+    var avecAjout = t.id === "rpr-q";
+    var saisi = t.value;
+    clearTimeout(rprMinuteur);
+    if(String(saisi).trim().length < 3){ if(zoneRpr) zoneRpr.innerHTML = ""; return; }
+    rprMinuteur = setTimeout(function(){
+      chercherRepertoire(saisi).then(function(liste){
+        rprResultats = liste;
+        var z = document.getElementById(avecAjout ? "rpr-res" : "rpr-cat-res");
+        if(z) z.innerHTML = rprHTML(liste, avecAjout);
+      });
+    }, 300);
     return;
   }
   if(t.id === "c-texte"){
