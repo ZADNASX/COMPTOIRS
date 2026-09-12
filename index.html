@@ -719,7 +719,11 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
 
 /* En-tête entreprise imprimé */#marches .print-entreprise, #marches-print .print-entreprise{
   border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 14px;
-}#marches .print-entreprise.avec-logo, #marches-print .print-entreprise.avec-logo{
+}/* L'en-tête d'une maison sans la page qui va avec : on neutralise le format
+   A4 pour ne garder que le bandeau. */
+#marches .feuille.entete-seule, #marches-print .feuille.entete-seule{
+  width: auto; min-height: 0; padding: 0; margin: 0; box-shadow: none; background: none; }
+#marches .print-entreprise.avec-logo, #marches-print .print-entreprise.avec-logo{
   display: flex; align-items: flex-start; gap: 10mm; }
 #marches .print-entreprise .print-ident, #marches-print .print-entreprise .print-ident{ flex: 1; }
 #marches .print-logo, #marches-print .print-logo{
@@ -2924,23 +2928,11 @@ function confirmerAvantImpression(d) {
 // IMPRESSION DU BORDEREAU — un lot = ses propres pages
 // ============================================================
 function enteteEntrepriseHtml() {
-  const p = PROFILE;
-  const coord = [
-    p.rccm ? "RCCM : " + p.rccm : "",
-    p.ifu ? "IFU : " + p.ifu : "",
-    p.tel, p.email, p.adresse,
-  ].filter(Boolean).map(esc).join(" · ");
-  /* La maison signe ses soumissions de sa marque, comme sur ses factures. */
-  const marque = p.logo
-    ? `<img class="print-logo" src="${esc(p.logo)}" alt="${esc(p.nomCourt || p.raisonSociale)}">`
-    : "";
-  return `<div class="print-entreprise${marque ? " avec-logo" : ""}">
-    ${marque}
-    <div class="print-ident">
-      <div class="rs">${esc(p.raisonSociale)}</div>
-      <div class="coord">${coord}</div>
-    </div>
-  </div>`;
+  /* Le format de la pièce est imposé par le dossier d'appel d'offres, mais le
+     papier reste celui de la maison : on reprend l'en-tête de ses courriers,
+     et `entete-seule` annule la géométrie de la page A4 qui l'accompagne. */
+  var m = maquetteCourante();
+  return '<div class="feuille ' + m + ' entete-seule">' + enteteLettre(reglages(), {}, m) + "</div>";
 }
 
 function signatureHtml(lieuLabel) {
@@ -4541,6 +4533,19 @@ function cachetSVG(r){
    Un courrier n'est pas un tableau : il reprend l'en-tête et le pied de la
    maquette du comptoir, et rien d'autre. */
 function enteteLettre(r, d, maquette){
+  if(maquette === "dsn"){
+    /* Composition relevée sur ENTETE DSN.docx : logo à gauche, mentions
+       alignées à droite en Times, un filet d'un point dessous. */
+    return '<div class="tete-dsn"><div class="marque">' + (logoComptoir(r, "22mm") || marqueSVG(r)) + "</div>" +
+      '<div class="ident">' +
+        '<div class="rs">' + echap(r.forme || r.nom) + "</div>" +
+        (r.activite ? '<div class="act">' + echap(r.activite) + "</div>" : "") +
+        '<div class="men">RCCM : ' + echap(r.rccm) + "  -  IFU : " + echap(r.ifu) + "</div>" +
+        '<div class="men">Tél : ' + echap(r.tel) + "  -  " + echap(r.email) + "</div>" +
+        (r.adresse ? '<div class="adr">' + echap(r.adresse) + "</div>" : "") +
+      "</div></div>" +
+      '<div class="filet-dsn"></div>';
+  }
   if(maquette === "nassra"){
     return '<div class="marque-bloc">' +
       (logoComptoir(r, "16mm") ||
