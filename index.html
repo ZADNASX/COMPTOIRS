@@ -5079,7 +5079,11 @@ function nuitTombee(){
 }
 
 function appliquerCharte(code){
-  charteCourante = CHARTES[code] ? code : "zadna";
+  /* La palette se choisit dans les réglages. Sans cela elle se déduisait du
+     code du comptoir, et un comptoir nouveau n'en avait aucune. C'est le
+     pendant de ce qui a été fait pour la maquette. */
+  var voulue = String(reglages().charte || "").trim() || code;
+  charteCourante = CHARTES[voulue] ? voulue : (CHARTES[code] ? code : "zadna");
   var c = CHARTES[charteCourante];
   var st = document.documentElement.style;
   /* on efface d'abord : sans ça, passer de NASSRA à ZADNA laisserait les
