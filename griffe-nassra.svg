@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 260" width="62mm" height="26mm" role="img" aria-label="Griffe NASSRA">
+  <title>Griffe rectangulaire NASSRA — 62 × 26 mm</title>
+  <rect x="5" y="5" width="610" height="250" rx="14" fill="none" stroke="#1B3A8F" stroke-width="7"/>
+  <g transform="translate(78,130) scale(0.62) translate(-60,-46.5)">
+    <path d="M22 74 V44 a38 38 0 0 1 76 0 v30 h-13 V44 a25 25 0 0 0 -50 0 v30 z" fill="#1B3A8F"/>
+    <rect x="22" y="80" width="76" height="7" rx="3.5" fill="#1B3A8F"/>
+  </g>
+  <rect x="140" y="38" width="2.5" height="184" fill="#1B3A8F"/>
+  <g font-family="'Poppins','Montserrat','Segoe UI',sans-serif" fill="#1B3A8F">
+    <text x="166" y="76" font-size="38" font-weight="700" letter-spacing="4">NASSRA</text>
+    <text x="168" y="100" font-size="14" font-weight="500" letter-spacing="1.6">FOURNITURES · BTP · NEGOCE</text>
+    <text x="166" y="136" font-size="17" font-weight="500">RCCM : RB/COT/21 A 72362  ·  IFU : 0202113205653</text>
+    <text x="166" y="162" font-size="17" font-weight="500">Tel. : +229 01 47 99 09 99</text>
+    <text x="166" y="188" font-size="17" font-weight="500">Zongo Ehuzu, Cotonou — Benin</text>
+    <text x="166" y="220" font-size="16" font-weight="700" letter-spacing="1.5">LA PROMOTRICE</text>
+  </g>
+</svg>

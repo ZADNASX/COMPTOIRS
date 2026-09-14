@@ -291,6 +291,10 @@ table.lignes input.ref-rpr{margin-top:4px;padding:4px 8px;font-size:11.5px;
   font-family:"Public Sans",sans-serif;font-size:10.5pt;line-height:1.5;box-shadow:0 2px 14px rgba(0,0,0,.12)}
 .feuille .logo-comptoir,.feuille-mini .logo-comptoir{width:auto;max-width:72mm;object-fit:contain}
 .feuille img.cachet{object-fit:contain}
+/* La griffe est un rectangle de 62 × 26 mm : la loger dans le carré du
+   cachet rond l'écraserait. Elle se pose plus bas, à l'aplomb du blanc de
+   signature, et non par-dessus. */
+.feuille img.cachet.griffe{width:62mm;height:26mm;top:4mm;opacity:.95}
 .feuille.nassra .marque-bloc{display:flex;align-items:flex-start;justify-content:space-between;gap:14mm}
 .feuille.nassra .filet{height:1mm;display:flex;margin-top:5mm}
 .feuille.nassra .filet i{display:block;height:100%}
@@ -4632,9 +4636,9 @@ function feuilleCourrier(d){
   if(d.copie) annexes.push("<b>Copie \u00e0 :</b> " + echap(d.copie));
 
   var signature = m === "nassra"
-    ? '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? (cachetFichier(r) || cachetNassra(r)) : "") +
+    ? '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? (cachetFichier(r, d) || cachetNassra(r)) : "") +
       '<span class="qui">' + echap(r.signataire) + "</span>" + echap(r.fonction) + "</div></div>"
-    : '<div class="paraphes"><div class="sig-d">' + (d.cachet !== false ? (cachetFichier(r) || cachetSVG(r)) : "") +
+    : '<div class="paraphes"><div class="sig-d">' + (d.cachet !== false ? (cachetFichier(r, d) || cachetSVG(r)) : "") +
       "<b>Pour " + echap(r.nom) + "</b>" +
       '<span class="qui">' + echap(r.signataire) + "</span><br>" + echap(r.fonction) + "</div></div>";
 
@@ -4661,7 +4665,14 @@ function feuilleCourrier(d){
 /* Le cachet déposé par l'entreprise. Le dessin qui suit n'est qu'un repli :
    un vrai cachet a sa forme, ses mentions et son usure, qu'aucun tracé ne
    reproduit. */
-function cachetFichier(r){
+function cachetFichier(r, d){
+  /* Sur un bon de livraison, la griffe si la maison en a une : elle porte la
+     qualité du signataire et se pose là où l'on signe la remise. Le cachet
+     rond, lui, authentifie une pièce comptable. */
+  if(d && d.type === "bl"){
+    var griffe = String((r && r.griffeFichier) || "").trim();
+    if(griffe) return '<img class="cachet griffe" src="' + echap(griffe) + '" alt="">';
+  }
   var src = String((r && r.cachetFichier) || "").trim();
   if(src) return '<img class="cachet" src="' + echap(src) + '" alt="">';
   /* À défaut d'empreinte déposée, la forme choisie dans les réglages. */
@@ -4871,7 +4882,7 @@ function feuilleDsn(d){
       ? '<div class="notes">' + echap(r.mention) + "</div>" : "") +
     (d.type === "bl" ? '<div class="notes">Le client reconnaît avoir reçu les articles ci-dessus en bon état et en bonne quantité.</div>' : "") +
     bandeCertif(d) +
-    '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? (cachetFichier(r) || cachetNassra(r)) : "") +
+    '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? (cachetFichier(r, d) || cachetNassra(r)) : "") +
     '<span class="qui">' + echap(r.signataire) + "</span>" + echap(r.fonction) + "</div>" +
     /* La livraison se fait contresigner, et le devis se fait accepter. */
     (d.type === "bl"
@@ -4982,7 +4993,7 @@ function feuilleNassra(d){
       ? '<div class="notes">' + echap(r.mention) + "</div>" : "") +
     (d.type === "bl" ? '<div class="notes">Le client reconnaît avoir reçu les articles ci-dessus en bon état et en bonne quantité.</div>' : "") +
     bandeCertif(d) +
-    '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? (cachetFichier(r) || cachetNassra(r)) : "") +
+    '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? (cachetFichier(r, d) || cachetNassra(r)) : "") +
     '<span class="qui">' + echap(r.signataire) + "</span>" + echap(r.fonction) + "</div>" +
     /* La livraison se fait contresigner, et le devis se fait accepter. */
     (d.type === "bl"
@@ -5162,7 +5173,7 @@ function feuilleZadna(d){
 
   /* ZADNA signe toujours a droite ; a gauche, ce que le client doit remplir
      change selon la nature du document */
-  var signature = '<div class="sig-d">' + (d.cachet !== false ? (cachetFichier(r) || cachetSVG(r)) : "") +
+  var signature = '<div class="sig-d">' + (d.cachet !== false ? (cachetFichier(r, d) || cachetSVG(r)) : "") +
     "<b>Pour " + echap(r.nom) + "</b>" +
     '<span class="qui">' + echap(r.signataire) + "</span><br>" + echap(r.fonction) + "</div>";
 
