@@ -3266,20 +3266,23 @@ function docEmptyState(msg) { return `<div class="empty-state">${esc(msg)}</div>
 function docBPU(d, lot) {
   const lignes = lotLignes(lot);
   if (!lignes.length) return docEmptyState("Aucune ligne dans ce lot. Ajoutez des articles depuis le Bordereau.");
+  /* Le BPU dit le même prix que le bordereau : déposer l'un en TTC et l'autre
+     hors taxes, c'est une contradiction dans la même offre. */
+  const mode = d.priceMode;
   let rows = "";
   lotChapitres(lot).forEach((c, ci) => {
     c.lignes.forEach((l, i) => {
       rows += `<tr>
         <td>${esc(ligneNumero(lot, ci, i, l))}</td>
         <td>${esc(l.designation) || "—"}</td>
-        <td>${esc(capitalize(nombreEnLettresFr(l.puht)))} francs CFA</td>
-        <td class="num">${fmtInt(l.puht)}</td>
+        <td>${esc(capitalize(nombreEnLettresFr(priceInputValue(l, mode))))} francs CFA</td>
+        <td class="num">${fmtInt(priceInputValue(l, mode))}</td>
       </tr>`;
     });
   });
   return `<table class="bordereau-table"><thead><tr>
       <th style="width:60px;">N° de prix</th><th>Désignation des produits / prestations</th>
-      <th>Prix unitaire en lettres</th><th style="width:150px;">Prix unitaire en chiffres (FCFA)</th>
+      <th>Prix unitaire en lettres</th><th style="width:150px;">Prix unitaire en chiffres (${suffixeMode(mode)})</th>
     </tr></thead><tbody>${rows}</tbody></table>`;
 }
 
@@ -3666,8 +3669,11 @@ document.getElementById("btnDocExportCsv").addEventListener("click", () => {
   lotChapitres(lot).forEach((c, ci) => c.lignes.forEach((l, i) => chapLignes.push({ n: ligneNumero(lot, ci, i, l), l })));
 
   if (DOC_ACTIVE_TYPE === "bpu") {
-    rows.push(["N° de prix", "Désignation", "Prix unitaire en lettres", "Prix unitaire en chiffres"]);
-    chapLignes.forEach(({ n, l }) => rows.push([n, l.designation, capitalize(nombreEnLettresFr(l.puht)) + " francs CFA", l.puht]));
+    rows.push(["N° de prix", "Désignation", "Prix unitaire en lettres", "Prix unitaire en chiffres (" + suffixeMode(d.priceMode) + ")"]);
+    chapLignes.forEach(({ n, l }) => {
+      const pu = priceInputValue(l, d.priceMode);
+      rows.push([n, l.designation, capitalize(nombreEnLettresFr(pu)) + " francs CFA", pu]);
+    });
   } else if (DOC_ACTIVE_TYPE === "calendrier") {
     rows.push(["Article", "Description", "Unité", "Quantité", "Site", "Date de livraison"]);
     chapLignes.forEach(({ n, l }) => rows.push([n, l.designation, l.unite, l.qte, l.site, l.dateLivraison]));
