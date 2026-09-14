@@ -984,9 +984,11 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
           <tbody id="bordereauBody"></tbody>
           <tfoot>
             <tr id="rowChapTotal"><td colspan="6" style="text-align:right;" id="footChapLabel">Sous-total du chapitre</td><td class="num" id="totalChap">0</td><td class="no-print"></td></tr>
-            <tr><td colspan="6" style="text-align:right;">Total HTVA du lot</td><td class="num" id="totalHT">0</td><td class="no-print"></td></tr>
-            <tr><td colspan="6" style="text-align:right;">TVA (18%)</td><td class="num" id="totalTVA">0</td><td class="no-print"></td></tr>
-            <tr><td colspan="6" style="text-align:right;">TOTAL TTC du lot</td><td class="num" id="totalTTC">0</td><td class="no-print"></td></tr>
+            <!-- Trois emplacements, pas trois montants fixes : leur contenu et
+                 leur ordre viennent de ordrePied(). -->
+            <tr><td colspan="6" style="text-align:right;" id="libT1">Total HTVA du lot</td><td class="num" id="valT1">0</td><td class="no-print"></td></tr>
+            <tr><td colspan="6" style="text-align:right;" id="libT2">TVA (18%)</td><td class="num" id="valT2">0</td><td class="no-print"></td></tr>
+            <tr><td colspan="6" style="text-align:right;" id="libT3">TOTAL TTC du lot</td><td class="num" id="valT3">0</td><td class="no-print"></td></tr>
           </tfoot>
         </table>
         <p class="faint" style="margin-top:8px;">Seul le chapitre sélectionné s'affiche ici. « Imprimer » sort <strong>chaque lot sur ses propres pages</strong>, tous chapitres inclus — c'est ce que vous joignez à l'offre.</p>
@@ -1984,6 +1986,28 @@ function montantsLot(lot, mode) {
   const tva = money(ht * TVA_RATE);
   return { ht: ht, tva: tva, ttc: ht + tva };
 }
+/* L'ordre du pied de tableau. Le montant qui engage l'offre vient en tête :
+   en saisie TTC c'est le toutes taxes, comme sur les factures du comptoir.
+   Les trois lignes restent là dans les deux cas — une offre se lit hors taxes
+   comme toutes taxes ; c'est leur ordre qui dit laquelle fait foi. Le libellé
+   est laissé à l'appelant : l'écran dit « du lot », le papier nomme le lot. */
+function ordrePied(lot, mode) {
+  const m = montantsLot(lot, mode);
+  const ht  = { cle: "ht",  val: m.ht,  fort: false };
+  const tva = { cle: "tva", val: m.tva, fort: false };
+  const ttc = { cle: "ttc", val: m.ttc, fort: true };
+  return mode === "TTC" ? [ttc, tva, ht] : [ht, tva, ttc];
+}
+/* Les mêmes trois lignes, prêtes pour le papier. */
+function piedHTML(lot, mode) {
+  const nom = esc(lot.nom);
+  const LIB = { ht: "Total HTVA — " + nom, tva: "TVA (18%)", ttc: "TOTAL TTC — " + nom };
+  return ordrePied(lot, mode).map(function (r, i) {
+    const fort = t => r.fort ? "<strong>" + t + "</strong>" : t;
+    return '<tr><td style="text-align:right;">' + fort(LIB[r.cle]) + '</td>' +
+      '<td class="num"' + (i === 0 ? ' style="width:120px;"' : "") + ">" + fort(fmtInt(r.val)) + "</td></tr>";
+  }).join("");
+}
 function libellePU(mode) { return mode === "TTC" ? "PU TTC" : "PU HT"; }
 function libelleTotalLigne(mode) { return mode === "TTC" ? "Total TTC" : "Total HT"; }
 function suffixeMode(mode) { return mode === "TTC" ? "FCFA TTC" : "FCFA HT"; }
@@ -2768,11 +2792,15 @@ function refreshTotals(d) {
   document.getElementById("rowChapTotal").hidden = !plusieursChap;
   document.getElementById("footChapLabel").textContent =
     `Sous-total — ${String(chap.nom || "").trim() || "chapitre sans titre"}`;
-  const m = montantsLot(lot, d.priceMode);
   document.getElementById("totalChap").textContent = fmtInt(totalChapAffiche(chap, d.priceMode));
-  document.getElementById("totalHT").textContent = fmtInt(m.ht);
-  document.getElementById("totalTVA").textContent = fmtInt(m.tva);
-  document.getElementById("totalTTC").textContent = fmtInt(m.ttc);
+  const LIB = { ht: "Total HTVA du lot", tva: "TVA (18%)", ttc: "TOTAL TTC du lot" };
+  ordrePied(lot, d.priceMode).forEach(function (r, i) {
+    const lib = document.getElementById("libT" + (i + 1));
+    const val = document.getElementById("valT" + (i + 1));
+    lib.textContent = LIB[r.cle];
+    val.textContent = fmtInt(r.val);
+    lib.style.fontWeight = val.style.fontWeight = r.fort ? "700" : "";
+  });
   const hint = document.getElementById("dossierTotalHint");
   hint.textContent = d.lots.length > 1
     ? `Récapitulatif interne : ${fmtInt(dossierTotalsHT(d))} FCFA HT sur l'ensemble des ${d.lots.length} lots. Chaque lot fait l'objet d'une offre financière séparée — ce cumul ne figure sur aucun document imprimé.`
@@ -3107,9 +3135,7 @@ function buildPrintAllLotsHtml(d) {
     });
 
     html += `<table class="bordereau-table"><tbody>
-        <tr><td style="text-align:right;">Total HTVA — ${esc(lot.nom)}</td><td class="num" style="width:120px;">${fmtInt(m.ht)}</td></tr>
-        <tr><td style="text-align:right;">TVA (18%)</td><td class="num">${fmtInt(m.tva)}</td></tr>
-        <tr><td style="text-align:right;"><strong>TOTAL TTC — ${esc(lot.nom)}</strong></td><td class="num"><strong>${fmtInt(m.ttc)}</strong></td></tr>
+        ${piedHTML(lot, mode)}
       </tbody></table>
       <p style="font-size:12px;margin-top:8px;">Arrêté le présent bordereau à la somme de <strong>${esc(capitalize(nombreEnLettresFr(m.ttc)))} francs CFA TTC</strong>.</p>
       ${signatureHtml()}
