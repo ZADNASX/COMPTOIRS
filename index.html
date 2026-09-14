@@ -977,7 +977,7 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
               <th style="width:120px;">Date livraison</th>
               <th style="width:70px;">Qté</th>
               <th style="width:110px;" id="puColHeader">PU HT (FCFA)</th>
-              <th style="width:120px;">Total HT (FCFA)</th>
+              <th style="width:120px;" id="totalColHeader">Total HT (FCFA)</th>
               <th style="width:76px;" class="no-print"></th>
             </tr>
           </thead>
@@ -1961,6 +1961,32 @@ function getActiveChapitre(d) {
 function chapTotalHT(c) { return (c.lignes || []).reduce((s, l) => s + (Number(l.qte) || 0) * (Number(l.puht) || 0), 0); }
 function lotTotalsHT(lot) { return lotChapitres(lot).reduce((s, c) => s + chapTotalHT(c), 0); }
 function dossierTotalsHT(d) { return (d.lots || []).reduce((s, lot) => s + lotTotalsHT(lot), 0); }
+/* Le bordereau suit la bascule de saisie, comme les pièces commerciales du
+   comptoir : en TTC, « PU » et « Total » sont en TTC. Le total du lot est
+   alors la SOMME DES LIGNES AFFICHÉES, et non le hors-taxes reconverti :
+   sinon la colonne ne s'additionne pas au pied de page, ce qu'une commission
+   des marchés relève. */
+function totalChapAffiche(c, mode) {
+  return (c.lignes || []).reduce((s, l) => s + (Number(l.qte) || 0) * priceInputValue(l, mode), 0);
+}
+function totalLotAffiche(lot, mode) {
+  return lotChapitres(lot).reduce((s, c) => s + totalChapAffiche(c, mode), 0);
+}
+/* Les trois montants d'un lot. Dans les deux modes HT + TVA = TTC exactement :
+   arrondir séparément le hors-taxes et la taxe laissait passer un franc. */
+function montantsLot(lot, mode) {
+  if (mode === "TTC") {
+    const ttc = totalLotAffiche(lot, "TTC");
+    const ht = money(ttc / (1 + TVA_RATE));
+    return { ht: ht, tva: ttc - ht, ttc: ttc };
+  }
+  const ht = lotTotalsHT(lot);
+  const tva = money(ht * TVA_RATE);
+  return { ht: ht, tva: tva, ttc: ht + tva };
+}
+function libellePU(mode) { return mode === "TTC" ? "PU TTC" : "PU HT"; }
+function libelleTotalLigne(mode) { return mode === "TTC" ? "Total TTC" : "Total HT"; }
+function suffixeMode(mode) { return mode === "TTC" ? "FCFA TTC" : "FCFA HT"; }
 function dossierLignesCount(d) { return (d.lots || []).reduce((s, lot) => s + lotLignes(lot).length, 0); }
 
 // Retrouve une ligne (et son contexte) n'importe où dans le dossier.
@@ -2589,13 +2615,17 @@ function renderBordereau() {
   renderLotControls(d);
   const lot = getActiveLot(d);
   const mode = d.priceMode;
-  document.getElementById("puColHeader").textContent = mode === "TTC" ? "PU TTC (FCFA)" : "PU HT (FCFA)";
+  document.getElementById("puColHeader").textContent = libellePU(mode) + " (FCFA)";
+  /* La colonne des totaux affichait « HT » quel que soit le mode : en TTC on
+     lisait un prix unitaire TTC et un total hors taxes sur la même ligne, et
+     la multiplication ne tombait pas juste. */
+  document.getElementById("totalColHeader").textContent = libelleTotalLigne(mode) + " (FCFA)";
 
   let html = "";
   lotChapitres(lot).forEach((c, ci) => {
     const titre = String(c.nom || "").trim();
     if (lotChapitres(lot).length > 1 || titre) {
-      html += `<tr class="chap-head"><td colspan="8">${esc(titre || "Chapitre " + (ci + 1) + " — sans titre")}<span class="faint" style="font-weight:400;"> — ${fmtInt(chapTotalHT(c))} FCFA HT</span></td></tr>`;
+      html += `<tr class="chap-head"><td colspan="8">${esc(titre || "Chapitre " + (ci + 1) + " — sans titre")}<span class="faint" style="font-weight:400;"> — ${fmtInt(totalChapAffiche(c, mode))} ${suffixeMode(mode)}</span></td></tr>`;
     }
     if (!c.lignes.length) {
       html += `<tr><td colspan="8" class="faint" style="padding:10px 8px;">Chapitre vide.</td></tr>`;
@@ -2653,7 +2683,8 @@ function jaugeFourchette(l) {
 }
 
 function ligneRowHtml(d, lot, c, ci, l, idx, mode) {
-  const total = (Number(l.qte) || 0) * (Number(l.puht) || 0);
+  /* Le total suit le prix affiché : quantité × ce qu'on lit dans la colonne. */
+  const total = (Number(l.qte) || 0) * priceInputValue(l, mode);
   const outOfRange = horsFourchette(l);
   const rangeHint = `<span data-cell="jauge">${jaugeFourchette(l)}</span>`;
   const expanded = EXPANDED_ROWS.has(l.id);
@@ -2737,10 +2768,11 @@ function refreshTotals(d) {
   document.getElementById("rowChapTotal").hidden = !plusieursChap;
   document.getElementById("footChapLabel").textContent =
     `Sous-total — ${String(chap.nom || "").trim() || "chapitre sans titre"}`;
-  document.getElementById("totalChap").textContent = fmtInt(chapTotalHT(chap));
-  document.getElementById("totalHT").textContent = fmtInt(totalHT);
-  document.getElementById("totalTVA").textContent = fmtInt(money(totalHT * TVA_RATE));
-  document.getElementById("totalTTC").textContent = fmtInt(money(totalHT * (1 + TVA_RATE)));
+  const m = montantsLot(lot, d.priceMode);
+  document.getElementById("totalChap").textContent = fmtInt(totalChapAffiche(chap, d.priceMode));
+  document.getElementById("totalHT").textContent = fmtInt(m.ht);
+  document.getElementById("totalTVA").textContent = fmtInt(m.tva);
+  document.getElementById("totalTTC").textContent = fmtInt(m.ttc);
   const hint = document.getElementById("dossierTotalHint");
   hint.textContent = d.lots.length > 1
     ? `Récapitulatif interne : ${fmtInt(dossierTotalsHT(d))} FCFA HT sur l'ensemble des ${d.lots.length} lots. Chaque lot fait l'objet d'une offre financière séparée — ce cumul ne figure sur aucun document imprimé.`
@@ -2784,13 +2816,15 @@ document.getElementById("bordereauBody").addEventListener("input", (e) => {
   if (field === "qte" || field === "pu") {
     // On ne touche qu'aux cellules de résultat, jamais au champ actif.
     const cell = tr.querySelector('[data-cell="total"]');
-    if (cell) cell.textContent = fmtInt((Number(line.qte) || 0) * (Number(line.puht) || 0));
+    if (cell) cell.textContent = fmtInt((Number(line.qte) || 0) * priceInputValue(line, d.priceMode));
     if (field === "pu") {
       // La jauge est un frère du champ, jamais son parent : le focus est préservé.
       const jauge = tr.querySelector('[data-cell="jauge"]');
       if (jauge) jauge.innerHTML = jaugeFourchette(line);
-      const hors = (line.refBS && Number(line.puht) > Number(line.refBS))
-        || (line.refBI && Number(line.puht) > 0 && Number(line.puht) < Number(line.refBI));
+      /* Les bornes du Répertoire sont TTC : comparer le hors-taxes laissait le
+         champ noir pour un prix qui dépassait de 18 %, jusqu'au redessin de la
+         ligne. La jauge, elle, faisait déjà la bonne comparaison. */
+      const hors = horsFourchette(line);
       e.target.style.color = hors ? "var(--red)" : "";
       e.target.style.fontWeight = hors ? "700" : "";
     }
@@ -3036,8 +3070,10 @@ function signatureHtml(lieuLabel) {
 function buildPrintAllLotsHtml(d) {
   let html = "";
   d.lots.forEach(lot => {
-    const totalHT = lotTotalsHT(lot);
-    const tva = money(totalHT * TVA_RATE);
+    /* Le papier dit la même chose que l'écran : si la saisie est en TTC, le
+       bordereau déposé est en TTC. */
+    const mode = d.priceMode;
+    const m = montantsLot(lot, mode);
     const plusieursChap = lotChapitres(lot).length > 1;
     html += `<div class="print-lot">
       ${enteteEntrepriseHtml()}
@@ -3055,27 +3091,27 @@ function buildPrintAllLotsHtml(d) {
         <thead><tr>
           <th style="width:6%;">N°</th><th>Désignation</th><th style="width:7%;">Unité</th>
           <th style="width:12%;">Date livr.</th><th style="width:7%;">Qté</th>
-          <th style="width:12%;">PU HT</th><th style="width:13%;">Total HT</th>
+          <th style="width:12%;">${libellePU(mode)}</th><th style="width:13%;">${libelleTotalLigne(mode)}</th>
         </tr></thead>
         <tbody>
           ${c.lignes.map((l, i) => `<tr>
             <td>${esc(ligneNumero(lot, ci, i, l))}</td><td>${esc(l.designation)}</td><td>${esc(l.unite)}</td>
             <td>${fmtDate(l.dateLivraison)}</td><td class="num">${fmtInt(l.qte)}</td>
-            <td class="num">${fmtInt(l.puht)}</td><td class="num">${fmtInt((Number(l.qte) || 0) * (Number(l.puht) || 0))}</td>
+            <td class="num">${fmtInt(priceInputValue(l, mode))}</td><td class="num">${fmtInt((Number(l.qte) || 0) * priceInputValue(l, mode))}</td>
           </tr>`).join("")}
         </tbody>
       </table>`;
       if (plusieursChap || titre) {
-        html += `<div class="print-chap-total">Sous-total ${esc(titre || "chapitre " + (ci + 1))} : ${fmtInt(chapTotalHT(c))} FCFA HT</div>`;
+        html += `<div class="print-chap-total">Sous-total ${esc(titre || "chapitre " + (ci + 1))} : ${fmtInt(totalChapAffiche(c, mode))} ${suffixeMode(mode)}</div>`;
       }
     });
 
     html += `<table class="bordereau-table"><tbody>
-        <tr><td style="text-align:right;">Total HTVA — ${esc(lot.nom)}</td><td class="num" style="width:120px;">${fmtInt(totalHT)}</td></tr>
-        <tr><td style="text-align:right;">TVA (18%)</td><td class="num">${fmtInt(tva)}</td></tr>
-        <tr><td style="text-align:right;"><strong>TOTAL TTC — ${esc(lot.nom)}</strong></td><td class="num"><strong>${fmtInt(totalHT + tva)}</strong></td></tr>
+        <tr><td style="text-align:right;">Total HTVA — ${esc(lot.nom)}</td><td class="num" style="width:120px;">${fmtInt(m.ht)}</td></tr>
+        <tr><td style="text-align:right;">TVA (18%)</td><td class="num">${fmtInt(m.tva)}</td></tr>
+        <tr><td style="text-align:right;"><strong>TOTAL TTC — ${esc(lot.nom)}</strong></td><td class="num"><strong>${fmtInt(m.ttc)}</strong></td></tr>
       </tbody></table>
-      <p style="font-size:12px;margin-top:8px;">Arrêté le présent bordereau à la somme de <strong>${esc(capitalize(nombreEnLettresFr(totalHT + tva)))} francs CFA TTC</strong>.</p>
+      <p style="font-size:12px;margin-top:8px;">Arrêté le présent bordereau à la somme de <strong>${esc(capitalize(nombreEnLettresFr(m.ttc)))} francs CFA TTC</strong>.</p>
       ${signatureHtml()}
     </div>`;
   });
