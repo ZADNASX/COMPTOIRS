@@ -2107,10 +2107,35 @@ function profilConfigure(p) { return !!String((p || {}).raisonSociale || "").tri
 /* L'identité part de celle du comptoir actif : on ne la ressaisit pas. Ce que
    les marchés publics demandent en plus — références, personnel, matériel —
    reste propre au module. */
+/* Les mots qui ne nomment personne : ils disent la forme, pas la maison. */
+var MOTS_DE_FORME = ["ets", "etablissement", "etablissements", "entreprise", "entreprises",
+  "societe", "sarl", "sarlu", "suarl", "sa", "sas", "gie", "cabinet", "groupe"];
+function sansAccent(x) {
+  return String(x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+/* Le réglage « forme » porte selon les maisons la raison sociale complète
+   (« ETS DJOLO SALIFOU NAWAL (DSN) ») ou seulement la forme juridique
+   (« Entreprise individuelle »). On les distingue sur le contenu : si elle
+   nomme la maison, c'est la raison sociale ; sinon c'est la forme juridique,
+   et la raison sociale est le nom. Les mots de forme ne comptent pas dans la
+   comparaison, sans quoi « Société X » se reconnaîtrait dans « Société à
+   responsabilité limitée ». */
+function identiteMaison(r) {
+  var nom = String(r.nom || "").trim();
+  var forme = String(r.forme || "").trim();
+  var propres = sansAccent(nom).split(/[^a-z0-9]+/).filter(function (m) {
+    return m.length >= 3 && MOTS_DE_FORME.indexOf(m) < 0;
+  });
+  var nomme = forme && propres.some(function (m) { return sansAccent(forme).indexOf(m) >= 0; });
+  return nomme ? { raisonSociale: forme, formeJuridique: "" }
+               : { raisonSociale: nom || forme, formeJuridique: forme };
+}
+
 function loadProfile() {
-  var r = reglages(), enregistre = etatMarches().profil || {};
+  var r = reglages(), enregistre = etatMarches().profil || {}, ident = identiteMaison(r);
   var p = Object.assign(defaultProfile(), {
-    raisonSociale: r.forme || r.nom || "",
+    raisonSociale: ident.raisonSociale,
+    formeJuridique: ident.formeJuridique,
     nomCourt: r.nom || "",
     rccm: r.rccm || "", ifu: r.ifu || "",
     tel: r.tel || "", email: r.email || "",
