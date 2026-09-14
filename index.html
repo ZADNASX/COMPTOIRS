@@ -752,6 +752,11 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
 }#marches .doc-prose p, #marches-print .doc-prose p{ margin: 0 0 11px; }#marches .doc-prose .adresse-bloc, #marches-print .doc-prose .adresse-bloc{ margin: 18px 0; }#marches .doc-prose .objet, #marches-print .doc-prose .objet{ font-weight: 700; margin: 16px 0; }#marches .doc-prose ul, #marches-print .doc-prose ul{ margin: 0 0 11px; padding-left: 20px; }#marches .doc-prose li, #marches-print .doc-prose li{ margin-bottom: 5px; }#marches .signature-bloc, #marches-print .signature-bloc{
   margin-top: 34px; display: flex; justify-content: flex-end;
 }#marches .signature-bloc div, #marches-print .signature-bloc div{ text-align: center; font-size: 13px; min-width: 220px; }#marches .signature-bloc .sig-space, #marches-print .signature-bloc .sig-space{ height: 52px; }
+/* Le bloc des pieces de soumission : aligne a gauche, et jamais coupe entre
+   deux pages — une signature separee de son pouvoir ne vaut rien. */
+#marches .signature-soumission, #marches-print .signature-soumission{
+  margin-top: 26px; font-size: 13px; line-height: 1.75; break-inside: avoid; page-break-inside: avoid; }
+#marches .signature-soumission .sig-espace, #marches-print .signature-soumission .sig-espace{ height: 56px; }
 
 /* En-tête entreprise imprimé */#marches .print-entreprise, #marches-print .print-entreprise{
   border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 14px;
@@ -3083,6 +3088,33 @@ function enteteEntrepriseHtml() {
   return '<div class="feuille ' + m + ' entete-seule">' + tete + "</div>";
 }
 
+/* « 26 Mars 2025 jour du Mercredi » : la forme demandée sur les pièces de
+   soumission. Le mois et le jour de la semaine prennent la majuscule. */
+function dateSignature(quand) {
+  const j = quand || new Date();
+  const mois = capitalize(j.toLocaleDateString("fr-FR", { month: "long" }));
+  const sem = capitalize(j.toLocaleDateString("fr-FR", { weekday: "long" }));
+  return j.getDate() + " " + mois + " " + j.getFullYear() + " jour du " + sem;
+}
+
+/* Le bloc que portent les pièces déposées : il nomme le signataire, sa
+   qualité, et dit d'où lui vient le pouvoir d'engager la maison. « Fait à …,
+   le … » reste sur le bordereau, qui n'est pas une pièce de ce type. */
+function signatureSoumission() {
+  const r = reglages();
+  const nom = String(r.signataire || PROFILE.representant || "").trim();
+  const qualite = String(r.fonction || "").trim();
+  const maison = String(PROFILE.raisonSociale || r.forme || r.nom || "").trim();
+  return `<div class="signature-soumission">
+    <div>Nom : <strong>${esc(nom) || "…"}</strong></div>
+    <div>En tant que ${esc(qualite) || "…"}</div>
+    <div>Signature</div>
+    <div class="sig-espace"></div>
+    <div>Ayant pouvoir à signer la manifestation pour et au nom de <strong>${esc(maison) || "…"}</strong></div>
+    <div>En date du ${esc(dateSignature())}</div>
+  </div>`;
+}
+
 function signatureHtml(lieuLabel) {
   /* La ville vient des réglages du comptoir. « Fait à Cotonou » était écrit en
      dur : une maison établie ailleurs l'aurait signé quand même. */
@@ -3469,7 +3501,7 @@ function docLettreSoumission(d, lot) {
     <p>Nous certifions n'être frappés d'aucune des mesures d'exclusion de la commande publique et ne pas nous trouver en situation de conflit d'intérêts.</p>
 
     <p>Veuillez agréer, Madame, Monsieur, l'expression de notre considération distinguée.</p>
-    ${signatureHtml()}
+    ${signatureSoumission()}
   </div>`;
 }
 
@@ -3485,7 +3517,7 @@ function docRenseignements(d) {
     <table class="bordereau-table"><tbody>
       ${l.map(([k, v]) => `<tr><td style="width:38%;font-weight:600;">${esc(k)}</td><td>${esc(v) || "—"}</td></tr>`).join("")}
     </tbody></table>
-    <div class="doc-prose">${signatureHtml()}</div>`;
+    <div class="doc-prose">${signatureSoumission()}</div>`;
 }
 
 function docHabilitation(d) {
@@ -3495,7 +3527,7 @@ function docHabilitation(d) {
     <p class="objet">Objet : ${esc(d.reference) || "[référence du DAO/DRP]"} — ${esc(d.objet) || "[objet du marché]"}</p>
     <p>Je soussigné(e), agissant au nom et pour le compte de <strong>${esc(PROFILE.raisonSociale)}</strong>, certifie que <strong>${esc(PROFILE.representant) || "[nom et qualité]"}</strong> dispose de tous pouvoirs à l'effet de signer l'offre relative au marché cité en objet, ainsi que tout document s'y rapportant, et d'engager valablement l'entreprise dans le cadre de son exécution.</p>
     <p>La présente habilitation demeure valable pendant toute la durée de la procédure et, le cas échéant, de l'exécution du marché.</p>
-    ${signatureHtml()}
+    ${signatureSoumission()}
   </div>`;
 }
 
@@ -3513,7 +3545,7 @@ function docEthique(d) {
       <li>s'abstenir de toute pratique frauduleuse, collusoire, coercitive ou obstructive pendant toute la durée de la procédure et de l'exécution du marché ;</li>
       <li>accepter que la violation du présent engagement entraîne le rejet de l'offre ou la résiliation du marché, sans préjudice des sanctions prévues par la réglementation.</li>
     </ul>
-    ${signatureHtml()}
+    ${signatureSoumission()}
   </div>`;
 }
 
@@ -3528,7 +3560,7 @@ function docReferences() {
       ${r.map((x, i) => `<tr><td>${i + 1}</td><td>${esc(x.objet) || "—"}</td><td>${esc(x.client) || "—"}</td>
         <td>${esc(x.annee) || "—"}</td><td class="num">${fmtInt(x.montant)}</td><td>${esc(x.attestation) || "—"}</td></tr>`).join("")}
     </tbody></table>
-    <div class="doc-prose">${signatureHtml()}</div>`;
+    <div class="doc-prose">${signatureSoumission()}</div>`;
 }
 
 function docPersonnel() {
@@ -3542,7 +3574,7 @@ function docPersonnel() {
       ${p.map((x, i) => `<tr><td>${i + 1}</td><td>${esc(x.nom) || "—"}</td><td>${esc(x.poste) || "—"}</td>
         <td>${esc(x.qualification) || "—"}</td><td>${esc(x.experience) || "—"}</td></tr>`).join("")}
     </tbody></table>
-    <div class="doc-prose">${signatureHtml()}</div>`;
+    <div class="doc-prose">${signatureSoumission()}</div>`;
 }
 
 function docMateriel() {
@@ -3556,10 +3588,36 @@ function docMateriel() {
       ${m.map((x, i) => `<tr><td>${i + 1}</td><td>${esc(x.designation) || "—"}</td><td class="num">${esc(x.quantite) || "—"}</td>
         <td>${esc(x.etat) || "—"}</td><td>${esc(x.propriete) || "—"}</td></tr>`).join("")}
     </tbody></table>
-    <div class="doc-prose">${signatureHtml()}</div>`;
+    <div class="doc-prose">${signatureSoumission()}</div>`;
+}
+
+/* Les pièces en prose portent déjà leur titre ; celles qui ne sont qu'un
+   tableau arrivaient nues. On leur donne le nom officiel de la pièce et le
+   marché auquel elle se rattache — déposée seule, une grille de prix sans
+   référence ne se rattache à rien. */
+const TITRES_PIECES = {
+  bpu: "Bordereau des prix unitaires (BPU)",
+  import: "Bordereau des prix pour les fournitures à importer",
+  deja_importee: "Bordereau des prix pour les fournitures déjà importées",
+  fabrique_benin: "Bordereau des prix pour les fournitures fabriquées au Bénin",
+  services: "Bordereau et calendrier des services connexes",
+  calendrier: "Liste des fournitures et calendrier de livraison",
+  description: "Description technique des fournitures",
+};
+function titrePieceHtml(d, lot, type) {
+  const t = TITRES_PIECES[type];
+  if (!t) return "";
+  const plusieursLots = (d.lots || []).length > 1;
+  return `<div class="print-header">
+    <h2>${esc(t)}${plusieursLots ? " — " + esc(lot.nom) : ""}</h2>
+    <div class="meta">${esc(d.reference) || "Référence non renseignée"} · ${esc(d.objet) || "Objet non renseigné"}</div>
+  </div>`;
 }
 
 function buildDocHtml(d, lot, type) {
+  return titrePieceHtml(d, lot, type) + corpsDocHtml(d, lot, type);
+}
+function corpsDocHtml(d, lot, type) {
   switch (type) {
     case "lettre": return docLettreSoumission(d, lot);
     case "renseignements": return docRenseignements(d);
