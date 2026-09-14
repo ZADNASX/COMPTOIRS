@@ -1719,14 +1719,16 @@ const LS_PROFILE = "dsn_profile_v1";
 const LS_LASTBACKUP = "dsn_last_backup_v1";
 const APP_DATA_VERSION = 3;
 
-/* Le taux de la maison ouverte, et non une constante : ZADNA relève de la TPS
-   et ne facture pas de TVA. Il sert aussi à convertir les bornes du Répertoire,
-   qui sont ce que l'acheteur paie toutes taxes comprises — sans TVA, le prix
-   facturé est déjà ce montant-là. */
+/* Le taux de la maison ouverte, et non une constante. On ne regarde PAS
+   « TVA par défaut » ici : ce réglage vaut pour les ventes commerciales, où
+   ZADNA facture sans TVA au titre de la TPS. Un marché public se passe avec
+   une structure de l'État, qui retient la TVA à la source et la reverse au
+   Trésor : elle figure donc sur l'offre. Le taux reste celui des réglages,
+   pour qu'un changement de taux n'oblige pas à toucher au code.
+   Si un dossier devait partir sans TVA, il faudra un interrupteur par
+   dossier — pas un réglage de maison. */
 function tauxMarches() {
-  var r = reglages();
-  if (String(r.tvaDefaut || "") === "non") return 0;
-  var t = Number(r.tauxTva);
+  var t = Number(reglages().tauxTva);
   return isFinite(t) && t > 0 ? t / 100 : 0.18;
 }
 function libelleTVA() { return "TVA (" + (Math.round(tauxMarches() * 1000) / 10) + "%)"; }
