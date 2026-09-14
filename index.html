@@ -504,6 +504,10 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
   .feuille table.art thead{display:table-header-group}
   .feuille table.art tr,.feuille .barre-net,.feuille .totaux,.feuille .quittance,
   .feuille .lettres,.feuille .paraphes,.feuille .recu-par,.feuille .certif{break-inside:avoid;page-break-inside:avoid}
+  /* Les bandeaux de couleur des tableaux ne sont pas dans une .feuille : la
+     declaration qui force l'impression des fonds ne les couvrait pas, et un
+     entete blanc sur brun serait sorti blanc sur blanc. */
+  #marches-print, #marches-print *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   /* Les pieces de marche ne sont pas dans une .feuille : sans marge propre,
      elles s impriment bord a bord. On leur donne celle des factures.
      Le selecteur passe par #impression, qui les contient : le module declare
@@ -767,6 +771,43 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
 /* RCCM et IFU ajoutes sous l'en-tete des maisons qui les portent en pied. */
 #marches .mentions-marche, #marches-print .mentions-marche{
   font-size: 11px; letter-spacing: .02em; margin-top: 2mm; }
+
+/* ══ Les tableaux prennent la couleur de leur maison ══
+   Les couleurs sont celles de l'en-tete de chacune, releveees sur ses feuilles :
+   bleu #291DB2 pour DSN, brun #5A2E1E et ocre #C98A3C pour NASSRA, teal
+   #0088B0 pour ZADNA. La mise en page ne change pas — seul l'habillage. */
+
+/* — DSN : bandeau bleu plein, mentions en Times comme son en-tete — */
+#marches.maq-dsn .bordereau-table th, #marches-print.maq-dsn .bordereau-table th{
+  background: #291DB2; color: #fff; border-color: #291DB2;
+  font-family: "Times New Roman", Times, serif; font-size: 11.5px;
+  letter-spacing: .04em; text-transform: uppercase; }
+#marches.maq-dsn .bordereau-table td, #marches-print.maq-dsn .bordereau-table td{
+  border-color: #D8E4F3; }
+#marches.maq-dsn .print-header h2, #marches-print.maq-dsn .print-header h2{
+  color: #291DB2; font-family: "Times New Roman", Times, serif; }
+
+/* — NASSRA : bandeau brun, filet ocre dessous, aucune ligne verticale — */
+#marches.maq-nassra .bordereau-table th, #marches-print.maq-nassra .bordereau-table th{
+  background: #5A2E1E; color: #fff; border: 0; border-bottom: 3px solid #C98A3C;
+  letter-spacing: .05em; }
+#marches.maq-nassra .bordereau-table td, #marches-print.maq-nassra .bordereau-table td{
+  border: 0; border-bottom: 1px solid #E5DACA; }
+#marches.maq-nassra .print-header h2, #marches-print.maq-nassra .print-header h2{
+  color: #5A2E1E; }
+
+/* — ZADNA : pas de fond, un filet teal sous l'entete, chiffres en mono — */
+#marches.maq-zadna .bordereau-table th, #marches-print.maq-zadna .bordereau-table th{
+  background: transparent; color: #0088B0; border: 0; border-bottom: 2px solid #0088B0;
+  text-transform: uppercase; letter-spacing: .09em; font-size: 10.5px; }
+#marches.maq-zadna .bordereau-table td, #marches-print.maq-zadna .bordereau-table td{
+  border: 0; border-bottom: 1px solid #E4E4E4; }
+#marches.maq-zadna .bordereau-table tbody tr:nth-child(even) td,
+#marches-print.maq-zadna .bordereau-table tbody tr:nth-child(even) td{ background: #F2FAFD; }
+#marches.maq-zadna .bordereau-table td.num, #marches-print.maq-zadna .bordereau-table td.num{
+  font-family: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace; }
+#marches.maq-zadna .print-header h2, #marches-print.maq-zadna .print-header h2{
+  color: #0088B0; }
 #marches .print-entreprise.avec-logo, #marches-print .print-entreprise.avec-logo{
   display: flex; align-items: flex-start; gap: 10mm; }
 #marches .print-entreprise .print-ident, #marches-print .print-entreprise .print-ident{ flex: 1; }
@@ -1659,7 +1700,9 @@ function demarrerMarches(){
     /* Le comptoir masque .app à l'impression et n'affiche que #impression :
        on y dépose le contenu, enveloppé pour que le CSS du module s'y applique. */
     var cible = document.getElementById("impression");
-    cible.innerHTML = '<div id="marches-print">' + html + '</div>';
+    /* La maquette de la maison doit surplomber les tableaux : la feuille qui
+       la porte n'est que leur frère. */
+    cible.innerHTML = '<div id="marches-print" class="maq-' + maquetteCourante() + '">' + html + "</div>";
     window.print();
   }
 
@@ -4168,7 +4211,16 @@ document.getElementById("setupFileInput").addEventListener("change", async (e) =
 // ============================================================
 // INIT
 // ============================================================
+/* L'écran porte la même marque que le papier, sinon on ne verrait la table de
+   sa maison qu'à l'impression. */
+function marquerMaquette() {
+  var el = document.getElementById("marches");
+  if (!el) return;
+  ["dsn", "nassra", "zadna"].forEach(function (m) { el.classList.remove("maq-" + m); });
+  el.classList.add("maq-" + maquetteCourante());
+}
 rafraichirMarches = function(){
+  marquerMaquette();
   /* Un enregistrement en attente appartient à la maison qu'on quitte. */
   clearTimeout(minuteurMarches);
   comptoirMarches = Store.comptoir;
@@ -4184,6 +4236,7 @@ rafraichirMarches = function(){
   renderDocumentsView();
 };
 
+marquerMaquette();
 majEnteteMarque();
 refreshTabsState();
 renderDossiers();
