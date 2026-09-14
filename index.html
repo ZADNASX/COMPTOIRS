@@ -3557,6 +3557,10 @@ document.getElementById("docContent").addEventListener("input", (e) => {
 
 document.getElementById("btnDocPrint").addEventListener("click", () => {
   appliquerPoliceImpression(getActiveDossier());
+  /* L'en-tete est pose au rendu de l'onglet Documents. Changer de comptoir ne
+     redessine pas cet onglet : sans cette ligne, la piece partirait sur le
+     papier de la maison precedente. */
+  document.getElementById("docPrintHead").innerHTML = enteteEntrepriseHtml();
   imprimerParLeComptoir(["docPrintHead", "docContent", "docPrintFoot"]
     .map(function (id) { var e = document.getElementById(id); return e ? e.innerHTML : ""; })
     .join(""));
@@ -3970,6 +3974,10 @@ rafraichirMarches = function(){
   majEnteteMarque();
   refreshTabsState();
   renderDossiers();
+  /* Les pieces deja rendues portent l'identite de l'ancien comptoir : sans ce
+     redessin, revenir ici apres un changement de maison imprimerait ses
+     renseignements. La fonction se retire seule s'il n'y a pas de dossier. */
+  renderDocumentsView();
 };
 
 majEnteteMarque();
