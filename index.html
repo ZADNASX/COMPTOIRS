@@ -1857,7 +1857,6 @@ function fmtDate(d) {
   if (isNaN(dt)) return d;
   return dt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
-function today() { return new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }); }
 function esc(s) { return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
 function toast(msg) {
   const t = document.getElementById("mp-toast");
@@ -3115,18 +3114,6 @@ function signatureSoumission() {
   </div>`;
 }
 
-function signatureHtml(lieuLabel) {
-  /* La ville vient des réglages du comptoir. « Fait à Cotonou » était écrit en
-     dur : une maison établie ailleurs l'aurait signé quand même. */
-  const ville = String(reglages().ville || "").trim();
-  const lieu = lieuLabel || (ville ? "Fait à " + ville : "");
-  return `<div class="signature-bloc"><div>
-    <div>${lieu ? esc(lieu) + ", le " : "Le "}${today()}</div>
-    <div class="sig-space"></div>
-    <div><strong>${esc(PROFILE.representant || "Le représentant habilité")}</strong></div>
-  </div></div>`;
-}
-
 function buildPrintAllLotsHtml(d) {
   let html = "";
   d.lots.forEach(lot => {
@@ -3170,7 +3157,7 @@ function buildPrintAllLotsHtml(d) {
         ${piedHTML(lot, mode)}
       </tbody></table>
       <p style="font-size:12px;margin-top:8px;">Arrêté le présent bordereau à la somme de <strong>${esc(capitalize(nombreEnLettresFr(m.ttc)))} francs CFA TTC</strong>.</p>
-      ${signatureHtml()}
+      ${signatureSoumission()}
     </div>`;
   });
   return html;
@@ -3615,7 +3602,14 @@ function titrePieceHtml(d, lot, type) {
 }
 
 function buildDocHtml(d, lot, type) {
-  return titrePieceHtml(d, lot, type) + corpsDocHtml(d, lot, type);
+  const corps = corpsDocHtml(d, lot, type);
+  /* Toutes les pièces se déposent signées. Celles en prose portent déjà le
+     bloc ; on l'ajoute aux autres. Une pièce vide n'en reçoit pas : il n'y a
+     rien à signer, et la faire signer donnerait le change. */
+  const dejaSignee = corps.indexOf("signature-soumission") >= 0;
+  const vide = corps.indexOf("empty-state") >= 0;
+  return titrePieceHtml(d, lot, type) + corps +
+    (dejaSignee || vide ? "" : `<div class="doc-prose">${signatureSoumission()}</div>`);
 }
 function corpsDocHtml(d, lot, type) {
   switch (type) {
