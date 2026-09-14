@@ -504,6 +504,9 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
   .feuille table.art thead{display:table-header-group}
   .feuille table.art tr,.feuille .barre-net,.feuille .totaux,.feuille .quittance,
   .feuille .lettres,.feuille .paraphes,.feuille .recu-par,.feuille .certif{break-inside:avoid;page-break-inside:avoid}
+  /* Les pieces de marche ne sont pas dans une .feuille : sans marge propre,
+     elles s impriment bord a bord. On leur donne celle des factures. */
+  #marches-print{padding:16mm 18mm 20mm}
   @page{size:A4;margin:0}
 }
 
@@ -752,6 +755,9 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
    A4 pour ne garder que le bandeau. */
 #marches .feuille.entete-seule, #marches-print .feuille.entete-seule{
   width: auto; min-height: 0; padding: 0; margin: 0; box-shadow: none; background: none; }
+/* RCCM et IFU ajoutes sous l'en-tete des maisons qui les portent en pied. */
+#marches .mentions-marche, #marches-print .mentions-marche{
+  font-size: 11px; letter-spacing: .02em; margin-top: 2mm; }
 #marches .print-entreprise.avec-logo, #marches-print .print-entreprise.avec-logo{
   display: flex; align-items: flex-start; gap: 10mm; }
 #marches .print-entreprise .print-ident, #marches-print .print-entreprise .print-ident{ flex: 1; }
@@ -1983,16 +1989,26 @@ function loadDossiers() {
   return Array.isArray(l) ? l.map(migrateDossier) : [];
 }
 var minuteurMarches = null;
+/* La maison a laquelle DOSSIERS et PROFILE appartiennent. Sans elle, une
+   ecriture differee partie sous DSN s'enregistrait sous NASSRA. */
+var comptoirMarches = null;
 function saveDossiers(list) {
   /* Une frappe dans un prix appelle persistDossiers : sans ce délai, chaque
      caractère partirait au serveur. */
+  var maison = Store.comptoir;
   clearTimeout(minuteurMarches);
   minuteurMarches = setTimeout(function () {
+    /* Le comptoir a pu changer pendant le délai, ou ces dossiers venir d'une
+       autre maison : dans les deux cas on ne les écrit pas ici. */
+    if (Store.comptoir !== maison || comptoirMarches !== maison) return;
     Store.poser("reglages", { id: "marches", dossiers: list, profil: PROFILE });
   }, 900);
 }
-function getActiveId() { return localStorage.getItem(LS_ACTIVE) || null; }
-function setActiveId(id) { id ? localStorage.setItem(LS_ACTIVE, id) : localStorage.removeItem(LS_ACTIVE); }
+/* Une cle par maison : le dossier ouvert chez DSN ne doit pas etre celui
+   qu'on retrouve en ouvrant NASSRA. */
+function cleActive() { return LS_ACTIVE + ":" + (Store.comptoir || "?"); }
+function getActiveId() { return localStorage.getItem(cleActive()) || null; }
+function setActiveId(id) { id ? localStorage.setItem(cleActive(), id) : localStorage.removeItem(cleActive()); }
 
 // Profil vierge : aucune identité n'est livrée avec l'application.
 // Elle est saisie par l'utilisateur au premier lancement (voir modalSetup).
@@ -2039,9 +2055,13 @@ function loadProfile() {
 }
 function saveProfile(p) {
   PROFILE = p;
+  /* Même garde : le profil part avec la liste des dossiers, qui doit être
+     celle du comptoir ouvert. */
+  if (comptoirMarches !== Store.comptoir) return;
   Store.poser("reglages", { id: "marches", dossiers: DOSSIERS, profil: p });
 }
 
+comptoirMarches = Store.comptoir;
 let DOSSIERS = loadDossiers();
 let ACTIVE_ID = getActiveId();
 let PROFILE = loadProfile();
@@ -2311,7 +2331,10 @@ function norm(s) { return String(s || "").toLowerCase().normalize("NFD").replace
 async function loadRepertoire() {
   REP_LOADED = true;
   REP_CATS = [];
-  document.getElementById("repCount").textContent = "10 050 articles";
+  document.getElementById("repCount").textContent = "Répertoire des prix";
+  totalRepertoire().then(function (t) {
+    if (t) document.getElementById("repCount").textContent = nombre(t) + " articles";
+  });
   document.getElementById("repList").innerHTML =
     `<div class="empty-state">Tapez au moins trois lettres pour chercher dans le Répertoire de l'État.</div>`;
 }
@@ -2349,7 +2372,8 @@ function applyRepFilter() {
     });
     REP_FILTERED = REP_ROWS.map(function (_, i) { return i; });
     document.getElementById("repCount").textContent =
-      res.length + " résultat" + (res.length > 1 ? "s" : "") + " sur 10 050";
+      res.length + " résultat" + (res.length > 1 ? "s" : "") +
+      (rprTotal ? " sur " + nombre(rprTotal) : "");
     renderRepList();
   });
 }
@@ -2968,8 +2992,16 @@ function enteteEntrepriseHtml() {
   /* Le format de la pièce est imposé par le dossier d'appel d'offres, mais le
      papier reste celui de la maison : on reprend l'en-tête de ses courriers,
      et `entete-seule` annule la géométrie de la page A4 qui l'accompagne. */
-  var m = maquetteCourante();
-  return '<div class="feuille ' + m + ' entete-seule">' + enteteLettre(reglages(), {}, m) + "</div>";
+  var m = maquetteCourante(), r = reglages();
+  var tete = enteteLettre(r, {}, m);
+  /* Une soumission doit porter le RCCM et l'IFU. La maquette DSN les met dans
+     son en-tête ; les autres les réservent au pied de page, que cette pièce
+     n'a pas. On les ajoute sous le filet. */
+  if (m !== "dsn" && (r.rccm || r.ifu)) {
+    tete += '<div class="mentions-marche">RCCM : ' + esc(r.rccm || "—") +
+            "  ·  IFU : " + esc(r.ifu || "—") + "</div>";
+  }
+  return '<div class="feuille ' + m + ' entete-seule">' + tete + "</div>";
 }
 
 function signatureHtml(lieuLabel) {
@@ -3975,7 +4007,11 @@ document.getElementById("setupFileInput").addEventListener("change", async (e) =
 // INIT
 // ============================================================
 rafraichirMarches = function(){
+  /* Un enregistrement en attente appartient à la maison qu'on quitte. */
+  clearTimeout(minuteurMarches);
+  comptoirMarches = Store.comptoir;
   DOSSIERS = loadDossiers();
+  ACTIVE_ID = getActiveId();
   PROFILE = loadProfile();
   majEnteteMarque();
   refreshTabsState();
@@ -5281,6 +5317,17 @@ function feuilleZadna(d){
    pour un document qu'on ne consulte que ponctuellement. */
 var rprResultats = [];
 var rprMinuteur = null;
+/* Le nombre d'articles etait ecrit en dur : a la prochaine edition il aurait
+   menti. On le demande une fois a la base, sans rapatrier les lignes. */
+var rprTotal = null;
+function totalRepertoire(){
+  if(rprTotal !== null) return Promise.resolve(rprTotal);
+  if(!sb) return Promise.resolve(null);
+  return sb.from("repertoire").select("code", {count:"exact", head:true}).then(function(r){
+    rprTotal = r.error ? null : (r.count || 0);
+    return rprTotal;
+  }, function(){ return null; });
+}
 
 function chercherRepertoire(q){
   var t = String(q || "").trim().replace(/[%_]/g, " ");
