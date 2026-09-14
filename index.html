@@ -1638,6 +1638,9 @@ function signal(msg){
    sur la recherche serveur du comptoir. */
 var marchesDemarre = false;
 var rafraichirMarches = null;
+/* Fait partir tout de suite l'enregistrement des marchés encore en attente.
+   Appelé avant de quitter un comptoir. */
+var viderMarches = null;
 function demarrerMarches(){
   if(marchesDemarre) return;
   marchesDemarre = true;
@@ -1998,12 +2001,22 @@ function saveDossiers(list) {
   var maison = Store.comptoir;
   clearTimeout(minuteurMarches);
   minuteurMarches = setTimeout(function () {
+    minuteurMarches = null;
     /* Le comptoir a pu changer pendant le délai, ou ces dossiers venir d'une
        autre maison : dans les deux cas on ne les écrit pas ici. */
     if (Store.comptoir !== maison || comptoirMarches !== maison) return;
     Store.poser("reglages", { id: "marches", dossiers: list, profil: PROFILE });
   }, 900);
 }
+/* Quitter un comptoir ne doit pas coûter la dernière frappe : on force
+   l'enregistrement pendant que la bonne maison est encore ouverte. */
+viderMarches = function () {
+  if (!minuteurMarches) return;
+  clearTimeout(minuteurMarches);
+  minuteurMarches = null;
+  if (comptoirMarches !== Store.comptoir) return;
+  Store.poser("reglages", { id: "marches", dossiers: DOSSIERS, profil: PROFILE });
+};
 /* Une cle par maison : le dossier ouvert chez DSN ne doit pas etre celui
    qu'on retrouve en ouvrant NASSRA. */
 function cleActive() { return LS_ACTIVE + ":" + (Store.comptoir || "?"); }
@@ -5708,6 +5721,9 @@ function ouvrirComptoir(code){
 }
 
 function changerDeComptoir(){
+  /* Avant tout : ce qui est en attente d'enregistrement appartient encore à
+     cette maison-ci. */
+  if(typeof viderMarches === "function") viderMarches();
   try { localStorage.removeItem("comptoir:dernier"); } catch(e){}
   Store.canaux.forEach(function(c){ try { sb.removeChannel(c); } catch(e){} });
   Store.canaux = [];
@@ -5718,6 +5734,7 @@ function changerDeComptoir(){
 }
 
 function seDeconnecter(){
+  if(typeof viderMarches === "function") viderMarches();
   var fin = function(){
     try { localStorage.removeItem("comptoir:dernier"); } catch(e){}
     location.reload();
