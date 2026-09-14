@@ -1719,7 +1719,20 @@ const LS_PROFILE = "dsn_profile_v1";
 const LS_LASTBACKUP = "dsn_last_backup_v1";
 const APP_DATA_VERSION = 3;
 
-const TVA_RATE = 0.18;
+/* Le taux de la maison ouverte, et non une constante : ZADNA relève de la TPS
+   et ne facture pas de TVA. Il sert aussi à convertir les bornes du Répertoire,
+   qui sont ce que l'acheteur paie toutes taxes comprises — sans TVA, le prix
+   facturé est déjà ce montant-là. */
+function tauxMarches() {
+  var r = reglages();
+  if (String(r.tvaDefaut || "") === "non") return 0;
+  var t = Number(r.tauxTva);
+  return isFinite(t) && t > 0 ? t / 100 : 0.18;
+}
+function libelleTVA() { return "TVA (" + (Math.round(tauxMarches() * 1000) / 10) + "%)"; }
+function mentionSansTVA() {
+  return String(reglages().mention || "").trim() || "TVA non applicable.";
+}
 const BACKUP_RAPPEL_JOURS = 7;
 
 const CHECKLIST_BLOCS_FOURNITURES = [
@@ -2026,11 +2039,11 @@ function totalLotAffiche(lot, mode) {
 function montantsLot(lot, mode) {
   if (mode === "TTC") {
     const ttc = totalLotAffiche(lot, "TTC");
-    const ht = money(ttc / (1 + TVA_RATE));
+    const ht = money(ttc / (1 + tauxMarches()));
     return { ht: ht, tva: ttc - ht, ttc: ttc };
   }
   const ht = lotTotalsHT(lot);
-  const tva = money(ht * TVA_RATE);
+  const tva = money(ht * tauxMarches());
   return { ht: ht, tva: tva, ttc: ht + tva };
 }
 /* L'ordre du pied de tableau. Le montant qui engage l'offre vient en tête :
@@ -2040,6 +2053,9 @@ function montantsLot(lot, mode) {
    est laissé à l'appelant : l'écran dit « du lot », le papier nomme le lot. */
 function ordrePied(lot, mode) {
   const m = montantsLot(lot, mode);
+  /* Sans TVA, hors taxes et toutes taxes comprises sont le même montant :
+     trois lignes diraient trois fois la même somme. */
+  if (!tauxMarches()) return [{ cle: "total", val: m.ttc, fort: true }];
   const ht  = { cle: "ht",  val: m.ht,  fort: false };
   const tva = { cle: "tva", val: m.tva, fort: false };
   const ttc = { cle: "ttc", val: m.ttc, fort: true };
@@ -2048,7 +2064,8 @@ function ordrePied(lot, mode) {
 /* Les mêmes trois lignes, prêtes pour le papier. */
 function piedHTML(lot, mode) {
   const nom = esc(lot.nom);
-  const LIB = { ht: "Total HTVA — " + nom, tva: "TVA (18%)", ttc: "TOTAL TTC — " + nom };
+  const LIB = { ht: "Total HTVA — " + nom, tva: libelleTVA(),
+                ttc: "TOTAL TTC — " + nom, total: "MONTANT — " + nom };
   return ordrePied(lot, mode).map(function (r, i) {
     const fort = t => r.fort ? "<strong>" + t + "</strong>" : t;
     return '<tr><td style="text-align:right;">' + fort(LIB[r.cle]) + '</td>' +
@@ -2563,7 +2580,7 @@ function renderRepVisible() {
        au bordereau comme des prix hors taxes et on dépasse le plafond de 18 %.
        Le hors-taxes correspondant est donné juste en dessous : c'est lui qu'on
        saisit. */
-    const bsHT = bs ? money(Number(bs) / (1 + TVA_RATE)) : 0;
+    const bsHT = bs ? money(Number(bs) / (1 + tauxMarches())) : 0;
     const fourchette = (bi === null || bi === undefined)
       ? `borne basse n.c. — jusqu'à ${fmtMoney(bs)} TTC`
       : `${fmtMoney(bi)} – ${fmtMoney(bs)} TTC`;
@@ -2595,7 +2612,7 @@ document.getElementById("repList").addEventListener("click", (e) => {
   // Et comme ces bornes sont TTC, on en dégage le hors taxes : la colonne PU
   // tient un prix HT, y poser une borne telle quelle la sous-évaluait de 18 %.
   const borne = (bi === null || bi === undefined) ? (bs || 0) : bi;
-  const pu = money(borne / (1 + TVA_RATE));
+  const pu = money(borne / (1 + tauxMarches()));
   chap.lignes.push(normalizeLigne({
     id: uid(), designation: r[3], unite: r[4] || "", dateLivraison: "", qte: 1,
     puht: money(pu), refBI: bi || 0, refBS: bs || 0, descriptionDetaillee: r[7] || r[3],
@@ -2613,11 +2630,11 @@ const EXPANDED_ROWS = new Set();
 
 function priceInputValue(l, mode) {
   const ht = money(l.puht);
-  return mode === "TTC" ? money(ht * (1 + TVA_RATE)) : ht;
+  return mode === "TTC" ? money(ht * (1 + tauxMarches())) : ht;
 }
 function setPriceFromInput(l, mode, val) {
   const v = parseNum(val);
-  l.puht = money(mode === "TTC" ? v / (1 + TVA_RATE) : v);
+  l.puht = money(mode === "TTC" ? v / (1 + tauxMarches()) : v);
 }
 
 // ── Les bornes du Répertoire sont des prix TTC ──────────────────────────
@@ -2626,10 +2643,10 @@ function setPriceFromInput(l, mode, val) {
 // pour un plafond de 136 125 TTC, la jauge s'affichait en vert alors que
 // l'acheteur payait 160 480, soit 24 355 de trop. Offre écartée.
 // Tout ce qui touche aux bornes se compare donc en TTC.
-function prixPayeTTC(l) { return money((Number(l.puht) || 0) * (1 + TVA_RATE)); }
+function prixPayeTTC(l) { return money((Number(l.puht) || 0) * (1 + tauxMarches())); }
 function plafondHT(l) {
   const bs = Number(l.refBS) || 0;
-  return bs ? money(bs / (1 + TVA_RATE)) : 0;
+  return bs ? money(bs / (1 + tauxMarches())) : 0;
 }
 function horsFourchette(l) {
   const paye = prixPayeTTC(l);
@@ -2865,20 +2882,29 @@ function refreshTotals(d) {
   document.getElementById("footChapLabel").textContent =
     `Sous-total — ${String(chap.nom || "").trim() || "chapitre sans titre"}`;
   document.getElementById("totalChap").textContent = fmtInt(totalChapAffiche(chap, d.priceMode));
-  const LIB = { ht: "Total HTVA du lot", tva: "TVA (18%)", ttc: "TOTAL TTC du lot" };
-  ordrePied(lot, d.priceMode).forEach(function (r, i) {
+  const LIB = { ht: "Total HTVA du lot", tva: libelleTVA(),
+                ttc: "TOTAL TTC du lot", total: "MONTANT DU LOT" };
+  const lignes = ordrePied(lot, d.priceMode);
+  for (let i = 0; i < 3; i++) {
     const lib = document.getElementById("libT" + (i + 1));
     const val = document.getElementById("valT" + (i + 1));
+    const r = lignes[i];
+    /* Une maison sans TVA n'a qu'une ligne : les deux autres disparaissent. */
+    lib.closest("tr").hidden = !r;
+    if (!r) continue;
     lib.textContent = LIB[r.cle];
     val.textContent = fmtInt(r.val);
     lib.style.fontWeight = val.style.fontWeight = r.fort ? "700" : "";
-  });
+  }
   const hint = document.getElementById("dossierTotalHint");
   hint.textContent = d.lots.length > 1
     ? `Récapitulatif interne : ${fmtInt(dossierTotalsHT(d))} FCFA HT sur l'ensemble des ${d.lots.length} lots. Chaque lot fait l'objet d'une offre financière séparée — ce cumul ne figure sur aucun document imprimé.`
     : "";
-  if (d.priceMode === "TTC") {
+  if (d.priceMode === "TTC" && tauxMarches()) {
     hint.textContent += (hint.textContent ? " " : "") + "Saisie en TTC : le prix est converti et stocké en HT entier, un écart d'arrondi de 1 FCFA est possible.";
+  }
+  if (!tauxMarches()) {
+    hint.textContent += (hint.textContent ? " " : "") + mentionSansTVA();
   }
 }
 
@@ -3224,7 +3250,8 @@ function buildPrintAllLotsHtml(d) {
     html += `<table class="bordereau-table"><tbody>
         ${piedHTML(lot, mode)}
       </tbody></table>
-      <p style="font-size:12px;margin-top:8px;">Arrêté le présent bordereau à la somme de <strong>${esc(capitalize(nombreEnLettresFr(m.ttc)))} francs CFA TTC</strong>.</p>
+      <p style="font-size:12px;margin-top:8px;">Arrêté le présent bordereau à la somme de <strong>${esc(capitalize(nombreEnLettresFr(m.ttc)))} francs CFA${tauxMarches() ? " TTC" : ""}</strong>.</p>
+      ${tauxMarches() ? "" : '<p style="font-size:11px;margin-top:3px;font-style:italic;">' + esc(mentionSansTVA()) + "</p>"}
       ${signatureSoumission()}
     </div>`;
   });
@@ -3258,9 +3285,14 @@ document.getElementById("btnExportCsv").addEventListener("click", () => {
       if (lotChapitres(lot).length > 1) rows.push(["", "", "", "", "", "", "", `Sous-total ${titre}`, chapTotalHT(c)]);
     });
     const totalHT = lotTotalsHT(lot);
-    rows.push(["", "", "", "", "", "", "", `Total HTVA — ${lot.nom}`, totalHT]);
-    rows.push(["", "", "", "", "", "", "", "TVA (18%)", money(totalHT * TVA_RATE)]);
-    rows.push(["", "", "", "", "", "", "", `Total TTC — ${lot.nom}`, money(totalHT * (1 + TVA_RATE))]);
+    if (tauxMarches()) {
+      rows.push(["", "", "", "", "", "", "", `Total HTVA — ${lot.nom}`, totalHT]);
+      rows.push(["", "", "", "", "", "", "", libelleTVA(), money(totalHT * tauxMarches())]);
+      rows.push(["", "", "", "", "", "", "", `Total TTC — ${lot.nom}`, money(totalHT * (1 + tauxMarches()))]);
+    } else {
+      rows.push(["", "", "", "", "", "", "", `Montant — ${lot.nom}`, totalHT]);
+      rows.push(["", "", "", "", "", "", "", mentionSansTVA(), ""]);
+    }
     rows.push([]);
   });
   if (d.lots.length > 1) {
@@ -3524,9 +3556,22 @@ function adresseAutoriteHtml(d) {
 }
 
 function docLettreSoumission(d, lot) {
+  const taux = tauxMarches();
   const totalHT = lotTotalsHT(lot);
-  const tva = money(totalHT * TVA_RATE);
+  const tva = money(totalHT * taux);
   const ttc = totalHT + tva;
+  /* Une maison sans TVA annonce un montant, pas une décomposition fiscale —
+     et elle dit sous quel régime. */
+  const blocMontant = taux
+    ? `<ul>
+      <li>Montant hors TVA : <strong>${fmtInt(totalHT)} FCFA</strong> (${esc(capitalize(nombreEnLettresFr(totalHT)))} francs CFA)</li>
+      <li>${esc(libelleTVA())} : <strong>${fmtInt(tva)} FCFA</strong></li>
+      <li>Montant toutes taxes comprises : <strong>${fmtInt(ttc)} FCFA</strong> (${esc(capitalize(nombreEnLettresFr(ttc)))} francs CFA)</li>
+    </ul>`
+    : `<ul>
+      <li>Montant global toutes taxes comprises : <strong>${fmtInt(ttc)} FCFA</strong> (${esc(capitalize(nombreEnLettresFr(ttc)))} francs CFA)</li>
+    </ul>
+    <p>${esc(mentionSansTVA())}</p>`;
   const plusieursLots = d.lots.length > 1;
   return `<div class="doc-prose">
     <h3>Lettre de soumission</h3>
@@ -3539,11 +3584,7 @@ function docLettreSoumission(d, lot) {
     <p>Après avoir pris connaissance de l'ensemble des pièces du dossier ${d.modePassation ? "de " + esc(d.modePassation) : "d'appel d'offres"} cité en objet, et après nous être personnellement rendu compte de la nature et de l'étendue des prestations à réaliser, nous, soussignés <strong>${esc(PROFILE.raisonSociale)}</strong>${PROFILE.formeJuridique ? ", " + esc(PROFILE.formeJuridique) : ""}${PROFILE.rccm ? ", immatriculée au RCCM sous le numéro " + esc(PROFILE.rccm) : ""}${PROFILE.ifu ? " et titulaire de l'IFU n° " + esc(PROFILE.ifu) : ""}, dont le siège est sis ${esc(PROFILE.adresse) || "[adresse]"}, nous engageons à exécuter les prestations objet du présent marché${plusieursLots ? " au titre du " + esc(lot.nom) : ""}.</p>
 
     <p>Le montant de notre offre s'établit ainsi qu'il suit :</p>
-    <ul>
-      <li>Montant hors TVA : <strong>${fmtInt(totalHT)} FCFA</strong> (${esc(capitalize(nombreEnLettresFr(totalHT)))} francs CFA)</li>
-      <li>TVA (18 %) : <strong>${fmtInt(tva)} FCFA</strong></li>
-      <li>Montant toutes taxes comprises : <strong>${fmtInt(ttc)} FCFA</strong> (${esc(capitalize(nombreEnLettresFr(ttc)))} francs CFA)</li>
-    </ul>
+    ${blocMontant}
 
     <p>Nous nous engageons à exécuter les prestations dans un délai de <strong>${esc(d.delaiExec) || "[délai à préciser]"}</strong> à compter de la notification de l'ordre de service.</p>
 
