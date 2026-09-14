@@ -1109,13 +1109,18 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
       </label>
       <div class="grid2">
         <label class="field">Mode de passation
+          <!-- La valeur est le libellé entier, pas le sigle : la lettre de
+               soumission l'insère dans une phrase — « du dossier de Demande de
+               proposition cité en objet ». Le sigle reste visible ici. -->
           <select id="fMode">
             <option value="">— non précisé —</option>
-            <option value="AOO">Appel d'offres ouvert (AOO)</option>
-            <option value="AOR">Appel d'offres restreint (AOR)</option>
-            <option value="DRP">Demande de renseignements et de prix (DRP)</option>
-            <option value="AMI">Avis à manifestation d'intérêt (AMI)</option>
-            <option value="ED">Entente directe</option>
+            <option value="Appel d'offres ouvert">Appel d'offres ouvert (AOO)</option>
+            <option value="Appel d'offres restreint">Appel d'offres restreint (AOR)</option>
+            <option value="Demande de renseignements et de prix">Demande de renseignements et de prix (DRP)</option>
+            <option value="Demande de proposition">Demande de proposition (DP)</option>
+            <option value="Demande de cotation">Demande de cotation (DC)</option>
+            <option value="Avis à manifestation d'intérêt">Avis à manifestation d'intérêt (AMI)</option>
+            <option value="Entente directe">Entente directe</option>
           </select>
         </label>
         <label class="field">Date limite de dépôt
