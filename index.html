@@ -2940,8 +2940,12 @@ function enteteEntrepriseHtml() {
 }
 
 function signatureHtml(lieuLabel) {
+  /* La ville vient des réglages du comptoir. « Fait à Cotonou » était écrit en
+     dur : une maison établie ailleurs l'aurait signé quand même. */
+  const ville = String(reglages().ville || "").trim();
+  const lieu = lieuLabel || (ville ? "Fait à " + ville : "");
   return `<div class="signature-bloc"><div>
-    <div>${esc(lieuLabel || "Fait à Cotonou")}, le ${today()}</div>
+    <div>${lieu ? esc(lieu) + ", le " : "Le "}${today()}</div>
     <div class="sig-space"></div>
     <div><strong>${esc(PROFILE.representant || "Le représentant habilité")}</strong></div>
   </div></div>`;
@@ -4226,14 +4230,23 @@ function vueReglages(){
       ch("nom","Nom commercial") + ch("activite","Baseline") + ch("forme","Forme juridique et capital") +
       '<div class="champ"><label for="r-maquette">Maquette des documents</label>' +
       '<select id="r-maquette" data-reglage="maquette">' +
-      [["","Selon la charte du comptoir"],["zadna","ZADNA — en-tête à gauche, signature à droite"],
-       ["nassra","NASSRA — logo à gauche, signature à gauche"]].map(function(m){
+      [["","Selon la palette du comptoir"],
+       ["zadna","Technique — en-tête à gauche, signature à droite"],
+       ["nassra","Administrative — logo à gauche, signature à gauche"],
+       ["dsn","En-tête de lettre — mentions à droite en Times, filet"]].map(function(m){
         return '<option value="' + m[0] + '"' + ((r.maquette||"") === m[0] ? " selected" : "") +
           ">" + m[1] + "</option>";
       }).join("") + "</select></div>" +
       ch("rccm","RCCM") + ch("ifu","IFU") +
       ch("tel","Téléphone") + ch("email","E-mail") + ch("ville","Ville d'émission") +
-      ch("logo","Logo — adresse du fichier") + "</div>" +
+      ch("logo","Logo — adresse du fichier") +
+      '<div class="champ"><label for="r-charte">Palette</label>' +
+      '<select id="r-charte" data-reglage="charte">' +
+      [["","Selon le nom du comptoir"], ["zadna","Encre et couleurs vives"],
+       ["nassra","Brun et ocre"], ["dsn","Bleu"]].map(function(c){
+        return '<option value="' + c[0] + '"' + ((r.charte || "") === c[0] ? " selected" : "") +
+          ">" + c[1] + "</option>";
+      }).join("") + "</select></div></div>" +
       '<div style="margin-top:12px">' + ch("adresse","Adresse") + "</div></div>" +
     '<div class="carte"><h3>Encaissement</h3><div class="grille">' +
       ch("banque","Banque") + ch("compte","N° de compte") + ch("momo","Mobile Money") + "</div></div>" +
@@ -5439,7 +5452,7 @@ function appliquerCharte(code){
   /* Les chevrons appartiennent à ZADNA : toute autre maison porte son nom nu. */
   if(nom) nom.innerHTML = charteCourante === "zadna"
     ? '<span style="color:var(--ocre)">&lt;</span><span style="color:var(--encre)">' +
-      echap(reglages().nom || "ZADNA S.X") + '</span><span style="color:var(--ocre)">/&gt;</span>'
+      echap(reglages().nom || "Comptoir") + '</span><span style="color:var(--ocre)">/&gt;</span>'
     : echap(reglages().nom || "");
 }
 
