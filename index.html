@@ -505,8 +505,12 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
   .feuille table.art tr,.feuille .barre-net,.feuille .totaux,.feuille .quittance,
   .feuille .lettres,.feuille .paraphes,.feuille .recu-par,.feuille .certif{break-inside:avoid;page-break-inside:avoid}
   /* Les pieces de marche ne sont pas dans une .feuille : sans marge propre,
-     elles s impriment bord a bord. On leur donne celle des factures. */
-  #marches-print{padding:16mm 18mm 20mm}
+     elles s impriment bord a bord. On leur donne celle des factures.
+     Le selecteur passe par #impression, qui les contient : le module declare
+     plus bas « #marches, #marches-print{margin:0;padding:0} », de meme
+     specificite et plus loin dans la feuille — et @media n ajoute aucune
+     specificite, donc une regle a un seul identifiant perdait. */
+  #impression #marches-print{padding:16mm 18mm 20mm}
   @page{size:A4;margin:0}
 }
 
