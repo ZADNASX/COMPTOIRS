@@ -1105,6 +1105,13 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
         <input type="text" id="fReference" placeholder="Ex. DRP N°080/MEF/PRMP/SP">
       </label>
       <label class="field">Autorité contractante
+        <!-- Le carnet remplit la dénomination et le lieu de dépôt d'un choix ;
+             les deux champs restent libres pour un acheteur de passage. -->
+        <div class="row" style="gap:6px;margin-bottom:5px;">
+          <select id="fCarnet" style="flex:1;min-width:0;"></select>
+          <button class="btn sm ghost" id="btnAutCarnet" type="button"
+                  title="Enregistrer cette autorité dans le carnet">+ au carnet</button>
+        </div>
         <input type="text" id="fAutorite" placeholder="Ex. Ministère de l'Économie et des Finances">
       </label>
       <div class="grid2">
@@ -1165,6 +1172,7 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
       <button class="chip" data-stab="references" type="button" aria-pressed="false">Références</button>
       <button class="chip" data-stab="personnel" type="button" aria-pressed="false">Personnel</button>
       <button class="chip" data-stab="materiel" type="button" aria-pressed="false">Matériel</button>
+      <button class="chip" data-stab="autorites" type="button" aria-pressed="false">Autorités</button>
       <button class="chip" data-stab="sauvegarde" type="button" aria-pressed="false">Sauvegarde</button>
     </div>
 
@@ -1229,6 +1237,12 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
       <p class="faint">Matériel en propriété ou en location, repris dans le formulaire « Liste du matériel ».</p>
       <div id="matList" class="stack"></div>
       <button class="btn sm" id="btnAddMat" style="margin-top:10px;">+ Matériel</button>
+    </div>
+
+    <div class="stab" data-stab-panel="autorites" hidden>
+      <p class="faint">Les acheteurs publics avec qui vous traitez. Enregistrés une fois, ils se choisissent d'un menu à la création d'un dossier et remplissent l'autorité contractante et le lieu de dépôt.</p>
+      <div id="autList" class="stack"></div>
+      <button class="btn sm" id="btnAddAut" style="margin-top:10px;">+ Autorité</button>
     </div>
 
     <div class="stab" data-stab-panel="sauvegarde" hidden>
@@ -2167,6 +2181,9 @@ function defaultProfile() {
     references: [],
     personnel: [],
     materiel: [],
+    /* Les acheteurs publics reviennent : on garde leur dénomination et leur
+       lieu de dépôt plutôt que de les retaper à chaque dossier. */
+    autorites: [],
   };
 }
 // Le profil est considéré configuré dès que la raison sociale est renseignée.
@@ -2213,7 +2230,7 @@ function loadProfile() {
      réglages du comptoir, sinon changer de logo laisserait l'ancien sur les
      soumissions. */
   p.logo = r.logo || "";
-  ["references", "personnel", "materiel"].forEach(function (k) { if (!Array.isArray(p[k])) p[k] = []; });
+  ["references", "personnel", "materiel", "autorites"].forEach(function (k) { if (!Array.isArray(p[k])) p[k] = []; });
   return p;
 }
 function saveProfile(p) {
@@ -2427,6 +2444,7 @@ function openDossierModal(id) {
   document.getElementById("fObjet").value = d ? d.objet : "";
   document.getElementById("fReference").value = d ? d.reference : "";
   document.getElementById("fAutorite").value = d ? d.autorite : "";
+  remplirCarnet();
   document.getElementById("fMode").value = d ? (d.modePassation || "") : "";
   document.getElementById("fDateLimite").value = d ? d.dateLimite : "";
   document.getElementById("fHeureLimite").value = d ? (d.heureLimite || "") : "";
@@ -2441,6 +2459,39 @@ function openDossierModal(id) {
   modalDossier.hidden = false;
   document.getElementById("fObjet").focus();
 }
+/* Le carnet se relit à chaque ouverture du formulaire : une autorité ajoutée
+   depuis le profil est disponible sans recharger. */
+function remplirCarnet() {
+  const sel = document.getElementById("fCarnet");
+  const liste = PROFILE.autorites || [];
+  sel.innerHTML = '<option value="">— carnet d\'autorités —</option>' +
+    liste.map(function (a, i) {
+      const etiquette = String(a.sigle || "").trim() || String(a.nom || "").trim().slice(0, 60) || "Sans nom";
+      return '<option value="' + i + '">' + esc(etiquette) + "</option>";
+    }).join("");
+  sel.disabled = !liste.length;
+  if (!liste.length) sel.innerHTML = '<option value="">— carnet vide —</option>';
+}
+document.getElementById("fCarnet").addEventListener("change", (e) => {
+  const a = (PROFILE.autorites || [])[Number(e.target.value)];
+  if (!a) return;
+  document.getElementById("fAutorite").value = a.nom || a.sigle || "";
+  if (a.lieuDepot) document.getElementById("fLieuDepot").value = a.lieuDepot;
+});
+/* Enregistrer ce qui vient d'être tapé, pour ne pas le retaper au dossier
+   suivant. Doublon écarté sur la dénomination. */
+document.getElementById("btnAutCarnet").addEventListener("click", () => {
+  const nom = document.getElementById("fAutorite").value.trim();
+  if (!nom) { toast("Renseignez d'abord l'autorité contractante"); return; }
+  PROFILE.autorites = PROFILE.autorites || [];
+  if (PROFILE.autorites.some(function (a) { return String(a.nom || "").trim() === nom; })) {
+    toast("Déjà dans le carnet"); return;
+  }
+  PROFILE.autorites.push({ sigle: "", nom: nom, lieuDepot: document.getElementById("fLieuDepot").value.trim() });
+  saveProfile(PROFILE);
+  remplirCarnet();
+  toast("Ajoutée au carnet — donnez-lui un sigle dans ⚙︎ Profil › Autorités");
+});
 document.getElementById("btnNewDossier").addEventListener("click", () => openDossierModal(null));
 document.getElementById("btnCancelDossier").addEventListener("click", () => modalDossier.hidden = true);
 modalDossier.addEventListener("click", (e) => { if (e.target === modalDossier) modalDossier.hidden = true; });
@@ -4019,6 +4070,12 @@ const FICHE_DEFS = {
     champs: [["designation", "Désignation", "text"], ["quantite", "Quantité", "text"],
              ["etat", "État", "text"], ["propriete", "Propriété ou location", "text"]],
   },
+  autorites: {
+    listId: "autList", vide: "Aucune autorité enregistrée. Ajoutez celles avec qui vous traitez souvent.",
+    champs: [["sigle", "Sigle ou nom court", "text"],
+             ["nom", "Dénomination complète", "text"],
+             ["lieuDepot", "Lieu de dépôt des offres", "text"]],
+  },
 };
 
 function renderFiches(cle) {
@@ -4078,6 +4135,10 @@ document.getElementById("btnAddPers").addEventListener("click", () => {
 document.getElementById("btnAddMat").addEventListener("click", () => {
   PROFILE.materiel.push({ designation: "", quantite: "", etat: "", propriete: "" });
   renderFiches("materiel");
+});
+document.getElementById("btnAddAut").addEventListener("click", () => {
+  PROFILE.autorites.push({ sigle: "", nom: "", lieuDepot: "" });
+  renderFiches("autorites");
 });
 
 document.getElementById("btnSettings").addEventListener("click", () => {
