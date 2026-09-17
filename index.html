@@ -176,6 +176,27 @@ table.lignes input.ref-rpr{margin-top:4px;padding:4px 8px;font-size:11.5px;
 .rpr b{color:var(--encre)}
 .rpr.depasse{background:var(--brique-fond);border-left-color:var(--brique);color:var(--brique)}
 .rpr.depasse b{color:var(--brique)}
+
+/* rédaction assistée */
+.carte.ia{border-color:var(--marque);background:linear-gradient(var(--ivoire),var(--surface) 72px)}
+.carte.ia h3{color:var(--marque)}
+.carte.ia .aide{color:var(--doux);margin:10px 0 0;font-size:12.5px}
+.ia-jointes{display:flex;flex-wrap:wrap;gap:8px}
+.ia-jointes:not(:empty){margin-bottom:10px}
+.ia-jointe{position:relative;width:64px;height:84px;border:1px solid var(--ligne-forte);border-radius:6px;overflow:hidden;
+  background:var(--surface2);display:flex;align-items:center;justify-content:center;font:700 11px var(--mono);color:var(--doux)}
+.ia-jointe img{width:100%;height:100%;object-fit:cover}
+.ia-jointe button{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:0;padding:0;
+  background:rgba(10,10,10,.7);color:#fff;font-size:14px;line-height:22px;cursor:pointer}
+.ia-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.ia-etat{font-size:12.5px;color:var(--doux)}
+.ia-etat.erreur{color:var(--brique)}
+.ia-etat.actif::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--marque);
+  margin-right:7px;vertical-align:1px;animation:ia-pouls .9s ease-in-out infinite alternate}
+@keyframes ia-pouls{from{opacity:.2}to{opacity:1}}
+.ia-resume{margin-top:12px;font-size:13px;background:var(--surface2);border-left:3px solid var(--marque);
+  padding:8px 12px;border-radius:0 6px 6px 0}
+.ia-resume b{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--tres-doux);margin-bottom:3px}
 .barre-actions{position:sticky;bottom:0;background:var(--papier);border-top:1px solid var(--ligne);
   padding:12px 0;display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 
@@ -1560,6 +1581,30 @@ var Store = {
 
 window.addEventListener("online", function(){ Store.resynchroniser(); });
 function reglages(){ return Object.assign({}, REGLAGES_DEFAUT, Store.un("reglages","entreprise") || {}); }
+
+/* Les mots qui ne nomment personne : ils disent la forme, pas la maison. */
+var MOTS_DE_FORME = ["ets", "etablissement", "etablissements", "entreprise", "entreprises",
+  "societe", "sarl", "sarlu", "suarl", "sa", "sas", "gie", "cabinet", "groupe"];
+function sansAccent(x) {
+  return String(x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+/* Le réglage « forme » porte selon les maisons la raison sociale complète
+   (« ETS DJOLO SALIFOU NAWAL (DSN) ») ou seulement la forme juridique
+   (« Entreprise individuelle »). On les distingue sur le contenu : si elle
+   nomme la maison, c'est la raison sociale ; sinon c'est la forme juridique,
+   et la raison sociale est le nom. Les mots de forme ne comptent pas dans la
+   comparaison, sans quoi « Société X » se reconnaîtrait dans « Société à
+   responsabilité limitée ». */
+function identiteMaison(r) {
+  var nom = String(r.nom || "").trim();
+  var forme = String(r.forme || "").trim();
+  var propres = sansAccent(nom).split(/[^a-z0-9]+/).filter(function (m) {
+    return m.length >= 3 && MOTS_DE_FORME.indexOf(m) < 0;
+  });
+  var nomme = forme && propres.some(function (m) { return sansAccent(forme).indexOf(m) >= 0; });
+  return nomme ? { raisonSociale: forme, formeJuridique: "" }
+               : { raisonSociale: nom || forme, formeJuridique: forme };
+}
 function majEtat(){
   var el = document.getElementById("etat-stock");
   if(!el) return;
@@ -2190,30 +2235,8 @@ function defaultProfile() {
 function profilConfigure(p) { return !!String((p || {}).raisonSociale || "").trim(); }
 /* L'identité part de celle du comptoir actif : on ne la ressaisit pas. Ce que
    les marchés publics demandent en plus — références, personnel, matériel —
-   reste propre au module. */
-/* Les mots qui ne nomment personne : ils disent la forme, pas la maison. */
-var MOTS_DE_FORME = ["ets", "etablissement", "etablissements", "entreprise", "entreprises",
-  "societe", "sarl", "sarlu", "suarl", "sa", "sas", "gie", "cabinet", "groupe"];
-function sansAccent(x) {
-  return String(x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-/* Le réglage « forme » porte selon les maisons la raison sociale complète
-   (« ETS DJOLO SALIFOU NAWAL (DSN) ») ou seulement la forme juridique
-   (« Entreprise individuelle »). On les distingue sur le contenu : si elle
-   nomme la maison, c'est la raison sociale ; sinon c'est la forme juridique,
-   et la raison sociale est le nom. Les mots de forme ne comptent pas dans la
-   comparaison, sans quoi « Société X » se reconnaîtrait dans « Société à
-   responsabilité limitée ». */
-function identiteMaison(r) {
-  var nom = String(r.nom || "").trim();
-  var forme = String(r.forme || "").trim();
-  var propres = sansAccent(nom).split(/[^a-z0-9]+/).filter(function (m) {
-    return m.length >= 3 && MOTS_DE_FORME.indexOf(m) < 0;
-  });
-  var nomme = forme && propres.some(function (m) { return sansAccent(forme).indexOf(m) >= 0; });
-  return nomme ? { raisonSociale: forme, formeJuridique: "" }
-               : { raisonSociale: nom || forme, formeJuridique: forme };
-}
+   reste propre au module. identiteMaison() vit hors du module : la
+   rédaction assistée des courriers s'en sert aussi. */
 
 function loadProfile() {
   var r = reglages(), enregistre = etatMarches().profil || {}, ident = identiteMaison(r);
@@ -4375,7 +4398,9 @@ function rendre(forcer){
   majEtat();
 
   /* ne pas écraser une saisie en cours quand une mise à jour arrive du stockage */
-  if(!forcer && vue === "editeur" && document.getElementById("corps-lignes")){ majApercu(); return; }
+  if(!forcer && vue === "editeur" && (document.getElementById("corps-lignes") || document.getElementById("k-corps"))){
+    majApercu(); return;
+  }
   if(!forcer && formulaire && document.getElementById("form-panneau")) return;
 
   var el = document.getElementById("vue");
@@ -4700,7 +4725,8 @@ function carteCourrier(d){
       '<input id="k-' + cle + '" data-champ="' + cle + '" value="' + echap(d[cle] || "") + '"' +
       (ph ? ' placeholder="' + ph + '"' : "") + "></div>";
   }
-  return '<div class="carte"><h3>Destinataire</h3><div class="grille">' +
+  return carteIA(d) +
+    '<div class="carte"><h3>Destinataire</h3><div class="grille">' +
       '<div class="champ"><label for="k-client">Dans le carnet</label>' +
       '<select id="k-client" data-champ="clientId"><option value="">\u2014 Saisie libre \u2014</option>' +
       clients.map(function(c){
@@ -4745,6 +4771,331 @@ function carteCourrier(d){
       ch("pj", "Pi\u00e8ces jointes", "RCCM, attestation IFU\u2026") +
       ch("copie", "Copie \u00e0", "") +
       "</div></div>";
+}
+
+/* ---------- la rédaction assistée ----------
+   La clé de l'API Claude ne peut pas vivre dans la page : la fonction
+   « rediger-courrier » de Supabase la garde, vérifie que le compte a accès au
+   comptoir et renvoie le texte au fil de l'eau, une ligne JSON par événement.
+   L'IA propose, l'utilisateur relit : rien n'est enregistré sans lui. */
+var IA_URL = SB_URL + "/functions/v1/rediger-courrier";
+var IA_MAX_JOINTES = 6;
+var ia = {doc:null};
+
+/* L'état suit le brouillon : ouvrir un autre courrier repart de zéro, et une
+   rédaction en cours pour l'ancien s'arrête. */
+function iaPour(d){
+  if(ia.doc !== d){
+    if(ia.encours) ia.encours.abort();
+    ia = {doc:d, jointes:[], encours:null, avant:null, resume:"", etat:"", erreur:false};
+  }
+  return ia;
+}
+
+function carteIA(d){
+  var s = iaPour(d), occupe = !!s.encours, joint = s.jointes.length > 0;
+  var vignettes = s.jointes.map(function(j, i){
+    return '<div class="ia-jointe" title="' + echap(j.nom) + '">' +
+      (j.vignette ? '<img src="' + j.vignette + '" alt="">' : "PDF") +
+      (occupe ? "" : '<button data-ia-retirer="' + i + '" aria-label="Retirer ' + echap(j.nom) + '">×</button>') + "</div>";
+  }).join("");
+  var boutons = occupe
+    ? '<button class="btn" id="ia-arreter">Arrêter</button>'
+    : (joint ? '<button class="btn principal" id="ia-repondre">Rédiger la réponse</button>'
+             : '<button class="btn principal" id="ia-rediger">Rédiger</button>') +
+      '<button class="btn" id="ia-retoucher">Retoucher le texte</button>' +
+      (s.avant ? '<button class="btn discret" id="ia-annuler">Revenir au texte précédent</button>' : "");
+  return '<div class="carte ia" id="carte-ia"><h3>Rédiger avec l’IA</h3>' +
+    '<div class="ia-jointes">' + vignettes + "</div>" +
+    (occupe || s.jointes.length >= IA_MAX_JOINTES ? "" :
+      '<label class="btn" style="cursor:pointer">' +
+      (joint ? "Ajouter une page" : "Joindre un courrier reçu — photo ou PDF") +
+      '<input type="file" id="ia-fichier" accept="image/*,application/pdf" multiple hidden></label>') +
+    '<div class="champ" style="margin-top:12px"><label for="ia-consigne">' +
+      (joint ? "Ce que la réponse doit dire" : "Ce que le courrier doit dire") + "</label>" +
+    '<textarea id="ia-consigne" data-champ="consigne" rows="3" placeholder="' +
+      (joint ? "Ex. : accepter la demande, proposer une livraison sous 15 jours. Laissez vide pour une réponse point par point."
+             : "Ex. : transmettre notre devis, rappeler la validité de 30 jours et proposer une visite du chantier.") +
+      '">' + echap(d.consigne || "") + "</textarea></div>" +
+    '<div class="ia-actions">' + boutons +
+      '<span id="ia-etat" class="ia-etat' + (s.erreur ? " erreur" : occupe ? " actif" : "") + '" role="status">' +
+      echap(s.etat) + "</span></div>" +
+    '<div class="ia-resume" id="ia-resume"' + (s.resume ? "" : " hidden") +
+      "><b>Le courrier reçu, tel que l’IA l’a lu</b><span>" + echap(s.resume) + "</span></div>" +
+    '<p class="aide">L’IA propose, vous relisez : rien n’est enregistré avant « Enregistrer ». ' +
+      "Les pièces jointes ne sont pas conservées.</p></div>";
+}
+
+function rafraichirIA(){
+  var el = document.getElementById("carte-ia");
+  if(el && brouillon) el.outerHTML = carteIA(brouillon);
+}
+function etatIA(msg, erreur){
+  var s = ia;
+  s.etat = msg; s.erreur = !!erreur;
+  var el = document.getElementById("ia-etat");
+  if(el){ el.textContent = msg; el.className = "ia-etat" + (erreur ? " erreur" : s.encours ? " actif" : ""); }
+}
+
+/* ----- les pièces jointes -----
+   Une photo de téléphone pèse plusieurs mégaoctets : on la ramène à 2 000 px
+   de grand côté, ce qui suffit à lire une lettre et tient dans la requête. */
+function lireBase64(blob){
+  return new Promise(function(ok, ko){
+    var r = new FileReader();
+    r.onload = function(){ ok(String(r.result).split(",")[1] || ""); };
+    r.onerror = function(){ ko(new Error("Lecture impossible.")); };
+    r.readAsDataURL(blob);
+  });
+}
+function reduireImage(f){
+  return new Promise(function(ok, ko){
+    var url = URL.createObjectURL(f), img = new Image();
+    img.onload = function(){
+      var k = Math.min(1, 2000 / Math.max(img.naturalWidth, img.naturalHeight));
+      var c = document.createElement("canvas");
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      var g = c.getContext("2d");
+      g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+      g.drawImage(img, 0, 0, c.width, c.height);
+      var kv = 168 / Math.max(c.width, c.height), v = document.createElement("canvas");
+      v.width = Math.round(c.width * kv); v.height = Math.round(c.height * kv);
+      v.getContext("2d").drawImage(c, 0, 0, v.width, v.height);
+      URL.revokeObjectURL(url);
+      ok({nom:f.name, media_type:"image/jpeg", data:c.toDataURL("image/jpeg", 0.85).split(",")[1],
+          vignette:v.toDataURL("image/jpeg", 0.7)});
+    };
+    img.onerror = function(){
+      URL.revokeObjectURL(url);
+      ko(new Error(f.name + " : ce navigateur ne sait pas ouvrir cette image. Prenez la photo en JPEG."));
+    };
+    img.src = url;
+  });
+}
+function lireJointe(f){
+  if(f.type === "application/pdf"){
+    if(f.size > 10 * 1024 * 1024) return Promise.reject(new Error(f.name + " dépasse 10 Mo."));
+    return lireBase64(f).then(function(b){ return {nom:f.name, media_type:"application/pdf", data:b, vignette:""}; });
+  }
+  if(!/^image\//.test(f.type)) return Promise.reject(new Error(f.name + " n’est ni une photo ni un PDF."));
+  return reduireImage(f);
+}
+function ajouterJointesIA(liste){
+  var s = iaPour(brouillon), fichiers = Array.prototype.slice.call(liste || []);
+  var place = IA_MAX_JOINTES - s.jointes.length;
+  if(fichiers.length > place){
+    signal(IA_MAX_JOINTES + " pages au plus : les suivantes sont laissées de côté");
+    fichiers = fichiers.slice(0, Math.max(0, place));
+  }
+  if(!fichiers.length) return;
+  etatIA("Préparation des pièces…");
+  Promise.all(fichiers.map(function(f){
+    return lireJointe(f).catch(function(e){ return {erreur:e.message}; });
+  })).then(function(res){
+    if(ia !== s) return;
+    var erreurs = [];
+    res.forEach(function(r){ if(r.erreur) erreurs.push(r.erreur); else s.jointes.push(r); });
+    s.etat = erreurs.join(" "); s.erreur = erreurs.length > 0;
+    rafraichirIA();
+  });
+}
+
+/* ----- le dossier envoyé ----- */
+function piecesDuClient(d){
+  var nom = String((d.client || {}).nom || "").trim().toLowerCase();
+  return Store.tout("documents").filter(function(x){
+    if(x.id === d.id || !TYPES[x.type] || TYPES[x.type].lettre) return false;
+    return (d.clientId && x.clientId === d.clientId) ||
+      (nom && String((x.client || {}).nom || "").trim().toLowerCase() === nom);
+  }).sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); }).slice(0, 8).map(function(x){
+    return {numero:x.numero, type:TYPES[x.type].label, date:dateFr(x.date), objet:x.objet || "",
+      montant: TYPES[x.type].prix ? fcfa(netAPayer(x)) + (x.tva ? " TTC" : "") : ""};
+  });
+}
+function dossierIA(d, mode, s){
+  var r = reglages();
+  return {
+    comptoir: Store.comptoir, mode: mode, consigne: String(d.consigne || "").trim(),
+    maison: {
+      nom: r.nom, raisonSociale: identiteMaison(r).raisonSociale, activite: r.activite,
+      signataire: r.signataire, fonction: r.fonction, ville: r.ville,
+      mention: r.tvaDefaut === "non" ? (r.mention || "Non assujettie à la TVA")
+                                     : "Assujettie à la TVA au taux de " + (r.tauxTva || 18) + " %"
+    },
+    courrier: {
+      numero: d.numero,
+      date: d.date ? new Date(d.date + "T12:00:00").toLocaleDateString("fr-FR", {day:"numeric", month:"long", year:"numeric"}) : "",
+      destinataire: d.client.nom, destFonction: d.destFonction, adresse: d.client.adresse,
+      refVotre: d.refVotre, objet: d.objet, corps: mode === "retoucher" ? d.corps : ""
+    },
+    pieces: piecesDuClient(d),
+    politesses: POLITESSES,
+    jointes: s.jointes.map(function(j){ return {media_type:j.media_type, data:j.data}; })
+  };
+}
+
+/* ----- la réponse -----
+   Le texte arrive par morceaux, balise par balise. On relit le tout à chaque
+   morceau : une balise coupée en deux entre deux paquets se recoud d'elle-même. */
+var BALISES_IA = ["resume","destinataire","qualite","adresse","reference","objet","appel","corps","politesse","pj"];
+function lireBalisesIA(texte){
+  var out = {};
+  BALISES_IA.forEach(function(b){
+    var i = texte.indexOf("<" + b + ">");
+    if(i < 0) return;
+    var debut = i + b.length + 2, j = texte.indexOf("</" + b + ">", debut);
+    var v = j < 0 ? texte.slice(debut).replace(/<\/?[a-z]*$/, "") : texte.slice(debut, j);
+    out[b] = b === "corps" ? v.replace(/^\s*\n/, "").replace(/\s+$/, "") : v.replace(/\s+/g, " ").trim();
+  });
+  return out;
+}
+
+/* On ne remplace que ce que l'utilisateur n'avait pas écrit, sauf le corps et
+   la formule d'appel, qui sont précisément ce qu'on demande. */
+function appliquerIA(d, s, texte, mode, vides, fini){
+  var b = lireBalisesIA(texte);
+  /* nom, adresse et objet figurent aussi dans la carte « Client et dates » */
+  function poser(obj, cle, val, id){
+    obj[cle] = val;
+    [id, id.replace(/^k-/, "e-")].forEach(function(x){
+      var el = document.getElementById(x);
+      if(el && el.value !== val) el.value = val;
+    });
+  }
+  if(b.resume){
+    s.resume = b.resume;
+    var z = document.getElementById("ia-resume");
+    if(z){ z.hidden = false; z.querySelector("span").textContent = b.resume; }
+  }
+  if(mode === "repondre"){
+    if(b.destinataire && vides.nom) poser(d.client, "nom", b.destinataire, "k-nom");
+    if(b.qualite && vides.destFonction) poser(d, "destFonction", b.qualite, "k-destFonction");
+    if(b.adresse && vides.adresse) poser(d.client, "adresse", b.adresse, "k-adr");
+    if(b.reference && vides.refVotre) poser(d, "refVotre", b.reference, "k-refVotre");
+  }
+  if(b.objet && vides.objet) poser(d, "objet", b.objet, "k-objet");
+  if(b.appel && mode !== "retoucher") poser(d, "appel", b.appel, "k-appel");
+  if(b.corps){
+    poser(d, "corps", b.corps, "k-corps");
+    var zc = document.getElementById("k-corps");
+    if(zc && !fini) zc.scrollTop = zc.scrollHeight;
+  }
+  if(b.pj && vides.pj) poser(d, "pj", b.pj, "k-pj");
+  if(fini && b.politesse && mode !== "retoucher"){
+    var p = POLITESSES[parseInt(b.politesse, 10) - 1];
+    if(p) d.politesse = p;
+  }
+  if(fini) return;
+  if(texte.indexOf("<corps>") >= 0) etatIA("Rédaction en cours…");
+  else if(b.resume || b.destinataire) etatIA("Lecture du courrier reçu…");
+  /* l'aperçu suit, sans se reconstruire à chaque mot */
+  if(!appliquerIA.minuteur) appliquerIA.minuteur = setTimeout(function(){ appliquerIA.minuteur = null; majApercu(); }, 400);
+}
+
+function lancerIA(mode){
+  var d = brouillon, s = iaPour(d);
+  if(s.encours) return;
+  if(mode === "retoucher" && !String(d.corps || "").trim()){
+    etatIA("Il n’y a pas encore de texte à retoucher : écrivez-le ou faites-le rédiger.", true); return;
+  }
+  if(mode === "rediger" && !String(d.consigne || "").trim()){
+    etatIA("Dites en quelques mots ce que le courrier doit contenir.", true);
+    var zc = document.getElementById("ia-consigne"); if(zc) zc.focus();
+    return;
+  }
+  if(!navigator.onLine){ etatIA("Pas de connexion : l’IA a besoin du réseau.", true); return; }
+
+  var demande = dossierIA(d, mode, s);
+  var vides = {
+    nom: !String(d.client.nom || "").trim(), adresse: !String(d.client.adresse || "").trim(),
+    destFonction: !String(d.destFonction || "").trim(), refVotre: !String(d.refVotre || "").trim(),
+    objet: !String(d.objet || "").trim(), pj: !String(d.pj || "").trim()
+  };
+  var avant = {objet:d.objet, appel:d.appel, corps:d.corps, politesse:d.politesse, pj:d.pj,
+    nom:d.client.nom, adresse:d.client.adresse, destFonction:d.destFonction, refVotre:d.refVotre};
+  var ctrl = new AbortController(), texte = "";
+  s.encours = ctrl; s.resume = ""; s.avant = null;
+  s.etat = mode === "repondre" ? "Envoi du courrier reçu…" : "Envoi…"; s.erreur = false;
+  rafraichirIA();
+
+  function suivre(){ return ia === s && brouillon === d; }
+
+  sb.auth.getSession().then(function(r){
+    var jeton = r.data && r.data.session && r.data.session.access_token;
+    if(!jeton) throw new Error("Session expirée : reconnectez-vous.");
+    return fetch(IA_URL, {
+      method:"POST", signal:ctrl.signal, body:JSON.stringify(demande),
+      headers:{"Content-Type":"application/json", "Authorization":"Bearer " + jeton, "apikey":SB_CLE}
+    });
+  }).then(function(rep){
+    if(!rep.ok){
+      return rep.json().catch(function(){ return {}; }).then(function(j){
+        throw new Error(j.erreur || j.message || ("Le service a répondu " + rep.status + "."));
+      });
+    }
+    var lecteur = rep.body.getReader(), dec = new TextDecoder(), tampon = "", issue = null;
+    function ligne(l){
+      if(!l.trim()) return;
+      var ev; try { ev = JSON.parse(l); } catch(err){ return; }
+      if(ev.type === "reflexion"){ if(!texte) etatIA("L’IA réfléchit…"); }
+      else if(ev.type === "texte"){
+        if(!texte) s.avant = avant;
+        texte += ev.t;
+        if(suivre()) appliquerIA(d, s, texte, mode, vides, false); else ctrl.abort();
+      }
+      else if(ev.type === "fin" || ev.type === "erreur") issue = ev;
+    }
+    function pomper(){
+      return lecteur.read().then(function(r){
+        if(r.done){ ligne(tampon); return issue; }
+        tampon += dec.decode(r.value, {stream:true});
+        var lignes = tampon.split("\n"); tampon = lignes.pop();
+        lignes.forEach(ligne);
+        return pomper();
+      });
+    }
+    return pomper();
+  }).then(function(issue){
+    if(ia !== s) return;
+    s.encours = null;
+    if(!issue) issue = {type:"erreur", message:"La connexion s’est interrompue avant la fin. Relancez."};
+    if(issue.type === "erreur"){
+      if(issue.ecarter && s.avant) restaurerIA(true);
+      s.etat = issue.message; s.erreur = true;
+    } else {
+      appliquerIA(d, s, texte, mode, vides, true);
+      var b = lireBalisesIA(texte);
+      if(mode === "repondre" && !b.corps){
+        s.etat = "L’IA n’a pas pu lire de courrier dans ces pièces : voyez son compte rendu."; s.erreur = true;
+      } else {
+        s.etat = /\[[^\]]+\]/.test(d.corps || "")
+          ? "Proposé. Relisez et complétez les passages entre crochets."
+          : "Proposé. Relisez avant d’enregistrer.";
+      }
+    }
+    if(brouillon === d) rendre(true);
+  }).catch(function(e){
+    if(ia !== s) return;
+    s.encours = null;
+    if(e && e.name === "AbortError"){ s.etat = "Rédaction arrêtée."; s.erreur = false; }
+    else {
+      s.etat = /Failed to fetch|NetworkError|Load failed/i.test(e.message)
+        ? "Service injoignable : vérifiez la connexion, puis relancez." : e.message;
+      s.erreur = true;
+    }
+    if(brouillon === d) rendre(true);
+  });
+}
+
+function restaurerIA(silencieux){
+  var d = brouillon, s = iaPour(d), a = s.avant;
+  if(!a) return;
+  d.objet = a.objet; d.appel = a.appel; d.corps = a.corps; d.politesse = a.politesse; d.pj = a.pj;
+  d.client.nom = a.nom; d.client.adresse = a.adresse; d.destFonction = a.destFonction; d.refVotre = a.refVotre;
+  s.avant = null; s.resume = "";
+  if(silencieux) return;
+  s.etat = "Texte précédent rétabli."; s.erreur = false;
+  rendre(true);
 }
 
 /* ---------- éditeur ---------- */
@@ -6097,6 +6448,18 @@ document.addEventListener("click", function(e){
 
   if((el = c("[data-ouvrir]"))){ ouvrirDoc(el.dataset.ouvrir); return; }
 
+  if(c("#ia-rediger")){ lancerIA("rediger"); return; }
+  if(c("#ia-repondre")){ lancerIA("repondre"); return; }
+  if(c("#ia-retoucher")){ lancerIA("retoucher"); return; }
+  if(c("#ia-arreter")){ if(ia.encours) ia.encours.abort(); return; }
+  if(c("#ia-annuler")){ restaurerIA(); return; }
+  if((el = c("[data-ia-retirer]"))){
+    iaPour(brouillon).jointes.splice(Number(el.dataset.iaRetirer), 1);
+    ia.etat = ""; ia.erreur = false;
+    rafraichirIA();
+    return;
+  }
+
   if((el = c("[data-rpr-ajout]"))){
     var choisi = rprResultats[Number(el.dataset.rprAjout)];
     if(!choisi || !brouillon) return;
@@ -6323,6 +6686,7 @@ document.addEventListener("change", function(e){
   if(e.target.id === "f-statut"){ filtre.statut = e.target.value; rendre(true); return; }
   if(e.target.id === "c-source"){ filtreCat.source = e.target.value; rendre(true); return; }
   if(e.target.id === "c-famille"){ filtreCat.famille = e.target.value; rendre(true); return; }
+  if(e.target.id === "ia-fichier"){ ajouterJointesIA(e.target.files); return; }
   if(e.target.id === "import"){
     var f = e.target.files && e.target.files[0];
     if(!f) return;
