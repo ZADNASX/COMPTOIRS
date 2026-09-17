@@ -147,7 +147,9 @@ textarea{resize:vertical;min-height:64px}
 .filtres select{width:auto}
 
 .editeur{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,520px);gap:22px;align-items:start}
-@media (max-width:1080px){.editeur{grid-template-columns:1fr}.cadre-apercu{position:static}}
+/* minmax(0,…) et non 1fr : sinon la colonne s'élargit à la barre d'actions, qui
+   ne défile plus, et toute la page déborde sur téléphone */
+@media (max-width:1080px){.editeur{grid-template-columns:minmax(0,1fr)}.cadre-apercu{position:static}}
 .carte{background:var(--surface);border:1px solid var(--ligne);border-radius:var(--r);padding:16px}
 .carte + .carte{margin-top:14px}
 .carte h3{margin:0 0 12px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--tres-doux);font-weight:700}
@@ -197,6 +199,23 @@ table.lignes input.ref-rpr{margin-top:4px;padding:4px 8px;font-size:11.5px;
 .ia-resume{margin-top:12px;font-size:13px;background:var(--surface2);border-left:3px solid var(--marque);
   padding:8px 12px;border-radius:0 6px 6px 0}
 .ia-resume b{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--tres-doux);margin-bottom:3px}
+
+/* envoi par WhatsApp */
+dialog.envoi{border:1px solid var(--ligne);border-radius:14px;padding:0;width:min(480px, calc(100vw - 32px));
+  background:var(--surface);color:var(--encre);box-shadow:var(--ombre)}
+dialog.envoi::backdrop{background:rgba(10,10,10,.5)}
+dialog.envoi form{padding:20px;display:flex;flex-direction:column;gap:12px}
+dialog.envoi h2{margin:0;font-family:var(--titre);font-size:18px}
+dialog.envoi .sous{margin:-8px 0 0;color:var(--doux);font-size:13px}
+dialog.envoi .aide{color:var(--doux);font-size:12.5px;margin:0}
+.envoi-actions{display:flex;flex-wrap:wrap;gap:8px}
+.envoi-actions .fermer{margin-left:auto}
+/* la feuille qu'on photographie pour le PDF : hors de l'écran, à sa taille réelle */
+.scene-pdf{position:absolute;left:-12000px;top:0;width:210mm;background:#fff}
+.scene-pdf .feuille{box-shadow:none;margin:0}
+/* le canevas ne sait pas dessiner les chiffres à chasse fixe : la page les
+   placerait larges et html2canvas les dessinerait étroits, d'où « 200  847 » */
+.scene-pdf .feuille, .scene-pdf .feuille *{font-variant-numeric:normal!important}
 .barre-actions{position:sticky;bottom:0;background:var(--papier);border-top:1px solid var(--ligne);
   padding:12px 0;display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 
@@ -5262,6 +5281,7 @@ function vueEditeur(){
       '<div class="barre-actions">' +
         '<button class="btn principal" id="enregistrer">Enregistrer</button>' +
         '<button class="btn" id="imprimer">Imprimer / PDF</button>' +
+        '<button class="btn" id="envoyer-wa">Envoyer par WhatsApp</button>' +
         (T.lettre ? "" :
         (d.type === "devis" ? '<button class="btn" data-convertir="proforma">→ Pro forma</button>' : "") +
         (d.type !== "facture" && d.type !== "recu" && d.type !== "avoir" ? '<button class="btn" data-convertir="facture">→ Facture</button>' : "") +
@@ -6162,6 +6182,411 @@ function imprimer(){
   window.print();
 }
 
+/* ======================= le PDF ======================= */
+/* Le navigateur ne sait pas « imprimer vers un fichier » sur commande : on
+   photographie la feuille (html2canvas) et on range les pages dans un PDF
+   (jsPDF). Les deux bibliothèques ne se chargent qu'au premier envoi. */
+var LIBS_PDF = [
+  {src:"https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js", sri:"sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H"},
+  {src:"https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js", sri:"sha384-qovJwSBbRDPP5cEjCp8S0UP66wrvnjaa60XMOGzTNanrThcrGfXfnZkvgY8N1KT3"}
+];
+var libsPDF = null;
+function chargerLibsPDF(){
+  if(!libsPDF){
+    libsPDF = Promise.all(LIBS_PDF.map(function(l){
+      return new Promise(function(ok, ko){
+        var s = document.createElement("script");
+        s.src = l.src; s.integrity = l.sri; s.crossOrigin = "anonymous";
+        s.onload = ok;
+        s.onerror = function(){ ko(new Error("La fabrique de PDF ne se charge pas : vérifiez la connexion.")); };
+        document.head.appendChild(s);
+      });
+    })).catch(function(e){ libsPDF = null; throw e; });
+  }
+  return libsPDF;
+}
+
+function imagesChargees(el){
+  return Promise.all(Array.prototype.map.call(el.querySelectorAll("img"), function(i){
+    return i.complete ? null : new Promise(function(ok){ i.onload = i.onerror = ok; });
+  }));
+}
+
+/* html2canvas dessine un SVG comme une image isolée, qui n'a pas le droit
+   d'aller chercher un fichier : le monogramme au centre du cachet disparaissait.
+   On l'intègre au SVG avant la photo. */
+function integrerImagesSVG(el){
+  return Promise.all(Array.prototype.map.call(el.querySelectorAll("svg image"), function(im){
+    var href = im.getAttribute("href") || im.getAttribute("xlink:href") || "";
+    if(!href || /^data:/.test(href)) return null;
+    return fetch(href).then(function(r){ return r.blob(); }).then(function(b){
+      return new Promise(function(ok){
+        var lecteur = new FileReader();
+        lecteur.onload = function(){ im.setAttribute("href", lecteur.result); ok(); };
+        lecteur.onerror = function(){ ok(); };
+        lecteur.readAsDataURL(b);
+      });
+    }).catch(function(){ return null; });
+  }));
+}
+
+/* Un SVG positionné et tourné — le cachet — sortait décalé de 2 mm et coupé au
+   bas du bloc de signature. Remplacé par une image de lui-même, à la même
+   place et à la même taille, il se dessine entier. */
+var ATTRIBUTS_SVG = ["viewBox", "xmlns", "width", "height", "preserveAspectRatio", "role", "aria-hidden", "aria-label"];
+function svgEnImages(el){
+  return Promise.all(Array.prototype.map.call(el.querySelectorAll("svg"), function(s){
+    if(s.parentNode && s.parentNode.closest("svg")) return null;
+    var cs = getComputedStyle(s), l = parseFloat(cs.width), h = parseFloat(cs.height);
+    if(!l || !h) return null;
+    var clone = s.cloneNode(true);
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    clone.setAttribute("width", Math.round(l * 4));
+    clone.setAttribute("height", Math.round(h * 4));
+    var img = new Image();
+    Array.prototype.forEach.call(s.attributes, function(a){
+      if(ATTRIBUTS_SVG.indexOf(a.name) < 0) img.setAttribute(a.name, a.value);
+    });
+    img.style.width = l + "px"; img.style.height = h + "px";
+    return new Promise(function(ok){
+      img.onload = img.onerror = ok;
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+      s.replaceWith(img);
+    });
+  }));
+}
+
+/* html2canvas pose le texte mot par mot. L'espace fine des milliers (« 141 267 »)
+   et les espaces autour d'un tiret (« MEF — DPAF ») y sortaient décalés ; une
+   espace insécable ordinaire les garde d'un seul tenant. */
+var ESPACE_INSECABLE = String.fromCharCode(0xA0);
+var ESPACE_FINE = new RegExp(String.fromCharCode(0x202F), "g");
+var TIRET_ENTOURE = new RegExp(" ([" + String.fromCharCode(0x2013, 0x2014) + "]) ", "g");
+function souderEspaces(el){
+  var marcheur = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), n;
+  while((n = marcheur.nextNode())){
+    var t = n.nodeValue.replace(ESPACE_FINE, ESPACE_INSECABLE)
+      .replace(TIRET_ENTOURE, ESPACE_INSECABLE + "$1" + ESPACE_INSECABLE);
+    if(t !== n.nodeValue) n.nodeValue = t;
+  }
+}
+
+/* Le papier ne coupe jamais une ligne, un total ou une signature en deux. Les
+   blocs qui restent d'un seul tenant sont ceux que l'impression protège déjà
+   (break-inside:avoid) ; les autres se découpent jusqu'aux lignes des tableaux
+   et aux paragraphes — sans quoi tout le corps d'un long courrier partait en
+   page 2 et laissait la première presque vide. */
+var MM = 96 / 25.4;
+var INSECABLES = ".barre-net, .totaux, .quittance, .lettres, .paraphes, .recu-par, .certif";
+function seDecoupe(c, utile){
+  if(!c.children.length) return false;
+  /* du texte posé à même le bloc ne se déplace qu'avec lui */
+  var texte = Array.prototype.some.call(c.childNodes, function(n){ return n.nodeType === 3 && n.nodeValue.trim(); });
+  if(texte) return false;
+  var blocs = Array.prototype.some.call(c.children, function(e){ return !/^inline/.test(getComputedStyle(e).display); });
+  if(!blocs) return false;
+  if(c.getBoundingClientRect().height > utile) return true;       /* ne tiendrait sur aucune page */
+  if(c.matches(INSECABLES)) return false;
+  /* une rangée côte à côte se déplace d'un bloc, sauf si elle porte un tableau */
+  if(/flex|grid/.test(getComputedStyle(c).display)) return !!c.querySelector("table");
+  return true;
+}
+function unitesDeCoupe(el, utile){
+  var out = [];
+  Array.prototype.forEach.call(el.children, function(c){
+    var cs = getComputedStyle(c);
+    if(cs.position === "absolute" || cs.position === "fixed" || cs.display === "none") return;
+    if(c.tagName === "TABLE") out.push.apply(out, c.rows);
+    else if(seDecoupe(c, utile)) out.push.apply(out, unitesDeCoupe(c, utile));
+    else out.push(c);
+  });
+  return out;
+}
+function paginer(f){
+  var A4 = 297 * MM, haut = 14 * MM, bas = 16 * MM, utile = A4 - haut - bas;
+  f.style.minHeight = "0";
+  var base = function(){ return f.getBoundingClientRect().top; };
+  unitesDeCoupe(f, utile).forEach(function(u){
+    for(var essai = 0; essai < 3; essai++){
+      var r = u.getBoundingClientRect(), y0 = r.top - base(), y1 = r.bottom - base();
+      if(r.height > utile) return;                       /* ne tiendra jamais : on laisse */
+      var p = Math.floor(y0 / A4), dans = y0 - p * A4, delta = 0;
+      if(p > 0 && dans < haut) delta = haut - dans;       /* collé au haut d'une page */
+      else if(y1 > (p + 1) * A4 - bas) delta = (p + 1) * A4 + haut - y0;   /* à cheval */
+      if(delta < 0.5) return;
+      pousser(u, delta);
+    }
+  });
+  return calerSurA4(f);
+}
+function pousser(u, delta){
+  if(u.tagName !== "TR"){
+    u.style.marginTop = ((parseFloat(getComputedStyle(u).marginTop) || 0) + delta) + "px";
+    return;
+  }
+  var table = u.closest("table"), corps = u.parentNode;
+  var vide = document.createElement("tr"), td = document.createElement("td");
+  vide.style.border = "0";
+  td.colSpan = 99;
+  td.style.cssText = "height:" + delta + "px;padding:0;border:0;background:transparent";
+  vide.appendChild(td);
+  corps.insertBefore(vide, u);
+  /* les en-têtes de colonnes se répètent en haut de la nouvelle page */
+  var entete = table.tHead && table.tHead.rows[0];
+  if(entete && corps.tagName === "TBODY") corps.insertBefore(entete.cloneNode(true), u);
+}
+
+function nomFichierPDF(d){
+  var r = reglages();
+  var brut = TYPES[d.type].label + " " + String(d.numero || "").replace(/^N°\s*/, "") + " " + (r.nom || "");
+  /* sans accents ni signes, mais en gardant les majuscules : « Devis-DEV-2026-002-ZADNA-S.X.pdf » */
+  return brut.normalize("NFD").replace(/\p{M}+/gu, "").replace(/[^a-z0-9.]+/gi, "-").replace(/^-+|-+$/g, "") + ".pdf";
+}
+
+function fabriquerPDF(d){
+  var scene;
+  return chargerLibsPDF().then(function(){
+    scene = document.createElement("div");
+    scene.className = "scene-pdf";
+    scene.setAttribute("aria-hidden", "true");
+    scene.innerHTML = feuilleHTML(d);
+    document.body.appendChild(scene);
+    var f = scene.querySelector(".feuille");
+    souderEspaces(f);
+    return Promise.all([document.fonts ? document.fonts.ready : null, imagesChargees(f), integrerImagesSVG(f)]).then(function(){
+      return svgEnImages(f);
+    }).then(function(){
+      var pages = paginer(f);
+      /* La copie de page qu'html2canvas photographie prend la largeur annoncée :
+         sur téléphone, les règles pour petit écran s'appliqueraient à la feuille.
+         On lui donne toujours une largeur d'ordinateur. */
+      return window.html2canvas(f, {scale:2, backgroundColor:"#ffffff", logging:false, useCORS:true,
+        windowWidth:Math.max(1280, document.documentElement.clientWidth)}).then(function(canvas){
+        var PDF = window.jspdf.jsPDF;
+        var pdf = new PDF({unit:"mm", format:"a4", compress:true});
+        var hPage = canvas.height / pages;
+        for(var i = 0; i < pages; i++){
+          var c = document.createElement("canvas");
+          c.width = canvas.width; c.height = Math.round(hPage);
+          var g = c.getContext("2d");
+          g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+          g.drawImage(canvas, 0, Math.round(i * hPage), c.width, c.height, 0, 0, c.width, c.height);
+          if(i) pdf.addPage();
+          pdf.addImage(c.toDataURL("image/jpeg", 0.9), "JPEG", 0, 0, 210, 297);
+        }
+        pdf.setProperties({title: TYPES[d.type].label + " " + d.numero, author: reglages().nom || ""});
+        return {blob: pdf.output("blob"), pages: pages, nom: nomFichierPDF(d)};
+      });
+    });
+  }).finally(function(){ if(scene) scene.remove(); });
+}
+
+/* ======================= envoi par WhatsApp =======================
+   WhatsApp n'accepte pas de fichier par un lien. Deux voies, donc :
+   - le partage du téléphone (ou de Windows), qui joint le vrai PDF ;
+   - un lien wa.me vers le numéro du client, avec un lien de téléchargement du
+     PDF déposé dans le stockage privé « pieces », valable 30 jours. */
+var DUREE_LIEN = 30 * 24 * 3600;
+var envoi = null;
+
+/* Numéro international sans « + » ni zéros de tête, comme le veut wa.me.
+   Bénin : dix chiffres commençant par 01 depuis 2024 ; un ancien numéro à huit
+   chiffres prend le 01 devant. Vide = « choisir le contact dans WhatsApp ». */
+function numeroWA(brut){
+  var saisi = String(brut || "").trim();
+  if(!saisi) return "";
+  var s = saisi.split(/[\/,;]| et /)[0].replace(/[^\d+]/g, "");
+  if(s.charAt(0) === "+") s = s.slice(1);
+  else if(s.indexOf("00") === 0) s = s.slice(2);
+  s = s.replace(/\D/g, "");
+  if(/^01\d{8}$/.test(s)) s = "229" + s;
+  else if(/^\d{8}$/.test(s)) s = "22901" + s;
+  else if(/^229\d{8}$/.test(s)) s = "22901" + s.slice(3);
+  return /^\d{8,15}$/.test(s) ? s : null;
+}
+
+function messageWA(d){
+  var r = reglages(), T = TYPES[d.type];
+  var num = String(d.numero || "");
+  var ref = /^N°/.test(num) ? num : "N° " + num;
+  var piece = "notre " + T.label.toLowerCase() + " " + ref + " du " + dateFr(d.date);
+  var detail = "";
+  if(T.recu) detail = ", pour votre règlement de " + fcfa(Number(d.regle) || 0);
+  else if(T.prix) {
+    detail = ", d'un montant de " + fcfa(netAPayer(d)) + (d.tva ? " TTC" : "");
+    if(T.reglement && !T.avoir && Number(d.regle) > 0) detail += " (reste à payer : " + fcfa(resteDu(d)) + ")";
+    if(T.reglement && !T.recu && !T.avoir && d.echeance) detail += ", à régler avant le " + dateFr(d.echeance);
+  }
+  if(d.objet) detail += (detail ? ". Objet : " : ", objet : ") + d.objet;
+  return "Bonjour,\n\nVeuillez trouver ci-joint " + piece + detail + ".\n\nCordialement,\n" +
+    [r.signataire, r.nom].filter(Boolean).join(" — ") + (r.tel ? "\n" + r.tel : "");
+}
+
+function dialogueEnvoi(){
+  var dlg = document.getElementById("envoi-wa");
+  if(dlg) return dlg;
+  dlg = document.createElement("dialog");
+  dlg.id = "envoi-wa"; dlg.className = "envoi";
+  dlg.innerHTML = '<form method="dialog">' +
+    '<h2>Envoyer par WhatsApp</h2><p class="sous" id="wa-piece"></p>' +
+    '<div class="champ"><label for="wa-numero">Numéro WhatsApp du destinataire</label>' +
+    '<input id="wa-numero" type="tel" inputmode="tel" autocomplete="off" placeholder="01 96 69 99 90 — vide : choisir dans WhatsApp"></div>' +
+    '<div class="champ"><label for="wa-message">Message</label><textarea id="wa-message" rows="7"></textarea></div>' +
+    '<div id="wa-etat" class="ia-etat" role="status"></div>' +
+    '<div class="envoi-actions">' +
+      '<button type="button" class="btn principal" id="wa-partager" disabled>Partager le PDF</button>' +
+      '<button type="button" class="btn" id="wa-lien" disabled>Envoyer un lien</button>' +
+      '<button type="button" class="btn discret" id="wa-telecharger" disabled>Télécharger le PDF</button>' +
+      '<button value="fermer" class="btn discret fermer">Fermer</button>' +
+    "</div>" +
+    '<p class="aide" id="wa-aide"></p></form>';
+  document.body.appendChild(dlg);
+  dlg.querySelector("#wa-partager").onclick = partagerPDF;
+  dlg.querySelector("#wa-lien").onclick = envoyerLienWA;
+  dlg.querySelector("#wa-telecharger").onclick = telechargerPDF;
+  dlg.addEventListener("close", function(){ envoi = null; });
+  return dlg;
+}
+function etatEnvoi(msg, genre){
+  var el = document.getElementById("wa-etat");
+  if(el){ el.textContent = msg; el.className = "ia-etat" + (genre ? " " + genre : ""); }
+}
+function peutPartagerFichier(){
+  try {
+    return !!(navigator.canShare &&
+      navigator.canShare({files:[new File(["x"], "essai.pdf", {type:"application/pdf"})]}));
+  } catch(e){ return false; }
+}
+
+/* Postgres range les clés d'un jsonb à sa façon : une pièce relue de la base
+   n'a plus l'ordre du brouillon. On compare donc à clés triées. */
+function jsonStable(v){
+  if(Array.isArray(v)) return "[" + v.map(jsonStable).join(",") + "]";
+  if(v && typeof v === "object"){
+    return "{" + Object.keys(v).filter(function(k){ return v[k] !== undefined; }).sort()
+      .map(function(k){ return JSON.stringify(k) + ":" + jsonStable(v[k]); }).join(",") + "}";
+  }
+  return JSON.stringify(v);
+}
+
+function ouvrirEnvoiWA(){
+  var d = brouillon;
+  if(!d) return;
+  /* On n'envoie que ce qui est enregistré : la pièce partie chez le client
+     doit être celle qu'on retrouve dans le comptoir. */
+  var stocke = d.id && Store.un("documents", d.id);
+  if(!stocke || jsonStable(stocke) !== jsonStable(d)){
+    if(!enregistrerBrouillon()) return;
+    d = brouillon;
+  }
+  var cli = (d.clientId && Store.un("clients", d.clientId)) || {};
+  var dlg = dialogueEnvoi();
+  var partage = peutPartagerFichier();
+  envoi = {doc:d, pdf:null, lien:null};
+  dlg.querySelector("#wa-piece").textContent = TYPES[d.type].label + " " + d.numero +
+    (TYPES[d.type].prix ? " · " + fcfa(netAPayer(d)) : "") + " · " + (d.client.nom || "");
+  dlg.querySelector("#wa-numero").value = (d.client && d.client.tel) || cli.tel || "";
+  dlg.querySelector("#wa-message").value = messageWA(d);
+  dlg.querySelector("#wa-partager").hidden = !partage;
+  dlg.querySelector("#wa-aide").textContent = partage
+    ? "« Partager le PDF » ouvre le partage de l’appareil : choisissez WhatsApp puis le contact, le PDF part en pièce jointe. « Envoyer un lien » ouvre WhatsApp sur le numéro indiqué, avec un lien de téléchargement valable 30 jours."
+    : "Cet appareil ne sait pas joindre un fichier à WhatsApp. « Envoyer un lien » ouvre WhatsApp sur le numéro indiqué, avec un lien de téléchargement valable 30 jours. Vous pouvez aussi télécharger le PDF et le glisser dans la conversation.";
+  ["#wa-partager", "#wa-lien", "#wa-telecharger"].forEach(function(s){ dlg.querySelector(s).disabled = true; });
+  etatEnvoi("Préparation du PDF…", "actif");
+  if(!dlg.open) dlg.showModal();
+
+  var courant = envoi;
+  fabriquerPDF(d).then(function(pdf){
+    if(envoi !== courant) return;
+    courant.pdf = pdf;
+    ["#wa-partager", "#wa-lien", "#wa-telecharger"].forEach(function(s){ dlg.querySelector(s).disabled = false; });
+    etatEnvoi("PDF prêt : " + pdf.pages + " page" + (pdf.pages > 1 ? "s" : "") + ", " +
+      Math.max(1, Math.round(pdf.blob.size / 1024)) + " Ko.");
+  }).catch(function(e){
+    if(envoi !== courant) return;
+    etatEnvoi("Le PDF n’a pas pu être fabriqué : " + e.message, "erreur");
+  });
+}
+
+/* La pièce est partie : on le note sur elle, et un brouillon passe à « envoyé ». */
+function marquerEnvoye(d, mode, numero){
+  var stocke = Store.un("documents", d.id);
+  if(!stocke) return;
+  var maj = JSON.parse(JSON.stringify(stocke));
+  maj.envois = (maj.envois || []).concat({le:new Date().toISOString(), par:"whatsapp", mode:mode, numero:numero || ""});
+  if(maj.statut === "brouillon") maj.statut = "envoye";
+  Store.poser("documents", maj);
+  if(brouillon && brouillon.id === d.id){
+    brouillon.envois = maj.envois; brouillon.statut = maj.statut;
+    rendre(true);
+  }
+}
+
+function partagerPDF(){
+  var e = envoi;
+  if(!e || !e.pdf) return;
+  var fichier = new File([e.pdf.blob], e.pdf.nom, {type:"application/pdf"});
+  var texte = document.getElementById("wa-message").value;
+  /* Le partage doit partir du clic lui-même : le PDF est donc prêt avant. */
+  navigator.share({files:[fichier], title:e.pdf.nom, text:texte}).then(function(){
+    marquerEnvoye(e.doc, "partage", "");
+    etatEnvoi("Partagé. La pièce est notée comme envoyée.", "");
+  }).catch(function(err){
+    if(err && err.name === "AbortError") return etatEnvoi("Partage annulé.", "");
+    etatEnvoi("Le partage a échoué : " + (err && err.message || err), "erreur");
+  });
+}
+
+function envoyerLienWA(){
+  var e = envoi;
+  if(!e || !e.pdf) return;
+  var numero = numeroWA(document.getElementById("wa-numero").value);
+  if(numero === null){
+    etatEnvoi("Numéro illisible. Écrivez-le comme 01 96 69 99 90, ou +33 6 12 34 56 78 hors du Bénin.", "erreur");
+    document.getElementById("wa-numero").focus();
+    return;
+  }
+  if(!navigator.onLine){ etatEnvoi("Pas de connexion : le lien ne peut pas être créé.", "erreur"); return; }
+  /* L'onglet s'ouvre tout de suite, pendant le clic : ouvert après l'envoi du
+     fichier, le navigateur le bloquerait comme une fenêtre intempestive. */
+  var fenetre = window.open("", "_blank");
+  var texte = document.getElementById("wa-message").value;
+  etatEnvoi("Dépôt du PDF…", "actif");
+  var lien = e.lien ? Promise.resolve(e.lien) : (function(){
+    var chemin = Store.comptoir + "/" + e.doc.id + "/" + Date.now() + ".pdf";
+    var boite = sb.storage.from("pieces");
+    return boite.upload(chemin, e.pdf.blob, {contentType:"application/pdf", upsert:false}).then(function(r){
+      if(r.error) throw r.error;
+      return boite.createSignedUrl(chemin, DUREE_LIEN, {download: e.pdf.nom});
+    }).then(function(r){
+      if(r.error) throw r.error;
+      e.lien = r.data.signedUrl;
+      return e.lien;
+    });
+  })();
+  lien.then(function(url){
+    var wa = "https://wa.me/" + numero + "?text=" + encodeURIComponent(
+      texte + "\n\nLe document (PDF) est à télécharger ici, lien valable 30 jours :\n" + url);
+    if(fenetre){ fenetre.opener = null; fenetre.location.href = wa; }
+    else location.href = wa;
+    marquerEnvoye(e.doc, "lien", numero);
+    etatEnvoi("WhatsApp est ouvert : vérifiez le message puis envoyez-le. La pièce est notée comme envoyée.", "");
+  }).catch(function(err){
+    if(fenetre) fenetre.close();
+    etatEnvoi("Le lien n’a pas pu être créé : " + (err && err.message || err), "erreur");
+  });
+}
+
+function telechargerPDF(){
+  var e = envoi;
+  if(!e || !e.pdf) return;
+  var url = URL.createObjectURL(e.pdf.blob), a = document.createElement("a");
+  a.href = url; a.download = e.pdf.nom;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 10000);
+  etatEnvoi("PDF téléchargé : glissez-le dans la conversation WhatsApp.", "");
+}
+
 
 /* ======================= chartes ======================= */
 /* Chaque maison garde son identité : la charte ne fait que réécrire les
@@ -6478,28 +6903,8 @@ document.addEventListener("click", function(e){
     if(!brouillon.lignes.length) brouillon.lignes.push({d:"",q:1,pu:0});
     rendre(true); return;
   }
-  if(c("#enregistrer")){
-    var d = brouillon;
-    if(!String(d.client.nom || "").trim()){ signal("Indiquez au moins le nom du client"); return; }
-    if(TYPES[d.type].avoir && !String(d.source || "").trim()){
-      signal("Indiquez la facture d'origine de l'avoir");
-      return;
-    }
-    if(!d.id){
-      /* un autre appareil a pu prendre ce numéro entre-temps */
-      var pris = Store.tout("documents").some(function(x){ return x.numero === d.numero; });
-      if(pris){
-        var n = prochainNumero(d.type, d.date);
-        d.seq = n.seq; d.annee = n.annee; d.mois = n.mois; d.numero = n.numero;
-        signal("Numéro déjà pris ailleurs — renuméroté en " + d.numero);
-      }
-      d.id = uid();
-    }
-    Store.poser("documents", JSON.parse(JSON.stringify(d)));
-    rendre(true);
-    signal(TYPES[d.type].court + " " + d.numero + " enregistré");
-    return;
-  }
+  if(c("#enregistrer")){ enregistrerBrouillon(); return; }
+  if(c("#envoyer-wa")){ ouvrirEnvoiWA(); return; }
   if(c("#bascule-apercu")){
     var ouvert = document.body.classList.toggle("apercu");
     el = document.getElementById("bascule-apercu");
@@ -6543,6 +6948,29 @@ document.addEventListener("click", function(e){
     return;
   }
 });
+/* Renvoie faux si la pièce ne peut pas encore être enregistrée. */
+function enregistrerBrouillon(){
+  var d = brouillon;
+  if(!String(d.client.nom || "").trim()){ signal("Indiquez au moins le nom du client"); return false; }
+  if(TYPES[d.type].avoir && !String(d.source || "").trim()){
+    signal("Indiquez la facture d'origine de l'avoir");
+    return false;
+  }
+  if(!d.id){
+    /* un autre appareil a pu prendre ce numéro entre-temps */
+    var pris = Store.tout("documents").some(function(x){ return x.numero === d.numero; });
+    if(pris){
+      var n = prochainNumero(d.type, d.date);
+      d.seq = n.seq; d.annee = n.annee; d.mois = n.mois; d.numero = n.numero;
+      signal("Numéro déjà pris ailleurs — renuméroté en " + d.numero);
+    }
+    d.id = uid();
+  }
+  Store.poser("documents", JSON.parse(JSON.stringify(d)));
+  rendre(true);
+  signal(TYPES[d.type].court + " " + d.numero + " enregistré");
+  return true;
+}
 function montrerTexte(zone, texte){
   if(!zone) return;
   zone.innerHTML = '<p style="color:var(--doux);margin:14px 0 6px">Copiez ce contenu dans un fichier <code>.json</code> :</p>' +

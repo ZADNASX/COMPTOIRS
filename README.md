@@ -43,6 +43,17 @@ La clé de l'API Claude ne peut pas vivre dans une page publique. L'appel passe 
 
 Les pièces jointes ne sont conservées nulle part : les photos sont réduites à 2 000 px dans le navigateur, envoyées, puis oubliées.
 
+## Envoi des pièces par WhatsApp
+
+Le bouton « Envoyer par WhatsApp » de l'éditeur enregistre la pièce si besoin, puis en fabrique le PDF dans le navigateur (html2canvas + jsPDF, chargés au premier envoi). Le PDF reprend la feuille imprimée ; les pages se coupent entre deux lignes ou deux paragraphes, jamais au milieu d'un total ou d'une signature, et l'en-tête du tableau se répète.
+
+WhatsApp n'accepte pas de fichier par un lien, d'où deux voies :
+
+- **Partager le PDF** — le partage du téléphone (ou de Windows) : on choisit WhatsApp puis le contact, le fichier part en pièce jointe ;
+- **Envoyer un lien** — WhatsApp s'ouvre sur le numéro du client (`wa.me`), avec le message et un lien de téléchargement valable 30 jours. Le PDF est déposé dans le stockage privé **`pieces`** (`<comptoir>/<document>/<horodatage>.pdf`), soumis à la même liste blanche que les tables.
+
+Une pièce envoyée passe de « brouillon » à « envoyé », et garde la trace de ses envois (`envois`).
+
 ## Reste à faire
 
 - La marge : prix de revient par article, affichée contre le plafond du Répertoire.
