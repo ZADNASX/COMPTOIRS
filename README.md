@@ -39,7 +39,7 @@ La clé de l'API Claude ne peut pas vivre dans une page publique. L'appel passe 
 
 - exige un compte connecté **et** présent dans `autorises` pour le comptoir demandé — un compte non listé ne déclenche aucun appel payant ;
 - lit la clé dans le secret **`ANTHROPIC_API_KEY`** (Supabase → Edge Functions → Secrets) ;
-- interroge `claude-opus-5` et renvoie le texte au fil de l'eau, une ligne JSON par événement.
+- interroge `claude-sonnet-5` (effort moyen) et renvoie le texte au fil de l’eau, une ligne JSON par événement.
 
 Les pièces jointes ne sont conservées nulle part : les photos sont réduites à 2 000 px dans le navigateur, envoyées, puis oubliées.
 
