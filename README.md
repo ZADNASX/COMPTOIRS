@@ -16,6 +16,12 @@ Site statique, un seul fichier. Aucune étape de construction.
 
 `_headers` empêche le navigateur de garder une version périmée de `index.html` en cache.
 
+L’icône de l’application (`icone-*.png`, « <C/> » dans la typographie du mot ZADNA) et
+`manifest.webmanifest` sont déclarés dans l’en-tête de `index.html`, avant le lien
+`preconnect` : la régénération depuis la source garde cette partie telle quelle. Le manifeste
+reste en `display: browser` : l’icône posée sur l’écran d’accueil rouvre le navigateur, où
+le partage WhatsApp et le téléchargement des PDF fonctionnent.
+
 ## Données
 
 Supabase, projet `pfofqxhrtzydarlipcqy`.

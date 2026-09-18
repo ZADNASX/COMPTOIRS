@@ -7,6 +7,11 @@
 <meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Gestion commerciale : devis, factures, avoirs, bons de livraison et reçus.">
 <meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="32x32" href="./icone-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icone-192.png">
+<link rel="apple-touch-icon" href="./icone-180.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Comptoir">
 <title>Comptoir</title>
 </head>
 <body>
@@ -774,6 +779,28 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
 .actions-tete{display:flex;gap:8px;flex-wrap:wrap}
 .liste.docs .date-m{display:none}
 .retour-tete{display:none}
+/* le sceau du rail : la marque de la maison ouverte */
+.marque-sceau{display:inline-flex;align-items:center;flex:none;color:var(--marque)}
+.marque-sceau:empty{display:none}
+.marque-sceau img{display:block;height:30px;width:auto;max-width:150px;object-fit:contain}
+.sceau.logo-mot .marque-sceau img{height:22px}
+.marque-sceau svg{display:block;width:30px;height:30px;fill:currentColor}
+.marque-sceau svg .socle{fill:var(--ocre)}
+/* un logo en largeur dit déjà le nom : il ne reste que pour les lecteurs d'écran */
+.sceau.logo-mot .nom{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sceau.mot-zadna .nom{font-family:"Courier Prime",ui-monospace,monospace;font-size:17px;font-weight:400;
+  letter-spacing:0;color:var(--encre)}
+.sceau.mot-zadna .nom b{font-weight:700}
+.sceau .m1{color:#0088B0} .sceau .m2{color:#D6006C} .sceau .pt{color:#9B9797}
+/* de nuit : les logos gardent leur fond clair, le mot ZADNA ses teintes claires */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .marque-sceau img{background:#F3F2F2;border-radius:6px;padding:3px 5px}
+  :root:not([data-theme="light"]) .sceau .m1{color:var(--marque)}
+  :root:not([data-theme="light"]) .sceau .m2{color:var(--ocre)}
+}
+:root[data-theme="dark"] .marque-sceau img{background:#F3F2F2;border-radius:6px;padding:3px 5px}
+:root[data-theme="dark"] .sceau .m1{color:var(--marque)}
+:root[data-theme="dark"] .sceau .m2{color:var(--ocre)}
 /* réglages : onglets, cartes à deux colonnes, barre d'enregistrement */
 .onglets-reglages{display:flex;gap:2px;border-bottom:1px solid var(--ligne);margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
 .onglets-reglages::-webkit-scrollbar{display:none}
@@ -909,6 +936,8 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
   .retour-tete:hover{background:var(--surface2)}
   .retour-tete .ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   body.a-retour .editeur-tete .lien-retour{display:none}
+  /* un logo en largeur suffit dans la barre de tête : « Comptoir » laisse la place à la flèche */
+  .sceau.logo-mot .sous{display:none}
   /* la barre des réglages se pose au-dessus des onglets du bas */
   body[data-ecran="reglages"] .barre-reglages{bottom:calc(71px + env(safe-area-inset-bottom, 0px))}
 }
@@ -1042,6 +1071,7 @@ html .app #marches{
   --shadow:var(--ombre); --radius:var(--r);
   font-family:inherit;
 }
+html .app #marches header.topbar .brand .mark{width:auto;min-width:28px;padding:0 8px;letter-spacing:.04em;white-space:nowrap}
 #marches *, #marches-print *{ box-sizing: border-box; }#marches, #marches-print{ margin: 0; padding: 0; }#marches, #marches-print{
   background: var(--bg); color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -1298,16 +1328,7 @@ html .app #marches{
   <aside class="rail">
     <button class="retour-tete" id="retour-tete" aria-label="Retour" hidden><svg class="ic" aria-hidden="true"><use href="#i-retour"/></svg></button>
     <div class="sceau">
-      <svg viewBox="0 0 120 120" width="28" height="28" aria-hidden="true" style="flex:none;color:var(--encre)">
-        <g stroke="currentColor" stroke-width="5" stroke-linecap="round">
-          <line x1="60" y1="60" x2="60" y2="14"/><line x1="60" y1="60" x2="106" y2="60"/>
-          <line x1="60" y1="60" x2="60" y2="106"/><line x1="60" y1="60" x2="14" y2="60"/>
-        </g>
-        <circle cx="60" cy="14" r="9" fill="#3B5BFF"/><circle cx="106" cy="60" r="9" fill="#00C2A8"/>
-        <circle cx="60" cy="106" r="9" fill="#FF5B3D"/><circle cx="14" cy="60" r="9" fill="#FFC93C"/>
-        <circle cx="60" cy="60" r="13" fill="currentColor"/>
-        <circle cx="60" cy="60" r="5" style="fill:var(--surface)"/>
-      </svg>
+      <span class="marque-sceau" id="marque-sceau" aria-hidden="true"></span>
       <div>
         <div class="nom"><span style="color:var(--ocre)">&lt;</span><span style="color:var(--encre)">ZADNA S.X</span><span style="color:var(--ocre)">/&gt;</span></div>
         <div class="sous">Comptoir</div>
@@ -4703,7 +4724,8 @@ function majEnteteMarque() {
   const rs = String(PROFILE.raisonSociale || "").trim();
   const auto = rs ? rs.replace(/[^A-Za-zÀ-ÿ ]/g, " ").trim().split(/\s+/)
     .filter(m => m.length > 2).slice(0, 3).map(m => m[0].toUpperCase()).join("") : "";
-  document.getElementById("brandMark").textContent = (sigle || auto || "—").slice(0, 5);
+  /* coupé à cinq lettres dans un carré de 28 px, NASSRA devenait « NASSR » */
+  document.getElementById("brandMark").textContent = (sigle || auto || "—").slice(0, 10);
   document.getElementById("brandNom").textContent = "Marchés Publics";
   /* Le titre de l'onglet appartient au comptoir, pas au module. */
 }
@@ -7774,12 +7796,42 @@ function appliquerCharte(code){
   Object.keys(CHARTES.nassra.clair).forEach(function(k){ st.removeProperty(k); });
   var jeu = c.clair ? (nuitTombee() ? c.sombre : c.clair) : null;
   if(jeu) Object.keys(jeu).forEach(function(k){ st.setProperty(k, jeu[k]); });
+  poserSceau();
+}
+
+/* Le sceau du rail porte la marque de la maison ouverte : son logo s'il en a
+   un, le mot <ZADNA S.X/> pour ZADNA, l'arche pour NASSRA. L'ancien
+   monogramme ZADNA à quatre pastilles s'y affichait pour les cinq maisons. */
+/* le logo de DSN a de larges marges blanches ; sa marque recadrée tient à 30 px */
+var LOGOS_RAIL = {"./logo-dsn.png": "./marque-dsn.png"};
+function motZadna(nom){
+  /* même découpe que marqueSVG : « ZADNA S.X » → ZADNA, S, point, X */
+  var coupe = nom.match(/^(\S+)\s+(\S)(\W*)(\S)$/);
+  return '<span class="m1">&lt;</span>' + (coupe
+    ? "<b>" + echap(coupe[1]) + '</b> <span class="m2">' + echap(coupe[2]) + '</span><span class="pt">' +
+      echap(coupe[3]) + '</span><span class="m1">' + echap(coupe[4]) + "</span>"
+    : "<b>" + echap(nom) + "</b>") + '<span class="m2">/&gt;</span>';
+}
+function poserSceau(){
+  var sceau = document.querySelector(".sceau"), marque = document.getElementById("marque-sceau");
   var nom = document.querySelector(".sceau .nom");
-  /* Les chevrons appartiennent à ZADNA : toute autre maison porte son nom nu. */
-  if(nom) nom.innerHTML = charteCourante === "zadna"
-    ? '<span style="color:var(--ocre)">&lt;</span><span style="color:var(--encre)">' +
-      echap(reglages().nom || "Comptoir") + '</span><span style="color:var(--ocre)">/&gt;</span>'
-    : echap(reglages().nom || "");
+  if(!sceau || !marque || !nom) return;
+  var r = reglages(), n = String(r.nom || "").trim(), src = String(r.logo || "").trim();
+  sceau.className = "sceau"; marque.innerHTML = ""; nom.textContent = n || "Comptoir";
+  if(src){
+    var img = new Image();
+    img.alt = "";
+    /* un logo en largeur porte déjà le nom : on ne le répète pas à côté */
+    img.onload = function(){ if(img.naturalWidth / img.naturalHeight >= 1.6) sceau.classList.add("logo-mot"); };
+    img.onerror = function(){ marque.innerHTML = ""; sceau.classList.remove("logo-mot"); };
+    img.src = LOGOS_RAIL[src] || src;
+    marque.appendChild(img);
+    return;
+  }
+  if(charteCourante === "zadna"){ nom.innerHTML = motZadna(n || "Comptoir"); sceau.classList.add("mot-zadna"); return; }
+  if(charteCourante === "nassra")
+    marque.innerHTML = '<svg viewBox="18 2 84 89"><path d="M22 74 V44 a38 38 0 0 1 76 0 v30 h-13 V44 a25 25 0 0 0 -50 0 v30 z"/>' +
+      '<rect class="socle" x="22" y="80" width="76" height="7" rx="3.5"/></svg>';
 }
 
 if(window.matchMedia){
@@ -8075,6 +8127,7 @@ document.addEventListener("click", function(e){
     reglagesModifies = false;
     Store.poser("reglages", r);
     majBarreReglages(false);
+    appliquerCharte(charteCourante);
     signal("Réglages enregistrés");
     return;
   }
