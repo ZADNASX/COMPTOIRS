@@ -1768,6 +1768,10 @@ function montantTVA(d){
 function tauxAib(d){ return Number(d && d.aib) || 0; }
 function montantAIB(d){ return Math.round(montantHT(d) * tauxAib(d) / 100); }
 function netAPayer(d){ return montantHT(d) + montantTVA(d) + montantAIB(d); }
+/* Une grille de prix n'a pas de total : additionner des prix à la tonne ne fait
+   aucun montant, et un « net à payer » imprimé tromperait le client. Réservé aux
+   devis et pro forma — une facture, un avoir ou un reçu portent toujours leur somme. */
+function sansTotal(d){ return !!(d && d.sansTotal && (d.type === "devis" || d.type === "proforma")); }
 function resteDu(d){ return Math.max(0, netAPayer(d) - (Number(d.regle)||0)); }
 function statutDoc(d){
   var T = TYPES[d.type] || {};
@@ -4565,7 +4569,7 @@ function tableauDocs(docs){
         '<td data-lib="Type"><span class="puce type">' + T.court + "</span></td>" +
         '<td data-lib="Client">' + echap((d.client && d.client.nom) || "—") + "</td>" +
         '<td data-lib="Date">' + dateFr(d.date) + "</td>" +
-        '<td class="num" data-lib="Montant">' + (T.prix ? nombre(netAPayer(d)) : "—") + "</td>" +
+        '<td class="num" data-lib="Montant">' + (!T.prix ? "—" : sansTotal(d) ? "grille" : nombre(netAPayer(d))) + "</td>" +
         '<td data-lib="Statut"><span class="puce ' + s.cle + '">' + s.libelle + "</span></td></tr>";
     }).join("") + "</tbody></table>";
 }
@@ -5002,7 +5006,7 @@ function piecesDuClient(d){
       (nom && String((x.client || {}).nom || "").trim().toLowerCase() === nom);
   }).sort(function(a, b){ return String(b.date).localeCompare(String(a.date)); }).slice(0, 8).map(function(x){
     return {numero:x.numero, type:TYPES[x.type].label, date:dateFr(x.date), objet:x.objet || "",
-      montant: TYPES[x.type].prix ? fcfa(netAPayer(x)) + (x.tva ? " TTC" : "") : ""};
+      montant: TYPES[x.type].prix && !sansTotal(x) ? fcfa(netAPayer(x)) + (x.tva ? " TTC" : "") : ""};
   });
 }
 function dossierIA(d, mode, s){
@@ -5351,7 +5355,12 @@ function vueEditeur(){
         }).join("") + "</select></div>" +
         '<div class="champ"><label>Cachet</label>' +
         '<label class="bascule" for="cachet-actif" style="align-self:start"><input type="checkbox" id="cachet-actif"' +
-        (d.cachet !== false ? " checked" : "") + ">Apposer le cachet</label></div></div></div>" +
+        (d.cachet !== false ? " checked" : "") + ">Apposer le cachet</label></div>" +
+        (d.type === "devis" || d.type === "proforma" ? '<div class="champ"><label>Total</label>' +
+          '<label class="bascule" for="total-actif" style="align-self:start"><input type="checkbox" id="total-actif"' +
+          (sansTotal(d) ? "" : " checked") + ">Imprimer le total</label>" +
+          '<span style="font-size:12px;color:var(--doux)">Décochez pour une grille de prix</span></div>' : "") +
+        "</div></div>" +
       '<div class="barre-actions">' +
         '<button class="btn principal" id="enregistrer">Enregistrer</button>' +
         '<button class="btn" id="imprimer">Imprimer / PDF</button>' +
@@ -5761,7 +5770,8 @@ function feuilleDsn(d){
   var mots = enLettres(somme);
   /* million et milliard sont des noms : ils appellent « de » quand le compte tombe rond */
   var liaison = /milli(on|ard)s?$/.test(mots) ? " de francs CFA" : " francs CFA";
-  var lettres = T.prix ? '<div class="lettres">' + intro + mots + liaison +
+  if(sansTotal(d)) totaux = "";
+  var lettres = T.prix && !sansTotal(d) ? '<div class="lettres">' + intro + mots + liaison +
     (d.tva ? " toutes taxes comprises" : "") + ".</div>" : "";
 
   var moyens = [r.banque && ("banque " + r.banque), r.compte && ("compte " + r.compte),
@@ -5882,7 +5892,8 @@ function feuilleNassra(d){
   var mots = enLettres(somme);
   /* million et milliard sont des noms : ils appellent « de » quand le compte tombe rond */
   var liaison = /milli(on|ard)s?$/.test(mots) ? " de francs CFA" : " francs CFA";
-  var lettres = T.prix ? '<div class="lettres">' + intro + mots + liaison +
+  if(sansTotal(d)) totaux = "";
+  var lettres = T.prix && !sansTotal(d) ? '<div class="lettres">' + intro + mots + liaison +
     (d.tva ? " toutes taxes comprises" : "") + ".</div>" : "";
 
   var moyens = [r.banque && ("banque " + r.banque), r.compte && ("compte " + r.compte),
@@ -5999,7 +6010,8 @@ function feuilleSeb(d){
   var mots = enLettres(somme);
   /* million et milliard sont des noms : ils appellent « de » quand le compte tombe rond */
   var liaison = /milli(on|ard)s?$/.test(mots) ? " de francs CFA" : " francs CFA";
-  var lettres = T.prix ? '<div class="lettres">' + intro + mots + liaison +
+  if(sansTotal(d)) totaux = "";
+  var lettres = T.prix && !sansTotal(d) ? '<div class="lettres">' + intro + mots + liaison +
     (d.tva ? " toutes taxes comprises" : "") + ".</div>" : "";
 
   var moyens = [r.banque && ("banque " + r.banque), r.compte && ("compte " + r.compte),
@@ -6193,7 +6205,8 @@ function feuilleZadna(d){
   var mots = enLettres(somme);
   /* million et milliard sont des noms : ils appellent « de » quand le compte tombe rond */
   var liaison = /milli(on|ard)s?$/.test(mots) ? " de francs CFA" : " francs CFA";
-  var lettres = T.prix ? '<div class="lettres">' + intro + mots + liaison +
+  if(sansTotal(d)) totaux = "";
+  var lettres = T.prix && !sansTotal(d) ? '<div class="lettres">' + intro + mots + liaison +
     (d.tva ? " toutes taxes comprises" : "") + ".</div>" : "";
 
   var moyens = [r.banque && ("banque " + r.banque), r.compte && ("compte " + r.compte),
@@ -6670,7 +6683,7 @@ function messageWA(d){
   var piece = "notre " + T.label.toLowerCase() + " " + ref + " du " + dateFr(d.date);
   var detail = "";
   if(T.recu) detail = ", pour votre règlement de " + fcfa(Number(d.regle) || 0);
-  else if(T.prix) {
+  else if(T.prix && !sansTotal(d)) {
     detail = ", d'un montant de " + fcfa(netAPayer(d)) + (d.tva ? " TTC" : "");
     if(T.reglement && !T.avoir && Number(d.regle) > 0) detail += " (reste à payer : " + fcfa(resteDu(d)) + ")";
     if(T.reglement && !T.recu && !T.avoir && d.echeance) detail += ", à régler avant le " + dateFr(d.echeance);
@@ -6742,7 +6755,7 @@ function ouvrirEnvoiWA(){
   var partage = peutPartagerFichier();
   envoi = {doc:d, pdf:null, lien:null};
   dlg.querySelector("#wa-piece").textContent = TYPES[d.type].label + " " + d.numero +
-    (TYPES[d.type].prix ? " · " + fcfa(netAPayer(d)) : "") + " · " + (d.client.nom || "");
+    (TYPES[d.type].prix && !sansTotal(d) ? " · " + fcfa(netAPayer(d)) : "") + " · " + (d.client.nom || "");
   dlg.querySelector("#wa-numero").value = (d.client && d.client.tel) || cli.tel || "";
   dlg.querySelector("#wa-message").value = messageWA(d);
   dlg.querySelector("#wa-partager").hidden = !partage;
@@ -7316,6 +7329,7 @@ document.addEventListener("input", function(e){
     return;
   }
   if(t.id === "cachet-actif"){ brouillon.cachet = t.checked; majApercu(); return; }
+  if(t.id === "total-actif"){ brouillon.sansTotal = !t.checked; majApercu(); return; }
 
   if(t.dataset.l !== undefined){
     var i = Number(t.dataset.l), l = brouillon.lignes[i], c = t.dataset.c;
