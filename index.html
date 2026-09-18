@@ -748,6 +748,28 @@ body.apercu .voile-apercu{opacity:1;pointer-events:auto}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--encre);color:var(--papier);
   padding:10px 16px;border-radius:99px;font-size:13px;font-weight:600;box-shadow:var(--ombre);z-index:50}
 .toast[hidden]{display:none}
+/* les onglets du bas et le panneau « Plus » : cachés au bureau, voir ≤ 820 px */
+.onglets-bas{display:none;position:fixed;left:0;right:0;bottom:0;z-index:30;grid-template-columns:repeat(4,1fr);
+  background:var(--surface);border-top:1px solid var(--ligne);padding:4px 6px calc(6px + env(safe-area-inset-bottom, 0px))}
+.onglets-bas button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:54px;
+  background:none;border:0;border-radius:10px;font:inherit;font-size:11.5px;color:var(--doux);cursor:pointer}
+.onglets-bas button .ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.onglets-bas button[aria-current="page"]{color:var(--marque);font-weight:600}
+.onglets-bas button[aria-current="page"] .ic{stroke-width:2.3}
+dialog.feuille-plus{margin:auto auto 0;width:100%;max-width:520px;border:0;border-radius:16px 16px 0 0;padding:0;
+  background:var(--surface);color:var(--encre);box-shadow:var(--ombre)}
+dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
+.feuille-plus .dedans{padding:6px 10px calc(14px + env(safe-area-inset-bottom, 0px))}
+.feuille-plus .poignee{width:40px;height:4px;border-radius:99px;background:var(--ligne-forte);margin:4px auto 8px}
+.feuille-plus button{display:flex;align-items:center;gap:12px;width:100%;min-height:50px;padding:0 12px;background:none;border:0;
+  border-radius:10px;font:inherit;font-size:15px;color:var(--encre);cursor:pointer;text-align:left}
+.feuille-plus button:hover{background:var(--surface2)}
+.feuille-plus .ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--doux)}
+.feuille-plus hr{border:0;border-top:1px solid var(--ligne);margin:6px 0}
+.compte-plus{margin:8px 12px 0;font-size:12.5px;color:var(--doux)}
+.actions-tete{display:flex;gap:8px;flex-wrap:wrap}
+.liste.docs .date-m{display:none}
+.chiffre .val small{font-size:1em}
 
 /* ---------- téléphone ---------- */
 @media (max-width:640px){
@@ -759,7 +781,9 @@ body.apercu .voile-apercu{opacity:1;pointer-events:auto}
   table.lignes tbody td:first-child{grid-column:1 / -1}
   table.lignes tbody td[style*="width"]{width:auto!important}
   table.lignes td[data-montant]{text-align:right;color:var(--doux);font-weight:600}
-  table.lignes td[data-montant]::before{content:"Montant ";font-weight:400;color:var(--tres-doux);font-size:11px}
+  /* le libellé au-dessus : à côté, il coupait le montant en deux lignes */
+  table.lignes td[data-montant]{white-space:nowrap;line-height:1.25}
+  table.lignes td[data-montant]::before{content:"Montant";display:block;font-weight:400;color:var(--tres-doux);font-size:11px}
   table.lignes td:last-child button{width:100%;padding:8px 0;font-size:16px;line-height:1}
   .somme dl{grid-template-columns:1fr 130px;width:100%}
   .entete-vue h1{font-size:20px}
@@ -808,7 +832,49 @@ body.apercu .voile-apercu{opacity:1;pointer-events:auto}
   .rail footer .etat > span{display:none}
   #changer-comptoir{white-space:nowrap;padding:7px 11px!important;font-size:12px!important;
     border:1px solid var(--ligne-forte);border-radius:8px}
-  main{padding:18px 16px 60px}
+  main{padding:18px 16px 96px}
+  /* Le rail devient une barre de tête : la maison, l'état, « Changer ». Les
+     sections passent dans les onglets du bas. */
+  .rail nav{display:none}
+  .rail{justify-content:space-between;overflow:visible}
+  .onglets-bas{display:grid}
+  body[data-ecran="editeur"] .onglets-bas{display:none}
+  body[data-ecran="editeur"] main{padding-bottom:24px}
+  /* Marchés publics : la vue principale reste vide, sa marge faisait une bande grise */
+  body[data-ecran="marches"] #vue{display:none}
+  body[data-ecran="marches"] #marches{padding-bottom:88px}
+  .toast{bottom:calc(86px + env(safe-area-inset-bottom, 0px))}
+  body[data-ecran="editeur"] .toast{bottom:120px}
+}
+@media (max-width:860px){
+  /* Une pièce sur deux lignes : numéro et montant, puis client, date et statut.
+     Les étiquettes empilées prenaient 155 px par pièce. */
+  .liste.docs tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:3px;align-items:center;padding:11px 14px}
+  .liste.docs tbody td{display:block;padding:0;border:0;min-width:0}
+  .liste.docs tbody td[data-lib]::before{content:none}
+  .liste.docs tbody td:first-child{grid-column:1;grid-row:1;margin:0;font-size:14px}
+  .liste.docs td[data-lib="Montant"]{grid-column:2;grid-row:1;text-align:right;font-weight:600}
+  .liste.docs td[data-lib="Client"]{grid-column:1;grid-row:2;color:var(--doux);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .liste.docs td[data-lib="Statut"]{grid-column:2;grid-row:2;text-align:right}
+  .liste.docs td[data-lib="Type"],.liste.docs td[data-lib="Date"]{display:none}
+  .liste.docs .date-m{display:inline}
+  .liste.clients tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:4px;align-items:center;padding:11px 14px}
+  .liste.clients tbody td{display:block;padding:0;border:0;min-width:0}
+  .liste.clients tbody td[data-lib]::before{content:none}
+  .liste.clients tbody td:first-child{grid-column:1;grid-row:1;margin:0}
+  .liste.clients td[data-lib="Reste dû"]{grid-column:2;grid-row:1;text-align:right}
+  .liste.clients td[data-lib="Téléphone"]{grid-column:1;grid-row:2;color:var(--doux);font-size:13px}
+  .liste.clients td.act{grid-column:2;grid-row:2;margin:0;text-align:right}
+  .liste.clients td[data-lib="IFU"],.liste.clients td[data-lib="Documents"]{display:none}
+}
+@media (max-width:560px){
+  /* les quatre chiffres en 2 × 2, les deux boutons côte à côte */
+  .chiffres{grid-template-columns:1fr 1fr;gap:10px}
+  .chiffre{padding:12px 13px}
+  .chiffre .val{font-size:18px}
+  .chiffre .val small{font-size:11px}
+  .actions-tete{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .actions-tete .btn{justify-content:center;min-height:44px}
 }
 
 /* ═══ Marchés publics : styles du module, cloisonnés ═══ */
@@ -1148,6 +1214,17 @@ body.apercu .voile-apercu{opacity:1;pointer-events:auto}
     </footer>
   </aside>
   <main id="vue" tabindex="-1"></main>
+  <!-- Sur téléphone : quatre onglets en bas, le reste derrière « Plus ». -->
+  <nav class="onglets-bas" id="onglets-bas" aria-label="Sections"></nav>
+  <dialog class="feuille-plus" id="feuille-plus" aria-label="Autres sections">
+    <div class="dedans"><div class="poignee" aria-hidden="true"></div>
+    <button data-vue="catalogue"><svg class="ic" aria-hidden="true"><use href="#i-catalogue"/></svg>Catalogue</button>
+    <button data-vue="marches"><svg class="ic" aria-hidden="true"><use href="#i-marches"/></svg>Marchés publics</button>
+    <button data-vue="reglages"><svg class="ic" aria-hidden="true"><use href="#i-reglages"/></svg>Réglages</button>
+    <hr>
+    <button data-changer><svg class="ic" aria-hidden="true"><use href="#i-convertir"/></svg>Changer de comptoir</button>
+    <p class="compte-plus" id="compte-plus"></p></div>
+  </dialog>
   <!-- Le module a son propre cycle de vie : il est rendu une fois et masqué,
        jamais réécrit par rendre(), sinon ses écouteurs seraient perdus. -->
 <section id="marches" hidden>
@@ -1577,6 +1654,13 @@ body.apercu .voile-apercu{opacity:1;pointer-events:auto}
   <symbol id="i-points" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></symbol>
   <symbol id="i-retour" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
   <symbol id="i-fermer" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-accueil" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-clients" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></symbol>
+  <symbol id="i-plus4" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></symbol>
+  <symbol id="i-catalogue" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></symbol>
+  <symbol id="i-marches" viewBox="0 0 24 24"><path d="M3 21h18M5 21V10M19 21V10M9.5 21V10M14.5 21V10M2 10l10-7 10 7z"/></symbol>
+  <symbol id="i-reglages" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></symbol>
 </svg>
 <div class="toast" id="toast" role="status" hidden></div>
 
@@ -1846,6 +1930,12 @@ function majEtat(){
   var partage = Store.mode === "partage";
   el.className = "etat" + (partage ? "" : " local");
   el.lastElementChild.textContent = partage ? "Synchronisé" : "Hors ligne — sur cet appareil";
+  var cp = document.getElementById("compte-plus");
+  if(cp){
+    var rr = reglages();
+    cp.textContent = [partage ? "Synchronisé" : "Hors ligne — sur cet appareil", Session.email,
+      rr.tvaDefaut === "non" ? "sans TVA par défaut" : "TVA " + (rr.tauxTva || 18) + " % par défaut"].filter(Boolean).join(" · ");
+  }
   var t = document.getElementById("etat-tva");
   if(t){
     var r = reglages();
@@ -1981,7 +2071,10 @@ function aller(cle){
     /* Les dossiers appartiennent au comptoir : en changer doit changer la liste. */
     if(typeof rafraichirMarches === "function") rafraichirMarches();
   }
-  var m = document.getElementById("vue"); if(m) m.focus();
+  /* une vue s'ouvre en haut ; sans preventScroll, le focus glissait le titre
+     sous la barre de tête collante du téléphone */
+  var m = document.getElementById("vue"); if(m) m.focus({preventScroll:true});
+  window.scrollTo(0, 0);
 }
 function signal(msg){
   var t = document.getElementById("toast");
@@ -4631,6 +4724,19 @@ if (!profilConfigure(PROFILE)) {
 /* ======================= rendu ======================= */
 function rendre(forcer){
   if(vue !== "editeur") document.body.classList.remove("apercu");
+  /* la vue courante, pour le CSS : l'éditeur masque les onglets du bas. Pas
+     « data-vue » : les clics cherchent [data-vue] parmi les ancêtres. */
+  document.body.setAttribute("data-ecran", vue);
+  var bas = document.getElementById("onglets-bas");
+  if(bas){
+    var dansPlus = ["catalogue", "marches", "reglages"].indexOf(vue) >= 0;
+    bas.innerHTML = [["bord", "accueil", "Accueil"], ["documents", "doc", "Documents"], ["clients", "clients", "Clients"]].map(function(o){
+      var actif = vue === o[0] || (vue === "editeur" && o[0] === "documents");
+      return '<button data-vue="' + o[0] + '"' + (actif ? ' aria-current="page"' : "") + '>' +
+        '<svg class="ic" aria-hidden="true"><use href="#i-' + o[1] + '"/></svg>' + o[2] + "</button>";
+    }).join("") + '<button id="ouvrir-plus"' + (dansPlus ? ' aria-current="page"' : "") + '>' +
+      '<svg class="ic" aria-hidden="true"><use href="#i-plus4"/></svg>Plus</button>';
+  }
   var nav = document.getElementById("nav");
   var nb = {documents:Store.tout("documents").length, clients:Store.tout("clients").length,
             catalogue:Store.tout("articles").length};
@@ -4689,7 +4795,7 @@ function vueBord(){
 
   return '<div class="entete-vue"><div><h1>Où en est ' + echap(reglages().nom) + ' aujourd\'hui</h1><p class="sous-titre">' +
     new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) +
-    '</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '</p></div><div class="actions-tete">' +
     '<button class="btn" data-neuf="devis">Nouveau devis</button>' +
     '<button class="btn principal" data-neuf="facture">Nouvelle facture</button></div></div>' +
     '<div class="chiffres">' +
@@ -4706,17 +4812,19 @@ function vueBord(){
     "</div>";
 }
 function chiffre(lib, val, det, classe){
-  return '<div class="chiffre ' + classe + '"><div class="lib">' + lib + '</div><div class="val">' + val +
+  return '<div class="chiffre ' + classe + '"><div class="lib">' + lib + '</div><div class="val">' +
+    String(val).replace(/ F CFA$/, '<small> F CFA</small>') +
     '</div><div class="det">' + det + "</div></div>";
 }
 function tableauDocs(docs){
-  return '<table class="liste"><thead><tr><th>Numéro</th><th>Type</th><th>Client</th><th>Date</th>' +
+  return '<table class="liste docs"><thead><tr><th>Numéro</th><th>Type</th><th>Client</th><th>Date</th>' +
     '<th class="num">Montant</th><th>Statut</th></tr></thead><tbody>' +
     docs.map(function(d){
       var s = statutDoc(d), T = TYPES[d.type] || {court:"?"};
       return '<tr data-ouvrir="' + d.id + '"><td class="ref">' + echap(d.numero) + "</td>" +
         '<td data-lib="Type"><span class="puce type">' + T.court + "</span></td>" +
-        '<td data-lib="Client">' + echap((d.client && d.client.nom) || "—") + "</td>" +
+        '<td data-lib="Client">' + echap((d.client && d.client.nom) || "—") +
+          '<span class="date-m"> · ' + dateFr(d.date) + "</span></td>" +
         '<td data-lib="Date">' + dateFr(d.date) + "</td>" +
         '<td class="num" data-lib="Montant">' + (!T.prix ? "—" : sansTotal(d) ? "grille" : nombre(netAPayer(d))) + "</td>" +
         '<td data-lib="Statut"><span class="puce ' + s.cle + '">' + s.libelle + "</span></td></tr>";
@@ -4806,7 +4914,7 @@ function vueClients(){
     '<button class="btn principal" data-form-neuf="clients">+ Nouveau client</button></div>' +
     panneauFormulaire() +
     '<div class="bloc">' + (cs.length ?
-      '<table class="liste"><thead><tr><th>Nom</th><th>IFU</th><th>Téléphone</th>' +
+      '<table class="liste clients"><thead><tr><th>Nom</th><th>IFU</th><th>Téléphone</th>' +
       '<th class="num">Documents</th><th class="num">Reste dû</th><th></th></tr></thead><tbody>' + corps + "</tbody></table>" :
       '<div class="vide"><p>Aucun client enregistré.</p><button class="btn principal" data-form-neuf="clients">Ajouter un client</button></div>') +
     "</div>";
@@ -7502,7 +7610,11 @@ document.addEventListener("click", function(e){
     if(!m.contains(e.target)) m.open = false;
   });
 
-  if((el = c("[data-vue]"))){ aller(el.dataset.vue); return; }
+  /* le panneau « Plus » : un clic sur le voile le referme */
+  var plus = document.getElementById("feuille-plus");
+  if(plus && e.target === plus){ plus.close(); return; }
+  if(c("#ouvrir-plus")){ if(plus && !plus.open) plus.showModal(); return; }
+  if((el = c("[data-vue]"))){ if(plus && plus.open) plus.close(); aller(el.dataset.vue); return; }
   if((el = c("[data-neuf]"))){ nouveauDoc(el.dataset.neuf); return; }
   if((el = c("[data-convertir]"))){ convertir(el.dataset.convertir); return; }
 
@@ -7576,7 +7688,7 @@ document.addEventListener("click", function(e){
   if(c("#ouvrir-apercu")){ basculerApercu(true); return; }
   if(c("#bascule-apercu")){ basculerApercu(); return; }
   if(c("#fermer-apercu") || c("#voile-apercu")){ basculerApercu(false); return; }
-  if(c("#changer-comptoir")){ changerDeComptoir(); return; }
+  if(c("#changer-comptoir") || c("[data-changer]")){ if(plus && plus.open) plus.close(); changerDeComptoir(); return; }
   if(c("#imprimer") || c("#imprimer2")){ imprimer(); return; }
   if(c("#supprimer")){
     if(aConfirmer === "doc"){ aConfirmer = null; Store.retirer("documents", brouillon.id); aller("documents"); }
