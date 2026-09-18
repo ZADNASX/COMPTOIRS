@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;800&family=Poppins:wght@600;700&family=Courier+Prime:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;800&family=Poppins:wght@600;700&family=Courier+Prime:wght@400;700&family=Chakra+Petch:wght@500;600;700&display=swap">
 <style>
 :root{
   /* Charte ZADNA en service, relevée sur le fichier de marque du 26-08-2026 :
@@ -474,6 +474,65 @@ dialog.envoi .aide{color:var(--doux);font-size:12.5px;margin:0}
 .feuille.dsn .repere-dsn b{font-size:12pt;color:#291DB2;letter-spacing:.04em;text-transform:uppercase}
 .feuille.dsn .repere-dsn span{font-size:9pt;color:#595959}
 
+/* ═══ la feuille de SEB, d'après son en-tête et ses proformas ═══
+   Le logo seul en haut à gauche, toutes les mentions en pied, un tableau
+   quadrillé de bout en bout où les totaux prolongent la grille. L'or est
+   celui du logo (#B3952B) ; en texte il fonce (#7A6418) pour rester lisible.
+   Chakra Petch a les angles coupés des lettres du logo. */
+.feuille.seb{width:210mm;min-height:297mm;background:#fff;color:#1D1B16;padding:16mm 18mm 26mm;position:relative;
+  font-family:"Public Sans",sans-serif;font-size:10.5pt;line-height:1.5;box-shadow:0 2px 14px rgba(0,0,0,.12)}
+.feuille.seb .tete-seb{display:flex;align-items:flex-end;justify-content:space-between;gap:10mm}
+.feuille.seb .tete-seb .logo-comptoir{height:10mm;max-width:70mm}
+.feuille.seb .tete-seb .ident{text-align:right;line-height:1.35}
+.feuille.seb .tete-seb .rs{font-family:"Chakra Petch",sans-serif;font-size:9.5pt;font-weight:700;letter-spacing:.05em;color:#7A6418;text-transform:uppercase}
+.feuille.seb .tete-seb .act{font-size:7.5pt;letter-spacing:.08em;color:#5E584B;text-transform:uppercase}
+.feuille.seb .filet-seb{height:.6mm;background:#B3952B;margin-top:3.5mm}
+.feuille.seb .titre-seb{margin:9mm 0 0;text-align:center;font-family:"Chakra Petch",sans-serif;font-size:15pt;font-weight:700;
+  letter-spacing:.03em;text-decoration:underline;text-decoration-color:#B3952B;text-decoration-thickness:.5mm;text-underline-offset:1.6mm}
+.feuille.seb .date-seb{text-align:right;font-size:9pt;color:#5E584B;margin-top:4mm}
+.feuille.seb .parties{display:flex;gap:8mm;margin-top:4mm;align-items:flex-start}
+.feuille.seb .parties .gauche{flex:1;font-size:9pt;color:#5E584B;line-height:1.65}
+.feuille.seb .parties .boite{width:78mm;border:.25mm solid #3B3730;padding:3.4mm 4mm;font-size:9pt;line-height:1.6}
+.feuille.seb .parties strong{display:block;font-family:"Chakra Petch",sans-serif;color:#7A6418;font-size:8.5pt;
+  letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.6mm}
+.feuille.seb table.art{width:100%;border-collapse:collapse;margin-top:7mm;font-size:9.5pt}
+.feuille.seb table.art th{background:#1D1B16;color:#E2C766;font-family:"Chakra Petch",sans-serif;font-size:8.5pt;font-weight:600;
+  letter-spacing:.05em;text-transform:uppercase;text-align:left;padding:2.2mm 2.4mm;border:.25mm solid #1D1B16}
+.feuille.seb table.art th.d{text-align:right}
+.feuille.seb table.art td{border:.25mm solid #3B3730;padding:2mm 2.4mm;vertical-align:top}
+.feuille.seb table.art td.n{text-align:center;font-family:"Chakra Petch",sans-serif;font-weight:600}
+.feuille.seb table.art td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.feuille.seb table.art .code{display:block;font-size:7.8pt;color:#7A7262;letter-spacing:.02em}
+.feuille.seb .totaux{display:flex;justify-content:flex-end}
+.feuille.seb .totaux table{border-collapse:collapse;min-width:92mm}
+.feuille.seb .totaux td{border:.25mm solid #3B3730;border-top:0;padding:2mm 2.4mm;font-size:9.5pt}
+.feuille.seb .totaux td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.feuille.seb .totaux tr.net td{background:#B3952B;color:#1D1B16;font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:10.5pt}
+.feuille.seb .lettres{margin-top:5mm;font-size:9.5pt}
+.feuille.seb .notes{margin-top:4mm;font-size:8.5pt;color:#5E584B;white-space:pre-wrap}
+.feuille.seb .certif{margin-top:6mm;border:.25mm solid #3B3730;background:#FBF8EF;
+  padding:3mm 3.5mm;display:flex;gap:4mm;align-items:center}
+.feuille.seb .certif .qr{flex:none;width:21mm;height:21mm;background:#fff}
+.feuille.seb .certif .qr img{width:100%;height:100%;display:block;image-rendering:pixelated}
+.feuille.seb .certif .corps{flex:1;min-width:0}
+.feuille.seb .certif .titre{font-family:"Chakra Petch",sans-serif;font-size:7pt;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:#7A6418;margin-bottom:1.6mm}
+.feuille.seb .certif dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:1mm 4mm;font-size:7.6pt;line-height:1.4}
+.feuille.seb .certif dt{color:#7A7262;letter-spacing:.09em;text-transform:uppercase;font-size:6.4pt;padding-top:.4mm}
+.feuille.seb .certif dd{margin:0;font-weight:500;word-break:break-all;font-variant-numeric:tabular-nums}
+.feuille.seb .paraphes{display:flex;justify-content:space-between;gap:10mm;margin-top:12mm;font-size:9pt;color:#5E584B}
+.feuille.seb .sig-g{position:relative;flex:1}
+.feuille.seb .sig-g .fonction{display:block;font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:9.5pt;
+  letter-spacing:.06em;text-transform:uppercase;color:#1D1B16}
+/* Le cachet de SEB est un rectangle de 50 × 21 mm, pas un rond. */
+.feuille.seb .cachet{position:absolute;left:0;top:7mm;width:50mm;height:21mm;transform:rotate(-4deg);opacity:.88;pointer-events:none}
+.feuille.seb .paraphes .qui{display:block;color:#1D1B16;font-weight:600;margin-top:28mm}
+.feuille.seb .paraphes .droite{text-align:right}
+.feuille.seb .paraphes .droite b{display:block;color:#1D1B16;margin-bottom:14mm}
+.feuille.seb .pied{position:absolute;left:18mm;right:18mm;bottom:9mm;border-top:.25mm solid #B3952B;padding-top:2.2mm;
+  text-align:center;font-size:6.8pt;line-height:1.6;color:#5E584B}
+.feuille.seb .pied b{color:#1D1B16;font-weight:600}
+
 /* ---------- typographie ZADNA : les labels techniques passent en mono ---------- */
 .sceau .sous,.bloc h2,.carte h3,.liste th,.champ label,.chiffre .lib,.chiffre .val,.puce,.ref,
 table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{font-family:var(--mono)}
@@ -848,6 +907,16 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
   font-family: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace; }
 #marches.maq-zadna .print-header h2, #marches-print.maq-zadna .print-header h2{
   color: #0088B0; }
+
+/* — SEB : quadrillage complet comme ses proformas, bandeau noir, titres or — */
+#marches.maq-seb .bordereau-table th, #marches-print.maq-seb .bordereau-table th{
+  background: #1D1B16; color: #E2C766; border: 1px solid #1D1B16;
+  font-family: "Chakra Petch", sans-serif; font-size: 11px;
+  letter-spacing: .05em; text-transform: uppercase; }
+#marches.maq-seb .bordereau-table td, #marches-print.maq-seb .bordereau-table td{
+  border: 1px solid #3B3730; }
+#marches.maq-seb .print-header h2, #marches-print.maq-seb .print-header h2{
+  color: #7A6418; font-family: "Chakra Petch", sans-serif; }
 #marches .print-entreprise.avec-logo, #marches-print .print-entreprise.avec-logo{
   display: flex; align-items: flex-start; gap: 10mm; }
 #marches .print-entreprise .print-ident, #marches-print .print-entreprise .print-ident{ flex: 1; }
@@ -1724,14 +1793,16 @@ function prochainNumero(type, dateIso){
       return d.type === type && d.annee === an && (!parMois || d.mois === mois);
     }).reduce(function(x,d){ return Math.max(x, d.seq || 0); }, 0) + 1;
   var code = TYPES[type].code;
-  /* Trois formats sans ressemblance possible entre eux :
+  /* Quatre formats sans ressemblance possible entre eux :
      - DSN  : N° 0007/DSN/FAC/09-2026, sa maison et le mois ;
+     - SEB  : N° 007/SEB/FAC/2026, trois chiffres comme ses proformas ;
      - NASSRA : N° 0007/FAC/2026, à la manière administrative ;
      - ZADNA : FAC-2026-007, à la manière technique.
      La séquence reste comptée PAR AN, pas par mois : elle l'était déjà pour
      les pièces émises, et la recompter par mois les aurait renumérotées. */
   var numero;
   if(m === "dsn")        numero = "N° " + String(seq).padStart(4,"0") + "/DSN/" + code + "/" + mois + "-" + an;
+  else if(m === "seb")   numero = "N° " + String(seq).padStart(3,"0") + "/SEB/" + code + "/" + an;
   else if(m !== "zadna") numero = "N° " + String(seq).padStart(4,"0") + "/" + code + "/" + an;
   else                   numero = code + "-" + an + "-" + String(seq).padStart(3,"0");
   return {seq:seq, annee:an, mois:mois, numero:numero};
@@ -4367,7 +4438,7 @@ document.getElementById("setupFileInput").addEventListener("change", async (e) =
 function marquerMaquette() {
   var el = document.getElementById("marches");
   if (!el) return;
-  ["dsn", "nassra", "zadna"].forEach(function (m) { el.classList.remove("maq-" + m); });
+  ["dsn", "nassra", "zadna", "seb"].forEach(function (m) { el.classList.remove("maq-" + m); });
   el.classList.add("maq-" + maquetteCourante());
 }
 rafraichirMarches = function(){
@@ -4673,12 +4744,14 @@ function vueReglages(){
       'incomplets : <b>' + manque.join(", ") + '</b>.</p></div>' : "") +
     '<div class="carte"><h3>Identité</h3><div class="grille">' +
       ch("nom","Nom commercial") + ch("activite","Baseline") + ch("forme","Forme juridique et capital") +
+      ch("capital","Capital social") +
       '<div class="champ"><label for="r-maquette">Maquette des documents</label>' +
       '<select id="r-maquette" data-reglage="maquette">' +
       [["","Selon la palette du comptoir"],
        ["zadna","Technique — en-tête à gauche, signature à droite"],
        ["nassra","Administrative — logo à gauche, signature à gauche"],
-       ["dsn","En-tête de lettre — mentions à droite en Times, filet"]].map(function(m){
+       ["dsn","En-tête de lettre — mentions à droite en Times, filet"],
+       ["seb","Quadrillée — logo seul en tête, mentions en pied"]].map(function(m){
         return '<option value="' + m[0] + '"' + ((r.maquette||"") === m[0] ? " selected" : "") +
           ">" + m[1] + "</option>";
       }).join("") + "</select></div>" +
@@ -4688,7 +4761,7 @@ function vueReglages(){
       '<div class="champ"><label for="r-charte">Palette</label>' +
       '<select id="r-charte" data-reglage="charte">' +
       [["","Selon le nom du comptoir"], ["zadna","Encre et couleurs vives"],
-       ["nassra","Brun et ocre"], ["dsn","Bleu"]].map(function(c){
+       ["nassra","Brun et ocre"], ["dsn","Bleu"], ["seb","Or et noir"]].map(function(c){
         return '<option value="' + c[0] + '"' + ((r.charte || "") === c[0] ? " selected" : "") +
           ">" + c[1] + "</option>";
       }).join("") + "</select></div></div>" +
@@ -5331,7 +5404,37 @@ function cachetSVG(r){
 /* ---------- la lettre ----------
    Un courrier n'est pas un tableau : il reprend l'en-tête et le pied de la
    maquette du comptoir, et rien d'autre. */
+/* ---------- SEB : en-tête, pied et signature ----------
+   Relevés sur SEB ENTETE.pdf et ses proformas : le logo seul en tête, toutes
+   les mentions légales centrées en pied, « LE GÉRANT » au-dessus du cachet.
+   Partagés par la feuille, la lettre et l'en-tête des soumissions. */
+function teteSeb(r){
+  return '<div class="tete-seb"><div class="marque">' + (logoComptoir(r, "10mm") ||
+      '<b style="font-family:\'Chakra Petch\',sans-serif;font-size:20pt;color:#B3952B;letter-spacing:.08em">' +
+      echap(r.nom) + "</b>") + "</div>" +
+    '<div class="ident"><div class="rs">' + echap(r.forme || r.nom) + "</div>" +
+    (r.activite ? '<div class="act">' + echap(r.activite) + "</div>" : "") + "</div></div>" +
+    '<div class="filet-seb"></div>';
+}
+function piedSeb(r){
+  var l1 = ["<b>" + echap(r.forme || r.nom) + "</b>",
+            r.capital && ("Société au capital de " + echap(r.capital)),
+            r.rccm && ("RCCM : " + echap(r.rccm)), r.ifu && ("IFU : " + echap(r.ifu))];
+  /* L'adresse du siège est longue : elle a sa ligne, les contacts la suivante. */
+  var l2 = [r.adresse && ("Siège social : " + echap(r.adresse))];
+  var l3 = [r.tel && ("Tél. : " + echap(r.tel)), r.email && echap(r.email),
+            r.banque && ("Banque : " + echap(r.banque) + (r.compte ? " — " + echap(r.compte) : ""))];
+  return '<div class="pied">' + [l1, l2, l3].map(function(l){ return l.filter(Boolean).join("  ·  "); })
+    .filter(Boolean).join("<br>") + "</div>";
+}
+function signatureSeb(r, d){
+  return '<div class="sig-g"><span class="fonction">' + echap(r.fonction || "") + "</span>" +
+    (d.cachet !== false ? cachetFichier(r, d) : "") +
+    '<span class="qui">' + echap(r.signataire) + "</span></div>";
+}
+
 function enteteLettre(r, d, maquette){
+  if(maquette === "seb") return teteSeb(r);
   if(maquette === "dsn"){
     /* Composition relevée sur ENTETE DSN.docx : logo à gauche, mentions
        alignées à droite en Times, un filet d'un point dessous. */
@@ -5364,6 +5467,7 @@ function enteteLettre(r, d, maquette){
 }
 
 function piedLettre(r, maquette){
+  if(maquette === "seb") return piedSeb(r);
   if(maquette === "nassra"){
     return '<div class="pied"><b>' + echap(r.nom) + "</b> \u2014 " + echap(r.forme || "") +
       "<br>RCCM : " + echap(r.rccm) + "  \u00b7  IFU : " + echap(r.ifu) +
@@ -5403,7 +5507,9 @@ function feuilleCourrier(d){
   if(d.pj) annexes.push("<b>P.J. :</b> " + echap(d.pj));
   if(d.copie) annexes.push("<b>Copie \u00e0 :</b> " + echap(d.copie));
 
-  var signature = m === "nassra"
+  var signature = m === "seb"
+    ? '<div class="paraphes">' + signatureSeb(r, d) + "</div>"
+    : m === "nassra"
     ? '<div class="paraphes"><div class="sig-g">' + (d.cachet !== false ? (cachetFichier(r, d) || cachetNassra(r)) : "") +
       '<span class="qui">' + echap(r.signataire) + "</span>" + echap(r.fonction) + "</div></div>"
     : '<div class="paraphes"><div class="sig-d">' + (d.cachet !== false ? (cachetFichier(r, d) || cachetSVG(r)) : "") +
@@ -5777,18 +5883,123 @@ function feuilleNassra(d){
     echap(r.adresse) + "</div></div>";
 }
 
+/* ---------- la feuille SEB ----------
+   Composition de ses proformas : titre centré et souligné qui porte le
+   numéro, tableau quadrillé où les totaux prolongent la grille, N° en
+   première colonne et référence du Répertoire sous la désignation. */
+function feuilleSeb(d){
+  var T = TYPES[d.type], r = reglages(), cli = d.client || {};
+  var net = netAPayer(d), brut = totalLignes(d), reste = resteDu(d);
+  var certifiable = estCertifiable(d);
+  var grpDefaut = r.groupeDefaut || "E";
+
+  var gauche = [];
+  gauche.push("<strong>" + (d.objet ? "Objet" : "Références") + "</strong>");
+  if(d.objet) gauche.push(echap(d.objet));
+  if(d.source) gauche.push((T.avoir ? "Avoir sur la facture " : "Établi d'après ") + echap(d.source));
+  if(T.validite) gauche.push("Validité de l'offre : " + echap(r.validite));
+  if(T.reglement && d.echeance) gauche.push("Échéance : " + dateFr(d.echeance));
+  if(!d.objet && !d.source && !T.validite && !d.echeance) gauche.push("…");
+
+  var colGr = certifiable ? '<th class="d" style="width:11mm">Gr.</th>' : "";
+  var cols = T.prix
+    ? '<th style="width:10mm">N°</th><th>Désignation</th><th class="d" style="width:16mm">Qté</th>' +
+      '<th class="d" style="width:27mm">P.U.' + (d.saisieTTC ? " TTC" : "") + '</th>' +
+      '<th class="d" style="width:30mm">Montant' + (d.saisieTTC ? " TTC" : "") + "</th>" + colGr
+    : '<th style="width:10mm">N°</th><th>Désignation</th><th class="d" style="width:26mm">Qté commandée</th>' +
+      '<th class="d" style="width:26mm">Qté livrée</th>';
+
+  var utiles = (d.lignes||[]).filter(function(l){
+    return String(l.d||"").trim() || Number(l.q) || Number(l.pu) || Number(l.ttc);
+  });
+  if(!utiles.length) utiles = [{d:"…", q:"", pu:0}];
+  var corps = utiles.map(function(l,i){
+    return '<tr><td class="n">' + (i+1) + "</td><td>" + echap(l.d) +
+      (l.code ? '<span class="code">Réf. ' + echap(l.code) + "</span>" : "") +
+      '</td><td class="d">' + echap(l.q) + "</td>" +
+      (T.prix ? '<td class="d">' + nombre(prixLigne(d,l)) + '</td><td class="d">' + nombre((Number(l.q)||0) * prixLigne(d,l)) + "</td>"
+              : '<td class="d"></td>') +
+      (certifiable ? '<td class="d">' + echap(l.g || grpDefaut) + "</td>" : "") + "</tr>";
+  }).join("");
+
+  var totaux = "";
+  if(T.prix){
+    var tx = tauxTva(d);
+    totaux = '<div class="totaux"><table>' +
+      (Number(d.remise) ? "<tr><td>Sous-total" + (d.saisieTTC ? " TTC" : "") + '</td><td class="d">' + nombre(brut) + "</td></tr>" +
+        '<tr><td>Remise</td><td class="d">− ' + nombre(d.remise) + "</td></tr>" : "") +
+      (tx ? (d.saisieTTC
+              ? '<tr><td>Montant TTC</td><td class="d">' + nombre(montantHT(d) + montantTVA(d)) + "</td></tr>" +
+                '<tr><td>dont TVA ' + tx + ' %</td><td class="d">' + nombre(montantTVA(d)) + "</td></tr>" +
+                '<tr><td>Montant HT</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>"
+              : '<tr><td>Montant hors TVA</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>" +
+                '<tr><td>TVA ' + tx + ' %</td><td class="d">' + nombre(montantTVA(d)) + "</td></tr>")
+          : (tauxAib(d) ? '<tr><td>Montant HT</td><td class="d">' + nombre(montantHT(d)) + "</td></tr>" : "")) +
+      (tauxAib(d) ? '<tr><td>AIB ' + tauxAib(d) + ' %</td><td class="d">' + nombre(montantAIB(d)) + "</td></tr>" : "") +
+      '<tr class="net"><td>' + (T.avoir ? "MONTANT DE L'AVOIR" : T.recu ? "MONTANT REÇU" : "NET À PAYER" + (tx ? " TTC" : "")) + ' (F CFA)</td><td class="d">' +
+      nombre(T.recu ? (Number(d.regle) || net) : net) + "</td></tr>" +
+      (T.reglement && !T.recu && Number(d.regle) > 0 ?
+        '<tr><td>Déjà réglé</td><td class="d">' + nombre(d.regle) + "</td></tr>" +
+        '<tr><td><b>Reste dû</b></td><td class="d"><b>' + nombre(reste) + "</b></td></tr>" : "") +
+      "</table></div>";
+  }
+
+  var somme = T.recu ? (Number(d.regle) || net) : net;
+  var intro = T.avoir ? "Arrêté le présent avoir à la somme de : "
+    : T.recu ? "Reçu la somme de : "
+    : (d.type === "devis" ? "Arrêté le présent devis à la somme de : "
+    : "Arrêtée la présente " + (d.type === "proforma" ? "facture pro forma" : "facture") + " à la somme de : ");
+  var mots = enLettres(somme);
+  /* million et milliard sont des noms : ils appellent « de » quand le compte tombe rond */
+  var liaison = /milli(on|ard)s?$/.test(mots) ? " de francs CFA" : " francs CFA";
+  var lettres = T.prix ? '<div class="lettres">' + intro + mots + liaison +
+    (d.tva ? " toutes taxes comprises" : "") + ".</div>" : "";
+
+  var moyens = [r.banque && ("banque " + r.banque), r.compte && ("compte " + r.compte),
+                r.momo && ("Mobile Money " + r.momo)].filter(Boolean).map(echap).join("  ·  ");
+  var encaissement = (d.type === "facture" || d.type === "recu") && moyens
+    ? '<div class="notes">Règlement : ' + moyens + "</div>" : "";
+
+  var numero = String(d.numero || "").trim();
+  return '<div class="feuille seb">' + teteSeb(r) +
+    '<h1 class="titre-seb">' + echap(T.label.toUpperCase()) + " " +
+      (numero.indexOf("N°") === 0 ? "" : "N° ") + echap(numero) + "</h1>" +
+    '<div class="date-seb">' + echap(r.ville || "") + ", le " + dateFr(d.date) + "</div>" +
+    /* L'intitulé est un bloc : un saut de ligne derrière lui laissait un blanc. */
+    '<div class="parties"><div class="gauche">' + gauche[0] + gauche.slice(1).join("<br>") + "</div>" +
+    '<div class="boite"><strong>' + (d.type === "recu" ? "Reçu de" : d.type === "bl" ? "Livré à" : "Client") + "</strong>" +
+    echap(cli.nom || "…") + "<br>" + echap(cli.adresse || "…") + "<br>IFU : " + echap(cli.ifu || "…") +
+    "  ·  Tél. : " + echap(cli.tel || "…") + "</div></div>" +
+    '<table class="art"><thead><tr>' + cols + "</tr></thead><tbody>" + corps + "</tbody></table>" +
+    totaux + lettres + encaissement +
+    (d.notes ? '<div class="notes">' + echap(d.notes) + "</div>" : "") +
+    /* Hors TVA, la mention de régime est obligatoire. */
+    (T.prix && !d.tva && String(r.mention || "").trim()
+      ? '<div class="notes">' + echap(r.mention) + "</div>" : "") +
+    (d.type === "bl" ? '<div class="notes">Le client reconnaît avoir reçu les articles ci-dessus en bon état et en bonne quantité.</div>' : "") +
+    bandeCertif(d) +
+    '<div class="paraphes">' + signatureSeb(r, d) +
+    (d.type === "bl"
+      ? '<div class="droite"><b>Cachet et signature du client</b>Date, signature, cachet</div>'
+      : d.type === "devis"
+      ? '<div class="droite"><b>Bon pour accord du client</b>Date, signature, cachet</div>'
+      : "") + "</div>" +
+    piedSeb(r) + "</div>";
+}
+
 /* Le choix de maquette est un réglage, pas une propriété du code : un
    nouveau comptoir peut donc adopter l'une ou l'autre sans qu'on y touche.
    À défaut de réglage, la charte ouverte décide. */
 function maquetteCourante(){
   var m = reglages().maquette;
-  if(m === "nassra" || m === "zadna" || m === "dsn") return m;
-  return charteCourante === "nassra" ? "nassra" : "zadna";
+  if(m === "nassra" || m === "zadna" || m === "dsn" || m === "seb") return m;
+  return charteCourante === "nassra" ? "nassra" : charteCourante === "seb" ? "seb" : "zadna";
 }
 function feuilleHTML(d){
   if(TYPES[d.type] && TYPES[d.type].lettre) return feuilleCourrier(d);
   var m = maquetteCourante();
   if(m === "dsn") return feuilleDsn(d);
+  if(m === "seb") return feuilleSeb(d);
   return m === "nassra" ? feuilleNassra(d) : feuilleZadna(d);
 }
 /* ---------- la feuille ZADNA ---------- */
@@ -6623,6 +6834,25 @@ var CHARTES = {
             "--marque":"#9B92FF", "--ocre":"#7FB6E8", "--ivoire":"#17222F",
             "--vert":"#76C7A6", "--vert-fond":"#15281F",
             "--brique":"#E8907F", "--brique-fond":"#2E1D19",
+            "--bleu":"#8CB6D0", "--bleu-fond":"#1B2831" }
+  },
+  /* SEB : l'or de son logo sur un papier à peine doré, l'encre presque
+     noire. L'or foncé (#7A6418) sert au texte et aux boutons, l'or franc
+     aux accents : sur blanc, l'or du logo ne se lirait pas en petit. */
+  seb: {
+    clair:{ "--papier":"#FAF8F2", "--surface":"#FFFFFF", "--surface2":"#F3EEE0",
+            "--ligne":"#E4DCC6", "--ligne-forte":"#CDC09E",
+            "--encre":"#1D1B16", "--doux":"#6B6352", "--tres-doux":"#9A917C",
+            "--marque":"#7A6418", "--ocre":"#B3952B", "--ivoire":"#F3ECD7",
+            "--vert":"#2C6A4E", "--vert-fond":"#E4F0E8",
+            "--brique":"#A6402A", "--brique-fond":"#F8E6E1",
+            "--bleu":"#2B5470", "--bleu-fond":"#E4EDF3" },
+    sombre:{ "--papier":"#13110D", "--surface":"#1C1914", "--surface2":"#25211A",
+            "--ligne":"#37311F", "--ligne-forte":"#4B4430",
+            "--encre":"#F1EBDD", "--doux":"#B0A78F", "--tres-doux":"#857C66",
+            "--marque":"#D9BE62", "--ocre":"#C9A83E", "--ivoire":"#2A2518",
+            "--vert":"#7CC69C", "--vert-fond":"#1D2E25",
+            "--brique":"#E79178", "--brique-fond":"#331F1A",
             "--bleu":"#8CB6D0", "--bleu-fond":"#1B2831" }
   }
 };
