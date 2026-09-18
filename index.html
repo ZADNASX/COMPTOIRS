@@ -584,21 +584,25 @@ body.apercu .voile-apercu{opacity:1;pointer-events:auto}
 .feuille.seb .pied b{color:#1D1B16;font-weight:600}
 
 /* ═══ la feuille d'ABZ et Co, d'après son en-tête Word ═══
-   Logo à gauche ; IFU, RCCM, téléphone, e-mail et quartier alignés à droite
-   contre le QR ; un filet cyan d'un bord à l'autre de la page. La « pilule »
+   Logo centré en haut (choix du user, 18-09-2026) ; dessous, IFU, RCCM,
+   téléphone, e-mail et quartier sur une ligne centrée, séparés par le point
+   cyan du logo ; un filet cyan d'un bord à l'autre de la page. La « pilule »
    du logo — le O étiré en dégradé bleu → cyan — revient deux fois : sous le
    titre et autour du net à payer. Montserrat a la carrure des lettres du logo. */
 .feuille.abz{width:210mm;min-height:297mm;background:#fff;color:#0B1B2E;padding:14mm 18mm 26mm;position:relative;
   font-family:"Public Sans",sans-serif;font-size:10.5pt;line-height:1.5;box-shadow:0 2px 14px rgba(0,0,0,.12)}
-.feuille.abz .tete-abz{display:flex;align-items:center;justify-content:space-between;gap:8mm}
-/* le logo « abz.co » est un mot en longueur (près de 4 pour 1) : 12 mm de
-   haut lui donnent 47 mm de large, l'équilibre du bloc de mentions en face */
-.feuille.abz .tete-abz .logo-comptoir{height:12mm;max-width:60mm}
-.feuille.abz .tete-abz .droite{display:flex;align-items:center;gap:3mm}
-.feuille.abz .tete-abz .men{text-align:right;font-size:8pt;line-height:1.55;color:#33475B}
-.feuille.abz .tete-abz .men span{display:inline-flex;align-items:center;gap:1.2mm}
-.feuille.abz .tete-abz .men svg{width:2.6mm;height:2.6mm;fill:#0FB5D8;flex:none}
-.feuille.abz .tete-abz .qr{width:19mm;height:19mm;object-fit:contain}
+.feuille.abz .tete-abz{position:relative;display:flex;flex-direction:column;align-items:center;gap:3.2mm}
+/* le logo « abz.co » est un mot en longueur (près de 4 pour 1) : 14 mm de
+   haut lui donnent 55 mm de large, seul au centre de la page */
+.feuille.abz .tete-abz .logo-comptoir{height:14mm;max-width:70mm}
+.feuille.abz .tete-abz .men{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
+  column-gap:2.6mm;row-gap:.6mm;font-size:8pt;line-height:1.5;color:#33475B;text-align:center}
+.feuille.abz .tete-abz .men span{display:inline-flex;align-items:center;white-space:nowrap}
+/* entre deux mentions, le point cyan du logo */
+.feuille.abz .tete-abz .men span + span::before{content:"";display:inline-block;width:1.1mm;height:1.1mm;
+  border-radius:50%;background:#0FB5D8;margin-right:2.6mm}
+/* un QR d'en-tête, si une maison en règle un, se range dans le coin droit */
+.feuille.abz .tete-abz .qr{position:absolute;right:0;top:0;width:17mm;height:17mm;object-fit:contain}
 /* le filet court d'un bord de la page à l'autre, comme sur l'en-tête Word */
 .feuille.abz .filet-abz{height:.5mm;background:#1CB8E2;margin:4mm -18mm 0}
 /* seul en tête d'une pièce de marché, le bandeau n'a plus de marges où déborder */
@@ -6356,28 +6360,23 @@ function feuilleSeb(d){
 }
 
 /* ---------- ABZ et Co : en-tête, pied et signature ----------
-   Relevés sur son en-tête Word : logo à gauche ; IFU, RCCM, téléphone,
-   e-mail et quartier à droite, chacun derrière son pictogramme, contre le QR ;
-   un filet cyan d'un bord à l'autre. Ses courriers n'ont pas de pied : les
-   mentions légales complètes y vont donc, discrètes. */
-var PICTOS_ABZ = {
-  tel: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg>',
-  mail: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18c.6 0 1 .4 1 1v12c0 .6-.4 1-1 1H3c-.6 0-1-.4-1-1V6c0-.6.4-1 1-1zm9 7.4L4 7.3V17h16V7.3z"/></svg>',
-  lieu: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>'
-};
+   Le logo au centre, en haut ; dessous, une ligne de mentions centrée que
+   ponctue le point cyan du logo ; un filet cyan d'un bord à l'autre. Ses
+   courriers n'ont pas de pied : les mentions légales complètes y vont donc,
+   discrètes. */
 function teteAbz(r){
   var men = [
     r.ifu && ("IFU : " + echap(r.ifu)),
-    r.rccm && echap(r.rccm),
-    r.tel && ("<span>" + PICTOS_ABZ.tel + echap(r.tel) + "</span>"),
-    r.email && ("<span>" + PICTOS_ABZ.mail + echap(r.email) + "</span>"),
-    (r.adresseCourte || r.adresse) && ("<span>" + PICTOS_ABZ.lieu + echap(r.adresseCourte || r.adresse) + "</span>")
-  ].filter(Boolean).join("<br>");
+    r.rccm && ("RCCM : " + echap(r.rccm)),
+    r.tel && echap(r.tel),
+    r.email && echap(r.email),
+    (r.adresseCourte || r.adresse) && echap(r.adresseCourte || r.adresse)
+  ].filter(Boolean).map(function(m){ return "<span>" + m + "</span>"; }).join("");
   var qr = String(r.qrEntete || "").trim();
-  return '<div class="tete-abz"><div class="marque">' + (logoComptoir(r, "12mm") ||
+  return '<div class="tete-abz"><div class="marque">' + (logoComptoir(r, "14mm") ||
       '<b style="font-family:Montserrat,sans-serif;font-size:22pt;color:#0A4BAA">' + echap(r.nom) + "</b>") + "</div>" +
-    '<div class="droite"><div class="men">' + men + "</div>" +
-    (qr ? '<img class="qr" src="' + echap(qr) + '" alt="">' : "") + "</div></div>" +
+    '<div class="men">' + men + "</div>" +
+    (qr ? '<img class="qr" src="' + echap(qr) + '" alt="">' : "") + "</div>" +
     '<div class="filet-abz"></div>';
 }
 function piedAbz(r){
