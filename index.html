@@ -6369,8 +6369,9 @@ function teteAbz(r){
     r.ifu && ("IFU : " + echap(r.ifu)),
     r.rccm && ("RCCM : " + echap(r.rccm)),
     r.tel && echap(r.tel),
-    r.email && echap(r.email),
-    (r.adresseCourte || r.adresse) && echap(r.adresseCourte || r.adresse)
+    r.email && echap(r.email)
+    /* le quartier n'y est plus : l'adresse complète du siège est au pied, et
+       le user ne veut rien voir deux fois sur la page (18-09-2026) */
   ].filter(Boolean).map(function(m){ return "<span>" + m + "</span>"; }).join("");
   var qr = String(r.qrEntete || "").trim();
   return '<div class="tete-abz"><div class="marque">' + (logoComptoir(r, "14mm") ||
@@ -6379,13 +6380,14 @@ function teteAbz(r){
     (qr ? '<img class="qr" src="' + echap(qr) + '" alt="">' : "") + "</div>" +
     '<div class="filet-abz"></div>';
 }
+/* Le pied ne répète rien de l'en-tête : l'IFU, le RCCM, le téléphone et
+   l'e-mail sont en haut ; en bas restent la raison sociale, le capital, le
+   siège et la banque. */
 function piedAbz(r){
   var l1 = ["<b>" + echap(r.forme || r.nom) + "</b>",
-            r.capital && ("Société au capital de " + echap(r.capital)),
-            r.rccm && ("RCCM : " + echap(r.rccm)), r.ifu && ("IFU : " + echap(r.ifu))];
+            r.capital && ("Société au capital de " + echap(r.capital))];
   var l2 = [r.adresse && ("Siège social : " + echap(r.adresse))];
-  var l3 = [r.tel && ("Tél. : " + echap(r.tel)), r.email && echap(r.email),
-            r.banque && ("Banque : " + echap(r.banque) + (r.compte ? " — " + echap(r.compte) : ""))];
+  var l3 = [r.banque && ("Banque : " + echap(r.banque) + (r.compte ? " — " + echap(r.compte) : ""))];
   return '<div class="pied">' + [l1, l2, l3].map(function(l){ return l.filter(Boolean).join("  ·  "); })
     .filter(Boolean).join("<br>") + "</div>";
 }
