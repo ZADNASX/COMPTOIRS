@@ -773,6 +773,7 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
 .compte-plus{margin:8px 12px 0;font-size:12.5px;color:var(--doux)}
 .actions-tete{display:flex;gap:8px;flex-wrap:wrap}
 .liste.docs .date-m{display:none}
+.retour-tete{display:none}
 .chiffre .val small{font-size:1em}
 /* liste des documents : tri, puces de filtre, échéance et reste dû */
 .liste th .tri{background:none;border:0;padding:0;margin:0;font:inherit;letter-spacing:inherit;text-transform:inherit;
@@ -875,6 +876,18 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
   body[data-ecran="marches"] #marches{padding-bottom:88px}
   .toast{bottom:calc(86px + env(safe-area-inset-bottom, 0px))}
   body[data-ecran="editeur"] .toast{bottom:120px}
+  /* la flèche de retour, à gauche de la maison */
+  .rail{justify-content:flex-start}
+  .rail footer{margin-left:auto}
+  .retour-tete{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;margin:-4px 0 -4px -8px;
+    flex:none;background:none;border:0;border-radius:10px;color:var(--encre);cursor:pointer}
+  .retour-tete[hidden]{display:none}
+  .retour-tete:hover{background:var(--surface2)}
+  .retour-tete .ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  body.a-retour .editeur-tete .lien-retour{display:none}
+}
+@media (max-width:400px){
+  #changer-comptoir .long{display:none}
 }
 @media (max-width:860px){
   /* Une pièce sur deux lignes : numéro et montant, puis client, date et statut.
@@ -1237,6 +1250,7 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
 
 <div class="app" hidden>
   <aside class="rail">
+    <button class="retour-tete" id="retour-tete" aria-label="Retour" hidden><svg class="ic" aria-hidden="true"><use href="#i-retour"/></svg></button>
     <div class="sceau">
       <svg viewBox="0 0 120 120" width="28" height="28" aria-hidden="true" style="flex:none;color:var(--encre)">
         <g stroke="currentColor" stroke-width="5" stroke-linecap="round">
@@ -1259,7 +1273,7 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
       <span id="etat-tva">—</span>
       <span class="compte" id="etat-compte"></span>
       <button class="btn discret" id="changer-comptoir"
-              style="padding:5px 0;justify-content:flex-start;font-size:11px">Changer de comptoir</button>
+              style="padding:5px 0;justify-content:flex-start;font-size:11px">Changer<span class="long"> de comptoir</span></button>
     </footer>
   </aside>
   <main id="vue" tabindex="-1"></main>
@@ -2114,6 +2128,7 @@ var ONGLETS = [
   {cle:"reglages", titre:"Réglages"}
 ];
 function aller(cle){
+  if(!Histo.enRetour && vue === "editeur" && cle !== "editeur" && !quitterEditeurPermis()) return;
   vue = cle; brouillon = null; formulaire = null; aConfirmer = null;
   rendre(true);
   if(cle === "marches"){
@@ -4772,11 +4787,105 @@ if (!profilConfigure(PROFILE)) {
 }
 
 /* ======================= rendu ======================= */
+/* ======================= retour =======================
+   Le bouton retour du téléphone faisait quitter l'application : aucune vue
+   n'était inscrite dans l'historique du navigateur. Chaque changement de vue
+   y ajoute maintenant une entrée, et « retour » rouvre la précédente. */
+var Histo = {enRetour:false, premier:true};
+var NOMS_VUES = {bord:"Tableau de bord", documents:"Documents", clients:"Clients", catalogue:"Catalogue",
+                 marches:"Marchés publics", reglages:"Réglages", editeur:"Pièce précédente"};
+function cleVue(){ return vue === "editeur" ? "editeur:" + ((brouillon && brouillon.id) || "neuf") : vue; }
+function inscrireVue(){
+  var s = history.state, cle = cleVue();
+  if(s && s.cle === cle) return;
+  var etat = {cle:cle, vue:vue, id:(vue === "editeur" && brouillon && brouillon.id) || null,
+              pas:(s && s.pas) || 0, depuis:(s && s.depuis) || null};
+  /* On remplace au lieu d'ajouter : au premier affichage, pendant un retour
+     (la vue demandée n'existe plus), et quand une pièce neuve vient d'être
+     enregistrée — c'est la même page, qui a reçu son identifiant. */
+  if(!s || !s.cle || Histo.premier || Histo.enRetour ||
+     (s.cle === "editeur:neuf" && vue === "editeur" && brouillon && brouillon.id)){
+    history.replaceState(etat, "");
+  } else {
+    /* la position dans la page part avec elle : au retour, on la retrouve */
+    history.replaceState(Object.assign({}, s, {y:window.scrollY}), "");
+    etat.pas = (s.pas || 0) + 1; etat.depuis = s.vue;
+    history.pushState(etat, "");
+  }
+  Histo.premier = false;
+}
+function majRetour(){
+  var s = history.state, peut = !!(s && s.pas > 0);
+  document.body.classList.toggle("a-retour", peut);
+  var b = document.getElementById("retour-tete");
+  if(b){
+    b.hidden = !peut;
+    b.setAttribute("aria-label", "Retour" + (peut && NOMS_VUES[s.depuis] ? " : " + NOMS_VUES[s.depuis] : ""));
+  }
+}
+function revenir(){
+  var s = history.state;
+  if(s && s.pas > 0) history.back();
+  else aller(vue === "editeur" ? "documents" : "bord");
+}
+/* la copie de travail d'une pièce, telle que l'éditeur l'attend */
+function copieEditable(d){
+  var b = JSON.parse(JSON.stringify(d));
+  if(!b.client) b.client = {nom:"",adresse:"",ifu:"",tel:""};
+  if(!b.lignes || !b.lignes.length) b.lignes = [{d:"",q:1,pu:0}];
+  return b;
+}
+/* Une pièce ouverte diffère-t-elle de ce qui est enregistré ? Une pièce neuve
+   compte dès qu'on y a saisi quelque chose. */
+function brouillonModifie(){
+  if(vue !== "editeur" || !brouillon) return false;
+  var b = brouillon;
+  if(!b.id) return !!((b.client && b.client.nom) || b.objet || b.corps || b.source ||
+    (b.lignes || []).some(function(l){ return l.d || Number(l.pu); }));
+  var s = Store.un("documents", b.id);
+  return !!s && jsonStable(copieEditable(s)) !== jsonStable(b);
+}
+/* Quitter l'éditeur perdait les modifications sans un mot ; avec le retour
+   du téléphone, un geste de trop suffisait. */
+function quitterEditeurPermis(){
+  if(!brouillonModifie()) return true;
+  return confirm((brouillon.id ? "Les modifications de " + brouillon.numero + " ne sont pas enregistrées."
+                               : brouillon.numero + " n'est pas encore enregistré.") + " Quitter quand même ?");
+}
+window.addEventListener("popstate", function(e){
+  var s = e.state;
+  var plus = document.getElementById("feuille-plus");
+  if(plus && plus.open) plus.close();
+  if(!s || !s.cle || document.querySelector(".app").hidden){ majRetour(); return; }
+  /* même pièce : seul l'aperçu A4 se referme, ou se rouvre en avançant */
+  if(s.cle === cleVue()){
+    if(!!s.apercu !== document.body.classList.contains("apercu")){
+      Histo.enRetour = true; basculerApercu(!!s.apercu); Histo.enRetour = false;
+    }
+    majRetour(); return;
+  }
+  if(vue === "editeur" && !quitterEditeurPermis()){
+    /* on reste : l'éditeur reprend sa place en haut de l'historique */
+    history.pushState({cle:cleVue(), vue:vue, id:brouillon.id || null, pas:(s.pas || 0) + 1, depuis:s.vue}, "");
+    majRetour(); return;
+  }
+  Histo.enRetour = true;
+  try {
+    if(s.vue === "editeur" && s.id && Store.un("documents", s.id)){
+      ouvrirDoc(s.id);
+      if(s.apercu) basculerApercu(true);
+    } else aller(s.vue === "editeur" ? "documents" : s.vue);
+  } finally { Histo.enRetour = false; }
+  majRetour();
+  if(s.y) window.scrollTo(0, s.y);
+});
+
 function rendre(forcer){
   if(vue !== "editeur") document.body.classList.remove("apercu");
   /* la vue courante, pour le CSS : l'éditeur masque les onglets du bas. Pas
      « data-vue » : les clics cherchent [data-vue] parmi les ancêtres. */
   document.body.setAttribute("data-ecran", vue);
+  inscrireVue(); majRetour();
   var bas = document.getElementById("onglets-bas");
   if(bas){
     var dansPlus = ["catalogue", "marches", "reglages"].indexOf(vue) >= 0;
@@ -5613,9 +5722,7 @@ function nouveauDoc(type){
 function ouvrirDoc(id){
   var d = Store.un("documents", id);
   if(!d) return;
-  brouillon = JSON.parse(JSON.stringify(d));
-  if(!brouillon.client) brouillon.client = {nom:"",adresse:"",ifu:"",tel:""};
-  if(!brouillon.lignes || !brouillon.lignes.length) brouillon.lignes = [{d:"",q:1,pu:0}];
+  brouillon = copieEditable(d);
   vue = "editeur"; aConfirmer = null; rendre(true);
 }
 function convertir(type){
@@ -5698,6 +5805,7 @@ function vueEditeur(){
     return '<button class="btn" id="' + id + '" title="' + lib + '">' + ico(icone) + '<span class="lib">' + lib + "</span></button>";
   }
   var coord = [d.client.ifu && ("IFU " + d.client.ifu), d.client.tel, d.client.adresse].filter(Boolean).join(" · ");
+  var sH = history.state, libRetour = (sH && sH.pas > 0 && NOMS_VUES[sH.depuis]) || "Documents";
   var certRempli = !!(d.cert && (d.cert.code || d.cert.nim || d.cert.qr));
   var conversions = T.lettre ? [] : [
     d.type === "devis" && ["proforma", "Pro forma"],
@@ -5718,7 +5826,7 @@ function vueEditeur(){
   }
 
   return '<div class="entete-vue editeur-tete"><div>' +
-      '<button class="lien-retour" data-vue="documents">' + ico("retour") + "Documents</button>" +
+      '<button class="lien-retour" data-retour>' + ico("retour") + echap(libRetour) + "</button>" +
       "<h1>" + T.label + ' <span class="num-piece">' + echap(d.numero) + "</span>" +
       (d.id ? ' <span class="puce ' + st.cle + '">' + st.libelle + "</span>" : "") + "</h1>" +
       '<p class="sous-titre">' + (d.id ? "Enregistré" : "Nouveau document, pas encore enregistré") +
@@ -6999,8 +7107,15 @@ function majRPR(){
 }
 /* ouvre (vrai), ferme (faux) ou bascule (rien) le panneau d'aperçu A4 */
 function basculerApercu(ouvrir){
+  var etait = document.body.classList.contains("apercu");
   var ouvert = document.body.classList.toggle("apercu", ouvrir);
   if(ouvert){ majApercu(); var f = document.getElementById("fermer-apercu"); if(f) f.focus(); }
+  /* sur téléphone, l'aperçu couvre l'écran : « retour » doit le refermer */
+  if(Histo.enRetour || ouvert === etait) return;
+  var s = history.state;
+  if(ouvert) history.pushState(Object.assign({}, s, {apercu:true, pas:((s && s.pas) || 0) + 1}), "");
+  else if(s && s.apercu) history.back();
+  majRetour();
 }
 function majApercu(){
   var porte = document.getElementById("porte");
@@ -7713,6 +7828,7 @@ function ouvrirComptoir(code){
 }
 
 function changerDeComptoir(){
+  if(vue === "editeur" && !quitterEditeurPermis()) return;
   /* Avant tout : ce qui est en attente d'enregistrement appartient encore à
      cette maison-ci. */
   if(typeof viderMarches === "function") viderMarches();
@@ -7746,6 +7862,7 @@ document.addEventListener("click", function(e){
   /* le panneau « Plus » : un clic sur le voile le referme */
   var plus = document.getElementById("feuille-plus");
   if(plus && e.target === plus){ plus.close(); return; }
+  if(c("[data-retour]") || c("#retour-tete")){ revenir(); return; }
   if(c("#ouvrir-plus")){ if(plus && !plus.open) plus.showModal(); return; }
   if((el = c("[data-vue]"))){ if(plus && plus.open) plus.close(); aller(el.dataset.vue); return; }
   if((el = c("[data-neuf]"))){ nouveauDoc(el.dataset.neuf); return; }
