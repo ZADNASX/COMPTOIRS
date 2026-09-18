@@ -5550,7 +5550,41 @@ function cachetFichier(r, d){
   var src = String((r && r.cachetFichier) || "").trim();
   if(src) return '<img class="cachet" src="' + echap(src) + '" alt="">';
   /* À défaut d'empreinte déposée, la forme choisie dans les réglages. */
-  return String((r && r.cachetForme) || "") === "couronne" ? cachetRond(r) : "";
+  var forme = String((r && r.cachetForme) || "");
+  if(forme === "rectangle") return cachetRectangle(r);
+  return forme === "couronne" ? cachetRond(r) : "";
+}
+
+/* Le cachet rectangulaire : un bandeau de titre, puis une mention par ligne,
+   centrées. C'est la forme du cachet de SEB. Ses lignes se règlent
+   (`cachetLignes`, une par ligne) : changer un numéro ne demande plus de
+   refaire une image. Sans elles, on les compose depuis l'identité. */
+function cachetRectangle(r){
+  var encre = String(r.cachetCouleur || "").trim() || "#E8322C";
+  var lignes = String(r.cachetLignes || "").split("\n")
+    .map(function(l){ return l.trim(); }).filter(Boolean);
+  if(!lignes.length) lignes = [String(r.cachetTitre || r.forme || r.nom || "").toUpperCase(),
+    r.ifu && ("N°IFU: " + r.ifu), r.tel && ("Tél: " + r.tel), r.email && ("Email: " + r.email),
+    String(r.ville || "").toUpperCase()].filter(Boolean);
+  /* Toutes les lignes ont le même corps, réglé sur la plus longue pour
+     qu'elle remplisse presque la largeur, comme sur l'empreinte d'origine :
+     0,58 cadratin par signe en Poppins grasse, mesuré. Les lignes se
+     serrent de même : 1,3 fois le corps. */
+  var L = 500;
+  var plus = lignes.reduce(function(m, l){ return Math.max(m, l.length); }, 1);
+  var corps = Math.max(16, Math.min(32, Math.floor((L - 20) / plus / 0.58)));
+  var PAS = Math.round(corps * 1.3), TETE = corps + 18;
+  var H = TETE + PAS * (lignes.length - 1) + 10;
+  var chasse = Math.round(corps * 0.35);
+  function ligne(y, s){ return '<text x="' + (L / 2) + '" y="' + y + '" text-anchor="middle">' + echap(s) + "</text>"; }
+  return '<svg class="cachet" viewBox="0 0 ' + L + " " + H + '" aria-hidden="true">' +
+    '<g fill="none" stroke="' + encre + '" stroke-width="3.5">' +
+    '<rect x="3" y="3" width="' + (L - 6) + '" height="' + (H - 6) + '"/>' +
+    '<line x1="3" y1="' + TETE + '" x2="' + (L - 3) + '" y2="' + TETE + '"/></g>' +
+    '<g fill="' + encre + '" font-family="Poppins,sans-serif" font-weight="700" font-size="' + corps + '">' +
+    ligne(TETE - 12, lignes[0]) +
+    lignes.slice(1).map(function(l, i){ return ligne(TETE + PAS * (i + 1) - chasse, l); }).join("") +
+    "</g></svg>";
 }
 
 /* Le cachet en couronne : tout le texte fait le tour entre deux cercles, la
