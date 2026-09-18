@@ -774,6 +774,30 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
 .actions-tete{display:flex;gap:8px;flex-wrap:wrap}
 .liste.docs .date-m{display:none}
 .retour-tete{display:none}
+/* réglages : onglets, cartes à deux colonnes, barre d'enregistrement */
+.onglets-reglages{display:flex;gap:2px;border-bottom:1px solid var(--ligne);margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+.onglets-reglages::-webkit-scrollbar{display:none}
+.onglets-reglages button{flex:none;display:inline-flex;align-items:center;gap:7px;background:none;border:0;
+  border-bottom:2px solid transparent;margin-bottom:-1px;padding:10px 12px;font:inherit;font-size:14px;font-weight:500;
+  color:var(--doux);cursor:pointer;white-space:nowrap}
+.onglets-reglages button:hover{color:var(--encre)}
+.onglets-reglages button[aria-selected="true"]{color:var(--marque);border-bottom-color:var(--marque);font-weight:600}
+.onglets-reglages .a-completer{width:7px;height:7px;border-radius:50%;background:var(--brique);display:inline-block}
+.panneau-reglages{display:grid;gap:14px}
+.panneau-reglages[hidden]{display:none}
+.grille-reglages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px}
+.grille-reglages .large{grid-column:1 / -1}
+.note-reglages{color:var(--doux);margin:12px 0 0;font-size:12.5px}
+.alerte-reglages{border-color:var(--brique);background:var(--brique-fond);margin-bottom:16px}
+.alerte-reglages b{color:var(--brique)}
+.alerte-reglages p{margin:6px 0 0;font-size:13px}
+.barre-reglages{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:8px;margin-top:16px;padding:10px 0;
+  background:var(--papier);border-top:1px solid var(--ligne)}
+.etat-reglages{margin-right:auto;font-size:13px;color:var(--doux)}
+.etat-reglages.modifie{color:var(--brique);font-weight:600}
+.barre-reglages .btn{min-height:40px}
+.barre-reglages .btn[disabled]{opacity:.45;cursor:default}
+.barre-reglages .btn[hidden]{display:none}
 .chiffre .val small{font-size:1em}
 /* liste des documents : tri, puces de filtre, échéance et reste dû */
 .liste th .tri{background:none;border:0;padding:0;margin:0;font:inherit;letter-spacing:inherit;text-transform:inherit;
@@ -885,6 +909,12 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
   .retour-tete:hover{background:var(--surface2)}
   .retour-tete .ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   body.a-retour .editeur-tete .lien-retour{display:none}
+  /* la barre des réglages se pose au-dessus des onglets du bas */
+  body[data-ecran="reglages"] .barre-reglages{bottom:calc(71px + env(safe-area-inset-bottom, 0px))}
+}
+@media (max-width:560px){
+  .grille-reglages{grid-template-columns:minmax(0,1fr)}
+  .etat-reglages{font-size:12.5px}
 }
 @media (max-width:400px){
   #changer-comptoir .long{display:none}
@@ -996,7 +1026,23 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
   --red: #E5877E;
   --red-soft: #3A211E;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.35);
-}#marches *, #marches-print *{ box-sizing: border-box; }#marches, #marches-print{ margin: 0; padding: 0; }#marches, #marches-print{
+}
+/* Refonte : à l'écran, le module prend les couleurs et la police de
+   l'application — il gardait son vert et la police système. Seul #marches
+   change : #marches-print et les maquettes .maq-* impriment comme avant.
+   « html .app #marches » l'emporte sur les blocs sombres du module ; la
+   surface passe par --fond-carte, --surface ne pouvant se citer elle-même. */
+:root{--fond-carte:var(--surface)}
+html .app #marches{
+  --bg:var(--papier); --surface:var(--fond-carte); --surface-2:var(--surface2);
+  --ink:var(--encre); --ink-soft:var(--doux); --ink-faint:var(--tres-doux);
+  --line:var(--ligne); --line-strong:var(--ligne-forte);
+  --accent:var(--marque); --accent-ink:var(--fond-carte); --accent-soft:var(--ivoire);
+  --gold:var(--bleu); --gold-soft:var(--bleu-fond); --red:var(--brique); --red-soft:var(--brique-fond);
+  --shadow:var(--ombre); --radius:var(--r);
+  font-family:inherit;
+}
+#marches *, #marches-print *{ box-sizing: border-box; }#marches, #marches-print{ margin: 0; padding: 0; }#marches, #marches-print{
   background: var(--bg); color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased;
@@ -2128,7 +2174,7 @@ var ONGLETS = [
   {cle:"reglages", titre:"Réglages"}
 ];
 function aller(cle){
-  if(!Histo.enRetour && vue === "editeur" && cle !== "editeur" && !quitterEditeurPermis()) return;
+  if(!Histo.enRetour && !quitterVuePermis()) return;
   vue = cle; brouillon = null; formulaire = null; aConfirmer = null;
   rendre(true);
   if(cle === "marches"){
@@ -4845,8 +4891,14 @@ function brouillonModifie(){
   var s = Store.un("documents", b.id);
   return !!s && jsonStable(copieEditable(s)) !== jsonStable(b);
 }
-/* Quitter l'éditeur perdait les modifications sans un mot ; avec le retour
-   du téléphone, un geste de trop suffisait. */
+/* Quitter l'éditeur ou les réglages perdait les modifications sans un mot ;
+   avec le retour du téléphone, un geste de trop suffisait. */
+function quitterVuePermis(){
+  if(vue === "editeur") return quitterEditeurPermis();
+  if(vue === "reglages" && reglagesModifies)
+    return confirm("Les réglages modifiés ne sont pas enregistrés. Quitter quand même ?");
+  return true;
+}
 function quitterEditeurPermis(){
   if(!brouillonModifie()) return true;
   return confirm((brouillon.id ? "Les modifications de " + brouillon.numero + " ne sont pas enregistrées."
@@ -4864,9 +4916,9 @@ window.addEventListener("popstate", function(e){
     }
     majRetour(); return;
   }
-  if(vue === "editeur" && !quitterEditeurPermis()){
-    /* on reste : l'éditeur reprend sa place en haut de l'historique */
-    history.pushState({cle:cleVue(), vue:vue, id:brouillon.id || null, pas:(s.pas || 0) + 1, depuis:s.vue}, "");
+  if(!quitterVuePermis()){
+    /* on reste : la vue reprend sa place en haut de l'historique */
+    history.pushState({cle:cleVue(), vue:vue, id:(brouillon && brouillon.id) || null, pas:(s.pas || 0) + 1, depuis:s.vue}, "");
     majRetour(); return;
   }
   Histo.enRetour = true;
@@ -5230,79 +5282,133 @@ function vueCatalogue(){
 }
 
 /* ---------- réglages ---------- */
+/* Les réglages en onglets (refonte, 18-09-2026). Une seule page de six cartes
+   en grille serrée tronquait les listes ; les onglets ne font que masquer :
+   tous les champs restent dans la page, et « Enregistrer » les lit tous. */
+var ongletReglages = "identite", reglagesModifies = false;
+var ONGLETS_REGLAGES = [["identite","Identité"],["documents","Documents"],["taxes","Taxes et e-MECeF"],
+                        ["encaissement","Encaissement"],["sauvegarde","Sauvegarde"]];
+function montrerOngletReglages(cle){
+  ongletReglages = cle;
+  ONGLETS_REGLAGES.forEach(function(o){
+    var b = document.getElementById("o-" + o[0]), p = document.getElementById("p-" + o[0]);
+    if(b) b.setAttribute("aria-selected", String(o[0] === cle));
+    if(p) p.hidden = o[0] !== cle;
+  });
+}
+function majBarreReglages(modif){
+  reglagesModifies = modif;
+  var e = document.getElementById("etat-reglages");
+  if(e){ e.textContent = modif ? "Modifications non enregistrées" : "Tout est enregistré"; e.classList.toggle("modifie", modif); }
+  var a = document.getElementById("annul-reglages"); if(a) a.hidden = !modif;
+  var s = document.getElementById("enr-reglages"); if(s) s.disabled = !modif;
+}
 function vueReglages(){
   var r = reglages();
-  function ch(cle, lib, zone){
-    return '<div class="champ"><label for="r-' + cle + '">' + lib + "</label>" +
-      (zone ? '<textarea id="r-' + cle + '" data-reglage="' + cle + '">' + echap(r[cle]) + "</textarea>"
-            : '<input id="r-' + cle + '" data-reglage="' + cle + '" value="' + echap(r[cle]) + '">') + "</div>";
+  /* la page reflète ce qui est enregistré */
+  reglagesModifies = false;
+  function ch(cle, lib, o){
+    o = o || {};
+    return '<div class="champ' + (o.large ? " large" : "") + '"><label for="r-' + cle + '">' + lib + "</label>" +
+      (o.zone ? '<textarea id="r-' + cle + '" data-reglage="' + cle + '">' + echap(r[cle]) + "</textarea>"
+              : '<input id="r-' + cle + '" data-reglage="' + cle + '" value="' + echap(r[cle]) + '"' +
+                (o.ph ? ' placeholder="' + o.ph + '"' : "") + ">") + "</div>";
+  }
+  function liste(cle, lib, options, large){
+    return '<div class="champ' + (large ? " large" : "") + '"><label for="r-' + cle + '">' + lib + "</label>" +
+      '<select id="r-' + cle + '" data-reglage="' + cle + '">' +
+      options.map(function(m){
+        return '<option value="' + m[0] + '"' + ((r[cle] || "") === m[0] ? " selected" : "") + ">" + m[1] + "</option>";
+      }).join("") + "</select></div>";
+  }
+  function carte(titre, contenu, note){
+    return '<div class="carte"><h3>' + titre + '</h3><div class="grille-reglages">' + contenu + "</div>" +
+      (note ? '<p class="note-reglages">' + note + "</p>" : "") + "</div>";
+  }
+  function panneau(cle, contenu){
+    return '<section class="panneau-reglages" id="p-' + cle + '" role="tabpanel" aria-labelledby="o-' + cle + '"' +
+      (ongletReglages === cle ? "" : " hidden") + ">" + contenu + "</section>";
   }
   /* Sans identité, les documents sortent avec des trous à la place du nom et
      du numéro fiscal. Mieux vaut le dire ici que le découvrir à l'impression. */
-  var manque = ["nom","ifu","rccm","adresse","signataire"]
-    .filter(function(c){ return !String(r[c] || "").trim(); });
+  var MANQUE = {nom:["identite","le nom commercial"], ifu:["identite","l'IFU"], rccm:["identite","le RCCM"],
+                adresse:["identite","l'adresse"], signataire:["documents","le signataire"]};
+  var manque = Object.keys(MANQUE).filter(function(c){ return !String(r[c] || "").trim(); });
+  var aCompleter = {};
+  manque.forEach(function(c){ aCompleter[MANQUE[c][0]] = true; });
+  var ouCompleter = ONGLETS_REGLAGES.filter(function(o){ return aCompleter[o[0]]; })
+    .map(function(o){ return "« " + o[1] + " »"; });
 
   return '<div class="entete-vue"><div><h1>Réglages</h1>' +
-    '<p class="sous-titre">Ces informations alimentent l\'en-tête et le pied de tous vos documents</p></div>' +
-    '<button class="btn principal" id="enr-reglages">Enregistrer</button></div>' +
-    (manque.length ? '<div class="carte" style="border-color:var(--brique);background:var(--brique-fond)">' +
-      '<b style="color:var(--brique)">Ce comptoir n\'est pas encore configuré.</b>' +
-      '<p style="margin:6px 0 0;font-size:13px">Tant que ces champs sont vides, vos documents sortiront ' +
-      'incomplets : <b>' + manque.join(", ") + '</b>.</p></div>' : "") +
-    '<div class="carte"><h3>Identité</h3><div class="grille">' +
-      ch("nom","Nom commercial") + ch("activite","Baseline") + ch("forme","Forme juridique et capital") +
-      ch("capital","Capital social") +
-      '<div class="champ"><label for="r-maquette">Maquette des documents</label>' +
-      '<select id="r-maquette" data-reglage="maquette">' +
-      [["","Selon la palette du comptoir"],
-       ["zadna","Technique — en-tête à gauche, signature à droite"],
-       ["nassra","Administrative — logo à gauche, signature à gauche"],
-       ["dsn","En-tête de lettre — mentions à droite en Times, filet"],
-       ["seb","Quadrillée — logo seul en tête, mentions en pied"],
-       ["abz","Dégradé — logo, mentions et QR en tête, signature à droite"]].map(function(m){
-        return '<option value="' + m[0] + '"' + ((r.maquette||"") === m[0] ? " selected" : "") +
-          ">" + m[1] + "</option>";
-      }).join("") + "</select></div>" +
-      ch("rccm","RCCM") + ch("ifu","IFU") +
-      ch("tel","Téléphone") + ch("email","E-mail") + ch("ville","Ville d'émission") +
-      ch("logo","Logo — adresse du fichier") +
-      ch("qrEntete","QR de l'en-tête — adresse du fichier") + ch("adresseCourte","Adresse courte (en-tête)") +
-      '<div class="champ"><label for="r-charte">Palette</label>' +
-      '<select id="r-charte" data-reglage="charte">' +
-      [["","Selon le nom du comptoir"], ["zadna","Encre et couleurs vives"],
-       ["nassra","Brun et ocre"], ["dsn","Bleu"], ["seb","Or et noir"], ["abz","Bleu et cyan"]].map(function(c){
-        return '<option value="' + c[0] + '"' + ((r.charte || "") === c[0] ? " selected" : "") +
-          ">" + c[1] + "</option>";
-      }).join("") + "</select></div></div>" +
-      '<div style="margin-top:12px">' + ch("adresse","Adresse") + "</div></div>" +
-    '<div class="carte"><h3>Encaissement</h3><div class="grille">' +
-      ch("banque","Banque") + ch("compte","N° de compte") + ch("momo","Mobile Money") + "</div></div>" +
-    '<div class="carte"><h3>Taxe sur la valeur ajoutée</h3><div class="grille">' +
-      ch("tauxTva","Taux de TVA (%)") +
-      '<div class="champ"><label for="r-tvaDefaut">TVA activée par défaut</label>' +
-      '<select id="r-tvaDefaut" data-reglage="tvaDefaut">' +
-      '<option value="oui"' + (r.tvaDefaut !== "non" ? " selected" : "") + ">Oui</option>" +
-      '<option value="non"' + (r.tvaDefaut === "non" ? " selected" : "") + ">Non</option></select></div></div>" +
-      '<p style="color:var(--doux);margin:12px 0 0;font-size:12.5px">Chaque document garde son propre réglage : ' +
-      "l'interrupteur « TVA » de l'éditeur ne touche que le document ouvert.</p></div>" +
-    '<div class="carte"><h3>Facture normalisée e-MECeF</h3><div class="grille">' +
-      '<div class="champ"><label for="r-groupeDefaut">Groupe de taxation par défaut</label>' +
-      '<select id="r-groupeDefaut" data-reglage="groupeDefaut">' +
-      GROUPES.map(function(g){
-        return '<option value="' + g[0] + '"' + (r.groupeDefaut === g[0] ? " selected" : "") +
-          ">" + g[0] + " · " + g[1] + " — " + g[2] + "</option>";
-      }).join("") + "</select></div></div>" +
-      '<p style="color:var(--doux);margin:12px 0 0;font-size:12.5px">Ce groupe est appliqué à chaque ' +
-      "nouvelle ligne de facture. Le régime TPS correspond au groupe E.</p></div>" +
-    '<div class="carte"><h3>Mentions et signature</h3><div class="grille">' +
-      ch("validite","Validité des offres") + ch("signataire","Signataire") + ch("fonction","Fonction") + "</div>" +
-      '<div style="margin-top:12px">' + ch("mention","Mention à porter quand la TVA est désactivée", true) + "</div></div>" +
-    '<div class="carte"><h3>Sauvegarde</h3>' +
-      '<p style="color:var(--doux);margin:0 0 12px">Exportez vos données pour les archiver, ou réimportez une sauvegarde.</p>' +
+    '<p class="sous-titre">Ces informations alimentent l\'en-tête et le pied de tous vos documents</p></div></div>' +
+    (manque.length ? '<div class="carte alerte-reglages">' +
+      '<b>Ce comptoir n\'est pas encore configuré.</b>' +
+      '<p>Tant que ces champs sont vides, vos documents sortiront incomplets : ' +
+      manque.map(function(c){ return MANQUE[c][1]; }).join(", ") + ". À compléter dans " + (ouCompleter.length > 1 ? "les onglets " : "l'onglet ") +
+      ouCompleter.join(" et ") + (ouCompleter.length > 1 ? ", marqués" : ", marqué") + " d'un point.</p></div>" : "") +
+    '<div class="onglets-reglages" role="tablist" aria-label="Rubriques des réglages">' +
+    ONGLETS_REGLAGES.map(function(o){
+      return '<button role="tab" id="o-' + o[0] + '" aria-controls="p-' + o[0] + '" aria-selected="' + (ongletReglages === o[0]) +
+        '" data-onglet-reglages="' + o[0] + '">' + o[1] +
+        (aCompleter[o[0]] ? '<i class="a-completer" title="Champs à compléter"></i>' : "") + "</button>";
+    }).join("") + "</div>" +
+
+    panneau("identite",
+      carte("Raison sociale",
+        ch("nom","Nom commercial") + ch("activite","Baseline") +
+        ch("forme","Forme juridique et capital") + ch("capital","Capital social")) +
+      carte("Immatriculation", ch("rccm","RCCM") + ch("ifu","IFU")) +
+      carte("Coordonnées",
+        ch("tel","Téléphone") + ch("email","E-mail") +
+        ch("adresse","Adresse", {large:true}) + ch("adresseCourte","Adresse courte (en-tête)"))) +
+
+    panneau("documents",
+      carte("Présentation",
+        liste("maquette", "Maquette des documents",
+          [["","Selon la palette du comptoir"],
+           ["zadna","Technique — en-tête à gauche, signature à droite"],
+           ["nassra","Administrative — logo à gauche, signature à gauche"],
+           ["dsn","En-tête de lettre — mentions à droite en Times, filet"],
+           ["seb","Quadrillée — logo seul en tête, mentions en pied"],
+           ["abz","Dégradé — logo, mentions et QR en tête, signature à droite"]], true) +
+        liste("charte", "Palette",
+          [["","Selon le nom du comptoir"], ["zadna","Encre et couleurs vives"],
+           ["nassra","Brun et ocre"], ["dsn","Bleu"], ["seb","Or et noir"], ["abz","Bleu et cyan"]]) +
+        ch("logo","Logo — adresse du fichier") +
+        ch("qrEntete","QR de l'en-tête — adresse du fichier", {large:true})) +
+      carte("Signature et mentions",
+        ch("ville","Ville d'émission") + ch("validite","Validité des offres") +
+        ch("signataire","Signataire") + ch("fonction","Fonction"))) +
+
+    panneau("taxes",
+      carte("Taxe sur la valeur ajoutée",
+        ch("tauxTva","Taux de TVA (%)") +
+        liste("tvaDefaut", "TVA activée par défaut", [["oui","Oui"],["non","Non"]]) +
+        ch("mention","Mention à porter quand la TVA est désactivée", {zone:true, large:true}),
+        "Chaque document garde son propre réglage : l'interrupteur « TVA » de l'éditeur ne touche que le document ouvert.") +
+      carte("Facture normalisée e-MECeF",
+        liste("groupeDefaut", "Groupe de taxation par défaut",
+          GROUPES.map(function(g){ return [g[0], g[0] + " · " + g[1] + " — " + g[2]]; }), true),
+        "Ce groupe est appliqué à chaque nouvelle ligne de facture. Le régime TPS correspond au groupe E.")) +
+
+    panneau("encaissement",
+      carte("Encaissement",
+        ch("banque","Banque") + ch("compte","N° de compte") + ch("momo","Mobile Money"),
+        "Ces coordonnées s'impriment au pied des factures pour le règlement.")) +
+
+    panneau("sauvegarde",
+      '<div class="carte"><h3>Sauvegarde</h3>' +
+      '<p class="note-reglages" style="margin:0 0 12px">Exportez vos données pour les archiver, ou réimportez une sauvegarde.</p>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
       '<button class="btn" id="export">Exporter (JSON)</button>' +
       '<label class="btn" style="cursor:pointer">Importer<input type="file" id="import" accept="application/json,.json" hidden></label>' +
-      '</div><div id="zone-export"></div></div>';
+      '</div><div id="zone-export"></div></div>') +
+
+    /* toujours visible : on sait si ce qu'on vient de taper est enregistré */
+    '<div class="barre-reglages">' +
+      '<span class="etat-reglages" id="etat-reglages" role="status">Tout est enregistré</span>' +
+      '<button class="btn" id="annul-reglages" hidden>Annuler</button>' +
+      '<button class="btn principal" id="enr-reglages" disabled>Enregistrer</button></div>';
 }
 
 /* ---------- la carte de rédaction ---------- */
@@ -7828,7 +7934,7 @@ function ouvrirComptoir(code){
 }
 
 function changerDeComptoir(){
-  if(vue === "editeur" && !quitterEditeurPermis()) return;
+  if(!quitterVuePermis()) return;
   /* Avant tout : ce qui est en attente d'enregistrement appartient encore à
      cette maison-ci. */
   if(typeof viderMarches === "function") viderMarches();
@@ -7958,13 +8064,17 @@ document.addEventListener("click", function(e){
     return;
   }
 
+  if((el = c("[data-onglet-reglages]"))){ montrerOngletReglages(el.dataset.ongletReglages); return; }
+  if(c("#annul-reglages")){ rendre(true); signal("Modifications annulées"); return; }
   if(c("#enr-reglages")){
     var r = reglages();
     Array.prototype.forEach.call(document.querySelectorAll("[data-reglage]"), function(i){
       r[i.dataset.reglage] = i.value;
     });
     r.id = "entreprise";
+    reglagesModifies = false;
     Store.poser("reglages", r);
+    majBarreReglages(false);
     signal("Réglages enregistrés");
     return;
   }
@@ -8019,6 +8129,7 @@ function montrerTexte(zone, texte){
 
 document.addEventListener("input", function(e){
   var t = e.target;
+  if(t.hasAttribute && t.hasAttribute("data-reglage")){ if(!reglagesModifies) majBarreReglages(true); return; }
 
   if(t.id === "f-texte"){
     filtre.texte = t.value;
