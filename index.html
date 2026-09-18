@@ -591,7 +591,9 @@ body.apercu .voile-apercu{opacity:1;pointer-events:auto}
 .feuille.abz{width:210mm;min-height:297mm;background:#fff;color:#0B1B2E;padding:14mm 18mm 26mm;position:relative;
   font-family:"Public Sans",sans-serif;font-size:10.5pt;line-height:1.5;box-shadow:0 2px 14px rgba(0,0,0,.12)}
 .feuille.abz .tete-abz{display:flex;align-items:center;justify-content:space-between;gap:8mm}
-.feuille.abz .tete-abz .logo-comptoir{height:21mm;max-width:40mm}
+/* le logo « abz.co » est un mot en longueur (près de 4 pour 1) : 12 mm de
+   haut lui donnent 47 mm de large, l'équilibre du bloc de mentions en face */
+.feuille.abz .tete-abz .logo-comptoir{height:12mm;max-width:60mm}
 .feuille.abz .tete-abz .droite{display:flex;align-items:center;gap:3mm}
 .feuille.abz .tete-abz .men{text-align:right;font-size:8pt;line-height:1.55;color:#33475B}
 .feuille.abz .tete-abz .men span{display:inline-flex;align-items:center;gap:1.2mm}
@@ -6264,7 +6266,7 @@ function teteAbz(r){
     (r.adresseCourte || r.adresse) && ("<span>" + PICTOS_ABZ.lieu + echap(r.adresseCourte || r.adresse) + "</span>")
   ].filter(Boolean).join("<br>");
   var qr = String(r.qrEntete || "").trim();
-  return '<div class="tete-abz"><div class="marque">' + (logoComptoir(r, "21mm") ||
+  return '<div class="tete-abz"><div class="marque">' + (logoComptoir(r, "12mm") ||
       '<b style="font-family:Montserrat,sans-serif;font-size:22pt;color:#0A4BAA">' + echap(r.nom) + "</b>") + "</div>" +
     '<div class="droite"><div class="men">' + men + "</div>" +
     (qr ? '<img class="qr" src="' + echap(qr) + '" alt="">' : "") + "</div></div>" +
