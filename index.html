@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;800&family=Poppins:wght@600;700&family=Courier+Prime:wght@400;700&family=Chakra+Petch:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;800&family=Poppins:wght@600;700&family=Courier+Prime:wght@400;700&family=Chakra+Petch:wght@500;600;700&family=Montserrat:wght@600;700;800&display=swap">
 <style>
 :root{
   /* Charte ZADNA en service, relevée sur le fichier de marque du 26-08-2026 :
@@ -103,7 +103,9 @@ h1{font-family:var(--titre);font-size:23px;font-weight:700;margin:0;letter-spaci
 .btn.danger:hover{background:var(--brique-fond)}
 .btn.attente{background:var(--brique);border-color:var(--brique);color:var(--surface)}
 .champ{display:flex;flex-direction:column;gap:5px}
-.champ label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tres-doux);font-weight:600}
+/* libellés en minuscules et assez contrastés (refonte du 18-09-2026) : les petites
+   capitales grises espacées étaient à 3,97 de contraste sur le fond */
+.champ label{font-size:12.5px;color:var(--doux);font-weight:500}
 input,select,textarea{background:var(--surface);border:1px solid var(--ligne);border-radius:8px;padding:8px 10px;width:100%}
 input:focus,select:focus,textarea:focus{border-color:var(--ocre);outline:none}
 textarea{resize:vertical;min-height:64px}
@@ -146,17 +148,43 @@ textarea{resize:vertical;min-height:64px}
 .filtres input[type="search"]{max-width:260px}
 .filtres select{width:auto}
 
-.editeur{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,520px);gap:22px;align-items:start}
-/* minmax(0,…) et non 1fr : sinon la colonne s'élargit à la barre d'actions, qui
-   ne défile plus, et toute la page déborde sur téléphone */
-@media (max-width:1080px){.editeur{grid-template-columns:minmax(0,1fr)}.cadre-apercu{position:static}}
+/* L'éditeur prend toute la largeur ; l'aperçu A4 s'ouvre dans un panneau. */
+.editeur{min-width:0}
+.editeur-tete{align-items:center}
+.editeur-tete h1{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.editeur-tete h1 .puce{font-family:var(--titre);font-size:12px}
+.num-piece{color:var(--marque);font-family:var(--mono);font-size:.9em}
+.lien-retour{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:4px 0;margin:0 0 4px;
+  color:var(--doux);font:inherit;font-size:13px;cursor:pointer;min-height:32px}
+.lien-retour:hover{color:var(--marque)}
+.grille-client{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.grille-client .large{grid-column:span 2}
+.plus-client{margin-top:12px;border-top:1px solid var(--ligne);padding-top:10px}
+.plus-client > summary{cursor:pointer;list-style:none;display:flex;gap:10px;align-items:baseline;font-size:13px;
+  font-weight:600;color:var(--marque);min-height:28px;white-space:nowrap}
+.plus-client > summary::-webkit-details-marker{display:none}
+.plus-client > summary::before{content:"▸";color:var(--doux)}
+.plus-client[open] > summary::before{content:"▾"}
+.plus-client > summary span{font-weight:400;color:var(--doux);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.plus-client[open] > summary{margin-bottom:10px}
+.carte.repli > summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.carte.repli > summary::-webkit-details-marker{display:none}
+.carte.repli > summary h3{margin:0}
+.carte.repli > summary span{font-size:13px;color:var(--doux)}
+.carte.repli > summary span::after{content:" ▸"}
+.carte.repli[open] > summary span::after{content:" ▾"}
+.carte.repli[open] > summary{margin-bottom:12px}
+.ajout-ligne{width:100%;justify-content:center;margin-top:10px;border:1.5px dashed var(--ligne-forte);background:transparent;
+  color:var(--marque);min-height:42px}
+.btn .ic,.lien-retour .ic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:820px){.grille-client{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .carte{background:var(--surface);border:1px solid var(--ligne);border-radius:var(--r);padding:16px}
 .carte + .carte{margin-top:14px}
-.carte h3{margin:0 0 12px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--tres-doux);font-weight:700}
+.carte h3{margin:0 0 12px;font-size:14px;color:var(--encre);font-weight:600}
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px}
 table.lignes{width:100%;border-collapse:collapse}
-table.lignes th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tres-doux);
-  text-align:left;padding:0 6px 6px;font-weight:600}
+table.lignes th{font-size:12.5px;color:var(--doux);text-align:left;padding:0 6px 6px;font-weight:500}
 table.lignes td{padding:3px}
 table.lignes input{padding:7px 8px}
 table.lignes input.ref-rpr{margin-top:4px;padding:4px 8px;font-size:11.5px;
@@ -216,13 +244,34 @@ dialog.envoi .aide{color:var(--doux);font-size:12.5px;margin:0}
 /* le canevas ne sait pas dessiner les chiffres à chasse fixe : la page les
    placerait larges et html2canvas les dessinerait étroits, d'où « 200  847 » */
 .scene-pdf .feuille, .scene-pdf .feuille *{font-variant-numeric:normal!important}
-.barre-actions{position:sticky;bottom:0;background:var(--papier);border-top:1px solid var(--ligne);
-  padding:12px 0;display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+/* une seule rangée ; le net et le reste dû toujours sous les yeux */
+.barre-actions{position:sticky;bottom:0;z-index:5;background:var(--papier);border-top:1px solid var(--ligne);
+  padding:10px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.barre-actions .btn{min-height:40px}
+.barre-actions .resume{margin-left:auto;display:flex;gap:16px;align-items:baseline;font-size:13px;color:var(--doux);white-space:nowrap}
+.barre-actions .resume b{font-family:var(--mono);font-size:16px;color:var(--encre);font-variant-numeric:tabular-nums}
+.barre-actions .resume .du b{color:var(--brique)}
+details.menu-actions{position:relative}
+details.menu-actions > summary{list-style:none}
+details.menu-actions > summary::-webkit-details-marker{display:none}
+.menu-actions .liste-menu{position:absolute;bottom:calc(100% + 6px);left:0;min-width:210px;background:var(--surface);
+  border:1px solid var(--ligne);border-radius:10px;box-shadow:var(--ombre);padding:6px;display:grid;gap:2px;z-index:6}
+.menu-actions .liste-menu .btn{justify-content:flex-start;width:100%;border-color:transparent;background:transparent}
+.menu-actions .liste-menu .btn:hover{background:var(--surface2)}
+.menu-actions .liste-menu .btn.attente{background:var(--brique);color:var(--surface)}
 
-.cadre-apercu{position:sticky;top:22px}
-.cadre-apercu .barre{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.cadre-apercu .barre > span:first-child{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tres-doux);font-weight:600}
-#bascule-apercu{display:none}
+/* l'aperçu A4, à la demande : un panneau qui glisse depuis la droite. Il reste
+   mis en page quand il est fermé, pour que majApercu mesure sa largeur. */
+.cadre-apercu{position:fixed;top:0;right:0;bottom:0;z-index:41;width:min(620px,100vw);overflow-y:auto;
+  background:var(--surface2);border-left:1px solid var(--ligne);box-shadow:var(--ombre);
+  transform:translateX(100%);visibility:hidden;transition:transform .25s ease,visibility 0s linear .25s}
+body.apercu .cadre-apercu{transform:none;visibility:visible;transition:transform .25s ease}
+.cadre-apercu .barre{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--ligne)}
+.cadre-apercu .barre b{font-size:15px}
+.cadre-apercu .scene{border:0;border-radius:0;background:transparent;margin:0}
+.voile-apercu{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .25s}
+body.apercu .voile-apercu{opacity:1;pointer-events:auto}
 .scene{background:var(--surface2);border:1px solid var(--ligne);border-radius:var(--r);padding:14px;overflow:hidden}
 .scene .porte{transform-origin:top left}
 
@@ -534,9 +583,78 @@ dialog.envoi .aide{color:var(--doux);font-size:12.5px;margin:0}
   text-align:center;font-size:6.8pt;line-height:1.6;color:#5E584B}
 .feuille.seb .pied b{color:#1D1B16;font-weight:600}
 
+/* ═══ la feuille d'ABZ et Co, d'après son en-tête Word ═══
+   Logo à gauche ; IFU, RCCM, téléphone, e-mail et quartier alignés à droite
+   contre le QR ; un filet cyan d'un bord à l'autre de la page. La « pilule »
+   du logo — le O étiré en dégradé bleu → cyan — revient deux fois : sous le
+   titre et autour du net à payer. Montserrat a la carrure des lettres du logo. */
+.feuille.abz{width:210mm;min-height:297mm;background:#fff;color:#0B1B2E;padding:14mm 18mm 26mm;position:relative;
+  font-family:"Public Sans",sans-serif;font-size:10.5pt;line-height:1.5;box-shadow:0 2px 14px rgba(0,0,0,.12)}
+.feuille.abz .tete-abz{display:flex;align-items:center;justify-content:space-between;gap:8mm}
+.feuille.abz .tete-abz .logo-comptoir{height:21mm;max-width:40mm}
+.feuille.abz .tete-abz .droite{display:flex;align-items:center;gap:3mm}
+.feuille.abz .tete-abz .men{text-align:right;font-size:8pt;line-height:1.55;color:#33475B}
+.feuille.abz .tete-abz .men span{display:inline-flex;align-items:center;gap:1.2mm}
+.feuille.abz .tete-abz .men svg{width:2.6mm;height:2.6mm;fill:#0FB5D8;flex:none}
+.feuille.abz .tete-abz .qr{width:19mm;height:19mm;object-fit:contain}
+/* le filet court d'un bord de la page à l'autre, comme sur l'en-tête Word */
+.feuille.abz .filet-abz{height:.5mm;background:#1CB8E2;margin:4mm -18mm 0}
+.feuille.abz .titre-abz{margin:9mm 0 0;text-align:center;font-family:Montserrat,sans-serif;font-weight:800;
+  font-size:15pt;letter-spacing:.04em;color:#0A4BAA;text-transform:uppercase}
+.feuille.abz .titre-abz small{display:block;font-weight:700;font-size:10pt;letter-spacing:.03em;color:#0B90B8;margin-top:1mm;text-transform:none}
+.feuille.abz .pilule{width:34mm;height:1.6mm;border-radius:1mm;margin:2.6mm auto 0;background:linear-gradient(90deg,#0A4BAA,#5FDDE6)}
+.feuille.abz .date-abz{text-align:right;font-size:9pt;color:#4F6A80;margin-top:5mm}
+.feuille.abz .parties{display:flex;gap:8mm;margin-top:4mm;align-items:flex-start}
+.feuille.abz .parties .gauche{flex:1;font-size:9pt;color:#4F6A80;line-height:1.65}
+.feuille.abz .parties .boite{width:80mm;background:#EEF8FC;border-radius:2mm;padding:3.6mm 4.2mm;font-size:9pt;line-height:1.6}
+.feuille.abz .parties strong{display:block;font-family:Montserrat,sans-serif;color:#0A4BAA;font-size:8pt;font-weight:700;
+  letter-spacing:.09em;text-transform:uppercase;margin-bottom:1.4mm}
+.feuille.abz table.art{width:100%;border-collapse:separate;border-spacing:0;margin-top:7mm;font-size:9.5pt}
+.feuille.abz table.art th{background:linear-gradient(90deg,#0A4BAA,#0FB5D8);color:#fff;font-family:Montserrat,sans-serif;
+  font-size:8pt;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:2.4mm 2.6mm}
+.feuille.abz table.art th:first-child{border-radius:2mm 0 0 2mm}
+.feuille.abz table.art th:last-child{border-radius:0 2mm 2mm 0}
+.feuille.abz table.art th.d{text-align:right}
+.feuille.abz table.art td{border-bottom:.3mm solid #D3E8F2;padding:2.3mm 2.6mm;vertical-align:top}
+.feuille.abz table.art td.n{color:#0A4BAA;font-family:Montserrat,sans-serif;font-weight:700}
+.feuille.abz table.art td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.feuille.abz table.art .code{display:block;font-size:7.8pt;color:#6F879A;letter-spacing:.02em}
+.feuille.abz .totaux{margin-top:5mm;display:flex;justify-content:flex-end}
+.feuille.abz .totaux table{border-collapse:separate;border-spacing:0;min-width:90mm}
+.feuille.abz .totaux td{padding:1.9mm 3.2mm;font-size:9.5pt;border-bottom:.3mm solid #D3E8F2}
+.feuille.abz .totaux td.d{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.feuille.abz .totaux tr.net td{background:linear-gradient(90deg,#0A4BAA,#0FB5D8);color:#fff;font-family:Montserrat,sans-serif;
+  font-weight:800;font-size:10.5pt;border:0;padding:2.6mm 4mm}
+.feuille.abz .totaux tr.net td:first-child{border-radius:6mm 0 0 6mm}
+.feuille.abz .totaux tr.net td:last-child{border-radius:0 6mm 6mm 0}
+.feuille.abz .totaux tr.net + tr td{border-top:0}
+.feuille.abz .lettres{margin-top:5mm;font-size:9.5pt}
+.feuille.abz .notes{margin-top:4mm;font-size:8.5pt;color:#4F6A80;white-space:pre-wrap}
+.feuille.abz .certif{margin-top:6mm;border:.3mm solid #AFD2E3;border-radius:2mm;background:#F5FBFE;
+  padding:3mm 3.5mm;display:flex;gap:4mm;align-items:center}
+.feuille.abz .certif .qr{flex:none;width:21mm;height:21mm;background:#fff}
+.feuille.abz .certif .qr img{width:100%;height:100%;display:block;image-rendering:pixelated}
+.feuille.abz .certif .corps{flex:1;min-width:0}
+.feuille.abz .certif .titre{font-family:Montserrat,sans-serif;font-size:7pt;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:#0A4BAA;margin-bottom:1.6mm}
+.feuille.abz .certif dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:1mm 4mm;font-size:7.6pt;line-height:1.4}
+.feuille.abz .certif dt{color:#6F879A;letter-spacing:.09em;text-transform:uppercase;font-size:6.4pt;padding-top:.4mm}
+.feuille.abz .certif dd{margin:0;font-weight:500;word-break:break-all;font-variant-numeric:tabular-nums}
+/* La signature se pose à droite, comme sur ses pièces : le client, quand il
+   doit accepter, signe à gauche. */
+.feuille.abz .paraphes{display:flex;justify-content:space-between;align-items:flex-start;gap:10mm;margin-top:12mm;font-size:9pt;color:#4F6A80}
+.feuille.abz .paraphes .gauche b{display:block;color:#0B1B2E;margin-bottom:14mm}
+.feuille.abz .sig-d{position:relative;width:62mm;margin-left:auto;text-align:center;min-height:44mm}
+.feuille.abz .sig-d .fonction{display:block;font-weight:600;color:#0B1B2E;text-decoration:underline;text-underline-offset:1mm}
+.feuille.abz .cachet{position:absolute;left:50%;top:6mm;width:32mm;height:32mm;margin-left:-16mm;transform:rotate(-8deg);opacity:.92;pointer-events:none}
+.feuille.abz .sig-d .qui{display:block;margin-top:33mm;color:#0B1B2E;font-weight:600}
+.feuille.abz .pied{position:absolute;left:18mm;right:18mm;bottom:9mm;border-top:.3mm solid #1CB8E2;padding-top:2.2mm;
+  text-align:center;font-size:6.8pt;line-height:1.6;color:#4F6A80}
+.feuille.abz .pied b{color:#0A4BAA;font-weight:700}
+
 /* ---------- typographie ZADNA : les labels techniques passent en mono ---------- */
-.sceau .sous,.bloc h2,.carte h3,.liste th,.champ label,.chiffre .lib,.chiffre .val,.puce,.ref,
-table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{font-family:var(--mono)}
+.sceau .sous,.bloc h2,.liste th,.chiffre .lib,.chiffre .val,.puce,.ref,
+.liste .num,.somme dd{font-family:var(--mono)}
 .ref{letter-spacing:0}
 .sceau .nom{letter-spacing:.02em}
 /* la feuille declare ses polices rule par rule, voir plus haut */
@@ -636,6 +754,10 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
   table.lignes td:last-child button{width:100%;padding:8px 0;font-size:16px;line-height:1}
   .somme dl{grid-template-columns:1fr 130px;width:100%}
   .entete-vue h1{font-size:20px}
+  /* au téléphone, les boutons secondaires ne gardent que leur icône : 44 px à toucher */
+  .barre-actions .btn,.barre-actions summary.btn{min-height:44px;min-width:44px;justify-content:center}
+  .barre-actions .btn:not(.principal) .lib{display:none}
+  .barre-actions .btn.principal{flex:1}
   .chiffre .val{font-size:22px}
 }
 /* ---------- listes : cartes empilées sur petit écran ---------- */
@@ -654,18 +776,15 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
   .filtres{flex-direction:column;align-items:stretch}
   .filtres input[type="search"],.filtres select{max-width:none;width:100%}
   .grille{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
-  .barre-actions{flex-wrap:nowrap;overflow-x:auto;padding:10px 0;scrollbar-width:thin}
-  .barre-actions .btn{flex:none}
-  .barre-actions .btn[style*="margin-left"]{margin-left:8px!important}
+  /* le résumé passe au-dessus des boutons ; les menus s'ouvrent vers le haut,
+     un défilement horizontal les couperait */
+  .barre-actions .resume{order:-1;width:100%;margin-left:0;justify-content:space-between}
 }
 @media (max-width:820px){
   .app{grid-template-columns:1fr}
   /* En une seule colonne, le module reprend sa place dans le flux, après le
      rail et la vue. */
   #marches{grid-row:auto;grid-column:1}
-  .cadre-apercu .scene{display:none}
-  body.apercu .cadre-apercu .scene{display:block}
-  #bascule-apercu{display:inline-flex}
   .rail{flex-direction:row;align-items:center;gap:14px;border-right:0;border-bottom:1px solid var(--ligne);
     overflow-x:auto;padding:12px 14px;position:sticky;top:0;z-index:20}
   .rail nav{flex-direction:row}
@@ -918,6 +1037,15 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
   border: 1px solid #3B3730; }
 #marches.maq-seb .print-header h2, #marches-print.maq-seb .print-header h2{
   color: #7A6418; font-family: "Chakra Petch", sans-serif; }
+
+/* — ABZ : bandeau en dégradé bleu → cyan, lignes fines cyan, sans verticales — */
+#marches.maq-abz .bordereau-table th, #marches-print.maq-abz .bordereau-table th{
+  background: linear-gradient(90deg, #0A4BAA, #0FB5D8); color: #fff; border: 0;
+  font-family: Montserrat, sans-serif; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+#marches.maq-abz .bordereau-table td, #marches-print.maq-abz .bordereau-table td{
+  border: 0; border-bottom: 1px solid #D3E8F2; }
+#marches.maq-abz .print-header h2, #marches-print.maq-abz .print-header h2{
+  color: #0A4BAA; font-family: Montserrat, sans-serif; }
 #marches .print-entreprise.avec-logo, #marches-print .print-entreprise.avec-logo{
   display: flex; align-items: flex-start; gap: 10mm; }
 #marches .print-entreprise .print-ident, #marches-print .print-entreprise .print-ident{ flex: 1; }
@@ -1432,6 +1560,15 @@ table.lignes th,.cadre-apercu .barre > span:first-child,.liste .num,.somme dd{fo
 </section>
 </div>
 <div id="impression" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-oeil" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-imprimer" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></symbol>
+  <symbol id="i-envoi" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></symbol>
+  <symbol id="i-convertir" viewBox="0 0 24 24"><path d="m16 3 4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"/></symbol>
+  <symbol id="i-points" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></symbol>
+  <symbol id="i-retour" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="i-fermer" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+</svg>
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
@@ -1798,9 +1935,10 @@ function prochainNumero(type, dateIso){
       return d.type === type && d.annee === an && (!parMois || d.mois === mois);
     }).reduce(function(x,d){ return Math.max(x, d.seq || 0); }, 0) + 1;
   var code = TYPES[type].code;
-  /* Quatre formats sans ressemblance possible entre eux :
+  /* Cinq formats sans ressemblance possible entre eux :
      - DSN  : N° 0007/DSN/FAC/09-2026, sa maison et le mois ;
      - SEB  : N° 007/SEB/FAC/2026, trois chiffres comme ses proformas ;
+     - ABZ  : ABZ/FAC/2026/007, la maison en tête et le rang en dernier ;
      - NASSRA : N° 0007/FAC/2026, à la manière administrative ;
      - ZADNA : FAC-2026-007, à la manière technique.
      La séquence reste comptée PAR AN, pas par mois : elle l'était déjà pour
@@ -1808,6 +1946,7 @@ function prochainNumero(type, dateIso){
   var numero;
   if(m === "dsn")        numero = "N° " + String(seq).padStart(4,"0") + "/DSN/" + code + "/" + mois + "-" + an;
   else if(m === "seb")   numero = "N° " + String(seq).padStart(3,"0") + "/SEB/" + code + "/" + an;
+  else if(m === "abz")   numero = "ABZ/" + code + "/" + an + "/" + String(seq).padStart(3,"0");
   else if(m !== "zadna") numero = "N° " + String(seq).padStart(4,"0") + "/" + code + "/" + an;
   else                   numero = code + "-" + an + "-" + String(seq).padStart(3,"0");
   return {seq:seq, annee:an, mois:mois, numero:numero};
@@ -3350,7 +3489,7 @@ function enteteEntrepriseHtml() {
   /* Une soumission doit porter le RCCM et l'IFU. La maquette DSN les met dans
      son en-tête ; les autres les réservent au pied de page, que cette pièce
      n'a pas. On les ajoute sous le filet. */
-  if (m !== "dsn" && (r.rccm || r.ifu)) {
+  if (m !== "dsn" && m !== "abz" && (r.rccm || r.ifu)) {
     tete += '<div class="mentions-marche">RCCM : ' + esc(r.rccm || "—") +
             "  ·  IFU : " + esc(r.ifu || "—") + "</div>";
   }
@@ -4443,7 +4582,7 @@ document.getElementById("setupFileInput").addEventListener("change", async (e) =
 function marquerMaquette() {
   var el = document.getElementById("marches");
   if (!el) return;
-  ["dsn", "nassra", "zadna", "seb"].forEach(function (m) { el.classList.remove("maq-" + m); });
+  ["dsn", "nassra", "zadna", "seb", "abz"].forEach(function (m) { el.classList.remove("maq-" + m); });
   el.classList.add("maq-" + maquetteCourante());
 }
 rafraichirMarches = function(){
@@ -4482,6 +4621,7 @@ if (!profilConfigure(PROFILE)) {
 
 /* ======================= rendu ======================= */
 function rendre(forcer){
+  if(vue !== "editeur") document.body.classList.remove("apercu");
   var nav = document.getElementById("nav");
   var nb = {documents:Store.tout("documents").length, clients:Store.tout("clients").length,
             catalogue:Store.tout("articles").length};
@@ -4756,7 +4896,8 @@ function vueReglages(){
        ["zadna","Technique — en-tête à gauche, signature à droite"],
        ["nassra","Administrative — logo à gauche, signature à gauche"],
        ["dsn","En-tête de lettre — mentions à droite en Times, filet"],
-       ["seb","Quadrillée — logo seul en tête, mentions en pied"]].map(function(m){
+       ["seb","Quadrillée — logo seul en tête, mentions en pied"],
+       ["abz","Dégradé — logo, mentions et QR en tête, signature à droite"]].map(function(m){
         return '<option value="' + m[0] + '"' + ((r.maquette||"") === m[0] ? " selected" : "") +
           ">" + m[1] + "</option>";
       }).join("") + "</select></div>" +
@@ -4766,7 +4907,7 @@ function vueReglages(){
       '<div class="champ"><label for="r-charte">Palette</label>' +
       '<select id="r-charte" data-reglage="charte">' +
       [["","Selon le nom du comptoir"], ["zadna","Encre et couleurs vives"],
-       ["nassra","Brun et ocre"], ["dsn","Bleu"], ["seb","Or et noir"]].map(function(c){
+       ["nassra","Brun et ocre"], ["dsn","Bleu"], ["seb","Or et noir"], ["abz","Bleu et cyan"]].map(function(c){
         return '<option value="' + c[0] + '"' + ((r.charte || "") === c[0] ? " selected" : "") +
           ">" + c[1] + "</option>";
       }).join("") + "</select></div></div>" +
@@ -5293,43 +5434,87 @@ function vueEditeur(){
       "</dl></div>";
   }
 
-  return '<div class="entete-vue"><div><h1>' + T.label +
-    ' <span style="color:var(--marque);font-family:var(--titre)">' + echap(d.numero) + "</span></h1>" +
-    '<p class="sous-titre">' + (d.id ? "Enregistré" : "Nouveau document, pas encore enregistré") +
-      (d.source ? " · issu de " + echap(d.source) : "") + "</p></div>" +
-    '<button class="btn discret" data-vue="documents">← Retour</button></div>' +
-    '<div class="editeur"><div>' +
-      '<div class="carte"><h3>Client et dates</h3><div class="grille">' +
+  /* La refonte (18-09-2026) : l'éditeur prend toute la largeur et l'aperçu A4
+     ne s'ouvre plus qu'à la demande, dans un panneau. À côté de la saisie, il
+     réduisait la désignation à 89 px sur un portable. La barre d'actions tient
+     sur une rangée ; conversions et suppression passent dans des menus. */
+  var st = statutDoc(d);
+  function ico(n){ return '<svg class="ic" aria-hidden="true"><use href="#i-' + n + '"/></svg>'; }
+  function bouton(id, icone, lib){
+    return '<button class="btn" id="' + id + '" title="' + lib + '">' + ico(icone) + '<span class="lib">' + lib + "</span></button>";
+  }
+  var coord = [d.client.ifu && ("IFU " + d.client.ifu), d.client.tel, d.client.adresse].filter(Boolean).join(" · ");
+  var certRempli = !!(d.cert && (d.cert.code || d.cert.nim || d.cert.qr));
+  var conversions = T.lettre ? [] : [
+    d.type === "devis" && ["proforma", "Pro forma"],
+    d.type !== "facture" && d.type !== "recu" && d.type !== "avoir" && ["facture", "Facture"],
+    d.type === "facture" && ["avoir", "Avoir"],
+    d.type === "facture" && ["bl", "Bon de livraison"],
+    d.type === "facture" && ["recu", "Reçu"]
+  ].filter(Boolean);
+  /* ce qu'on veut savoir sans remonter : le net, et ce qui reste à payer */
+  var resume = "";
+  if(T.prix && !T.lettre){
+    resume = sansTotal(d)
+      ? '<span class="resume"><span>Grille de prix, sans total</span></span>'
+      : '<span class="resume"><span>' + (T.recu ? "Montant reçu" : T.avoir ? "Montant de l'avoir" : "Net à payer") +
+        ' <b data-somme="net-b">' + nombre(T.recu ? (Number(d.regle) || netAPayer(d)) : netAPayer(d)) + "</b></span>" +
+        (T.reglement && !T.recu ? '<span class="du">Reste dû <b data-somme="reste-b">' + nombre(resteDu(d)) + "</b></span>" : "") +
+        "</span>";
+  }
+
+  return '<div class="entete-vue editeur-tete"><div>' +
+      '<button class="lien-retour" data-vue="documents">' + ico("retour") + "Documents</button>" +
+      "<h1>" + T.label + ' <span class="num-piece">' + echap(d.numero) + "</span>" +
+      (d.id ? ' <span class="puce ' + st.cle + '">' + st.libelle + "</span>" : "") + "</h1>" +
+      '<p class="sous-titre">' + (d.id ? "Enregistré" : "Nouveau document, pas encore enregistré") +
+      (d.source ? " · issu de " + echap(d.source) : "") +
+      (d.envois && d.envois.length ? " · envoyé par WhatsApp le " + dateFr(String(d.envois[d.envois.length - 1].le).slice(0, 10)) : "") +
+      "</p></div>" +
+    '<button class="btn" id="ouvrir-apercu">' + ico("oeil") + "Aperçu A4</button></div>" +
+    '<div class="editeur">' +
+      /* Le courrier a ses propres cartes (destinataire, références) : la carte
+         client les doublait, nom, adresse, date et objet compris. */
+      (T.lettre ? "" :
+      '<div class="carte"><div class="grille-client">' +
         '<div class="champ"><label for="e-client">Client enregistré</label><select id="e-client" data-champ="clientId">' +
         '<option value="">— Saisie libre —</option>' +
         clients.map(function(c){
           return '<option value="' + c.id + '"' + (d.clientId === c.id ? " selected" : "") + ">" + echap(c.nom) + "</option>";
         }).join("") + "</select></div>" +
         '<div class="champ"><label for="e-nom">Nom sur le document</label><input id="e-nom" data-client="nom" value="' + echap(d.client.nom) + '"></div>' +
-        '<div class="champ"><label for="e-ifu">IFU client</label><input id="e-ifu" data-client="ifu" value="' + echap(d.client.ifu) + '"></div>' +
-        '<div class="champ"><label for="e-tel">Téléphone client</label><input id="e-tel" data-client="tel" value="' + echap(d.client.tel) + '"></div>' +
-        '<div class="champ"><label for="e-adr">Adresse client</label><input id="e-adr" data-client="adresse" value="' + echap(d.client.adresse) + '"></div>' +
         '<div class="champ"><label for="e-date">Date</label><input id="e-date" type="date" data-champ="date" value="' + echap(d.date) + '"></div>' +
         (T.reglement && !T.recu ? '<div class="champ"><label for="e-ech">Échéance</label><input id="e-ech" type="date" data-champ="echeance" value="' + echap(d.echeance) + '"></div>' : "") +
+        '<div class="champ large"><label for="e-objet">' + (T.avoir ? "Motif de l'avoir" : "Objet") + "</label>" +
+          '<input id="e-objet" data-champ="objet" value="' + echap(d.objet||"") + '" placeholder="' +
+          (T.avoir ? "Retour de marchandise, erreur de facturation…" : "Fourniture de…") + '"></div>' +
         (T.reglement ? '<div class="champ"><label for="e-mode">Mode de règlement</label>' +
           '<input id="e-mode" data-champ="mode" list="modes" placeholder="Espèces, Mobile Money…" value="' + echap(d.mode || "") + '">' +
           '<datalist id="modes"><option value="Espèces"><option value="Mobile Money">' +
           '<option value="Virement bancaire"><option value="Chèque"></datalist></div>' : "") +
-        (T.avoir ? '<div class="champ"><label for="e-source">Facture d\'origine</label>' +
+        (T.avoir ? '<div class="champ"><label for="e-source">Facture d’origine</label>' +
           '<input id="e-source" data-champ="source" value="' + echap(d.source||"") + '" placeholder="FAC-2026-004"></div>' : "") +
-        '<div class="champ"><label for="e-objet">' + (T.avoir ? "Motif de l\'avoir" : "Objet") + "</label>" +
-          '<input id="e-objet" data-champ="objet" value="' + echap(d.objet||"") + '" placeholder="' +
-          (T.avoir ? "Retour de marchandise, erreur de facturation…" : "Fourniture de…") + '"></div>' +
-      "</div></div>" +
+      "</div>" +
+      /* IFU, téléphone et adresse s'impriment mais se saisissent rarement :
+         repliés, avec ce qu'ils contiennent sous les yeux. */
+      '<details class="plus-client"><summary>Coordonnées du client <span>' +
+        (coord ? echap(coord) : "IFU, téléphone et adresse à compléter") + "</span></summary>" +
+        '<div class="grille-client">' +
+        '<div class="champ"><label for="e-ifu">IFU</label><input id="e-ifu" data-client="ifu" value="' + echap(d.client.ifu) + '"></div>' +
+        '<div class="champ"><label for="e-tel">Téléphone</label><input id="e-tel" data-client="tel" inputmode="tel" value="' + echap(d.client.tel) + '"></div>' +
+        '<div class="champ large"><label for="e-adr">Adresse</label><input id="e-adr" data-client="adresse" value="' + echap(d.client.adresse) + '"></div>' +
+        "</div></details></div>") +
       (T.lettre ? carteCourrier(d) :
       '<div class="carte"><h3>Articles</h3><table class="lignes' + (certifiable ? " certif" : "") + '">' +
         '<thead><tr><th>Désignation</th><th>Qté</th>' + (certifiable ? "<th>Gr.</th>" : "") +
         (T.prix ? (d.saisieTTC ? "<th>P.U. TTC</th><th>Montant TTC</th>" : "<th>P.U.</th><th>Montant</th>") : "") + '<th></th></tr></thead><tbody id="corps-lignes">' + lignes + "</tbody></table>" +
         '<datalist id="cat">' + arts.map(function(a){ return '<option value="' + echap(a.d) + '">'; }).join("") + "</datalist>" +
-        '<button class="btn discret" id="ajout-ligne" style="margin-top:8px">+ Ajouter une ligne</button>' +
+        '<button class="btn ajout-ligne" id="ajout-ligne">+ Ajouter une ligne</button>' +
         '<div id="rpr-info"></div>' + sommes + "</div>") +
       (T.prix && !T.lettre ? carteRepertoire() : "") +
-      (certifiable ? '<div class="carte"><h3>Certification e-MECeF</h3><div class="grille">' +
+      (certifiable ? '<details class="carte repli"' + (certRempli ? " open" : "") + ">" +
+        '<summary><h3>Certification e-MECeF</h3><span>' + (certRempli ? "certifiée" : "non certifiée") + "</span></summary>" +
+        '<div class="grille">' +
         '<div class="champ"><label for="e-typeMecef">Type de pièce</label>' +
         '<select id="e-typeMecef" data-champ="typeMecef">' +
         TYPES_MECEF.map(function(t){
@@ -5345,9 +5530,9 @@ function vueEditeur(){
         champCert(d,"compteurs","Compteurs") + champCert(d,"date","Certifiée le") + "</div>" +
         '<div style="margin-top:12px">' + champCert(d,"qr","Contenu du QR code (URL de vérification)") + "</div>" +
         '<p style="color:var(--doux);margin:12px 0 0;font-size:12.5px">Reportez ici ce que renvoie e-MECeF. ' +
-        "Tant que ces champs sont vides, la facture s'imprime sans bande de certification.</p></div>" : "") +
+        "Tant que ces champs sont vides, la facture s’imprime sans bande de certification.</p></details>" : "") +
       '<div class="carte"><h3>Notes et statut</h3>' +
-        '<textarea data-champ="notes" placeholder="Conditions particulières, délai de livraison, référence de commande…">' + echap(d.notes||"") + "</textarea>" +
+        '<textarea data-champ="notes" aria-label="Notes" placeholder="Conditions particulières, délai de livraison, référence de commande…">' + echap(d.notes||"") + "</textarea>" +
         '<div class="grille" style="margin-top:12px"><div class="champ"><label for="e-statut">Statut</label>' +
         '<select id="e-statut" data-champ="statut">' +
         [["brouillon","Brouillon"],["envoye","Envoyé au client"],["annule","Annulé"]].map(function(s){
@@ -5363,22 +5548,24 @@ function vueEditeur(){
         "</div></div>" +
       '<div class="barre-actions">' +
         '<button class="btn principal" id="enregistrer">Enregistrer</button>' +
-        '<button class="btn" id="imprimer">Imprimer / PDF</button>' +
-        '<button class="btn" id="envoyer-wa">Envoyer par WhatsApp</button>' +
-        (T.lettre ? "" :
-        (d.type === "devis" ? '<button class="btn" data-convertir="proforma">→ Pro forma</button>' : "") +
-        (d.type !== "facture" && d.type !== "recu" && d.type !== "avoir" ? '<button class="btn" data-convertir="facture">→ Facture</button>' : "") +
-        (d.type === "facture" ? '<button class="btn" data-convertir="avoir">→ Avoir</button>' +
-          '<button class="btn" data-convertir="bl">→ Bon de livraison</button><button class="btn" data-convertir="recu">→ Reçu</button>' : "")) +
-        (d.id ? '<button class="btn ' + (aConfirmer === "doc" ? "attente" : "danger") + '" id="supprimer" style="margin-left:auto">' +
-          (aConfirmer === "doc" ? "Confirmer la suppression" : "Supprimer") + "</button>" : "") +
+        bouton("bascule-apercu", "oeil", "Aperçu") +
+        bouton("imprimer", "imprimer", "Imprimer") +
+        bouton("envoyer-wa", "envoi", "Envoyer") +
+        (conversions.length ? '<details class="menu-actions"><summary class="btn" title="Convertir">' + ico("convertir") +
+          '<span class="lib">Convertir</span></summary><div class="liste-menu">' +
+          conversions.map(function(x){ return '<button class="btn" data-convertir="' + x[0] + '">→ ' + x[1] + "</button>"; }).join("") +
+          "</div></details>" : "") +
+        (d.id ? '<details class="menu-actions"' + (aConfirmer === "doc" ? " open" : "") +
+          '><summary class="btn" title="Autres actions" aria-label="Autres actions">' + ico("points") + '</summary><div class="liste-menu">' +
+          '<button class="btn ' + (aConfirmer === "doc" ? "attente" : "danger") + '" id="supprimer">' +
+          (aConfirmer === "doc" ? "Confirmer la suppression" : "Supprimer la pièce") + "</button></div></details>" : "") +
+        resume +
       "</div></div>" +
-      '<div class="cadre-apercu"><div class="barre"><span>Aperçu A4</span>' +
-      '<span style="display:flex;gap:6px"><button class="btn discret" id="bascule-apercu">' +
-      (document.body.classList.contains("apercu") ? "Masquer" : "Afficher") + "</button>" +
-      '<button class="btn discret" id="imprimer2">Imprimer</button></span></div>' +
-      '<div class="scene"><div class="porte" id="porte"></div></div></div>' +
-    "</div>";
+    '<div class="voile-apercu" id="voile-apercu"></div>' +
+    '<aside class="cadre-apercu" aria-label="Aperçu A4"><div class="barre"><b>Aperçu A4</b>' +
+      '<span style="display:flex;gap:6px"><button class="btn" id="imprimer2">' + ico("imprimer") + "Imprimer</button>" +
+      '<button class="btn discret" id="fermer-apercu" aria-label="Fermer l’aperçu">' + ico("fermer") + "</button></span></div>" +
+      '<div class="scene"><div class="porte" id="porte"></div></div></aside>';
 }
 
 /* ---------- le cachet ---------- */
@@ -6407,6 +6594,11 @@ function majRPR(){
     ? '<div class="rpr-bloc">' + lignes.join("") + "</div>"
     : "";
 }
+/* ouvre (vrai), ferme (faux) ou bascule (rien) le panneau d'aperçu A4 */
+function basculerApercu(ouvrir){
+  var ouvert = document.body.classList.toggle("apercu", ouvrir);
+  if(ouvert){ majApercu(); var f = document.getElementById("fermer-apercu"); if(f) f.focus(); }
+}
 function majApercu(){
   var porte = document.getElementById("porte");
   if(!porte || !brouillon) return;
@@ -6430,6 +6622,8 @@ function majSommes(){
   put("aib", fcfa(montantAIB(d)));
   put("net", fcfa(netAPayer(d)));
   put("reste", fcfa(resteDu(d)));
+  put("net-b", nombre(TYPES[d.type].recu ? (Number(d.regle) || netAPayer(d)) : netAPayer(d)));
+  put("reste-b", nombre(resteDu(d)));
   var lib = document.querySelector(".somme dt.total");
   if(lib) lib.textContent = d.tva ? "Net à payer TTC" : "Net à payer";
   majRPR();
@@ -7123,6 +7317,10 @@ function seDeconnecter(){
 document.addEventListener("click", function(e){
   function c(s){ return e.target.closest(s); }
   var el;
+  /* un menu ouvert se referme dès qu'on clique ailleurs */
+  Array.prototype.forEach.call(document.querySelectorAll("details.menu-actions[open]"), function(m){
+    if(!m.contains(e.target)) m.open = false;
+  });
 
   if((el = c("[data-vue]"))){ aller(el.dataset.vue); return; }
   if((el = c("[data-neuf]"))){ nouveauDoc(el.dataset.neuf); return; }
@@ -7195,13 +7393,9 @@ document.addEventListener("click", function(e){
   }
   if(c("#enregistrer")){ enregistrerBrouillon(); return; }
   if(c("#envoyer-wa")){ ouvrirEnvoiWA(); return; }
-  if(c("#bascule-apercu")){
-    var ouvert = document.body.classList.toggle("apercu");
-    el = document.getElementById("bascule-apercu");
-    if(el) el.textContent = ouvert ? "Masquer" : "Afficher";
-    if(ouvert) majApercu();
-    return;
-  }
+  if(c("#ouvrir-apercu")){ basculerApercu(true); return; }
+  if(c("#bascule-apercu")){ basculerApercu(); return; }
+  if(c("#fermer-apercu") || c("#voile-apercu")){ basculerApercu(false); return; }
   if(c("#changer-comptoir")){ changerDeComptoir(); return; }
   if(c("#imprimer") || c("#imprimer2")){ imprimer(); return; }
   if(c("#supprimer")){
@@ -7424,6 +7618,12 @@ document.addEventListener("change", function(e){
 });
 
 window.addEventListener("resize", function(){ if(vue === "editeur") majApercu(); });
+/* Échap referme l'aperçu, puis les menus */
+document.addEventListener("keydown", function(e){
+  if(e.key !== "Escape") return;
+  if(document.body.classList.contains("apercu")){ basculerApercu(false); return; }
+  Array.prototype.forEach.call(document.querySelectorAll("details.menu-actions[open]"), function(m){ m.open = false; });
+});
 
 demarrer();
 </script>
