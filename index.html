@@ -774,6 +774,32 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
 .actions-tete{display:flex;gap:8px;flex-wrap:wrap}
 .liste.docs .date-m{display:none}
 .chiffre .val small{font-size:1em}
+/* liste des documents : tri, puces de filtre, échéance et reste dû */
+.liste th .tri{background:none;border:0;padding:0;margin:0;font:inherit;letter-spacing:inherit;text-transform:inherit;
+  color:inherit;cursor:pointer}
+.liste th .tri:hover,.liste th .tri.actif{color:var(--encre)}
+.liste .du{color:var(--brique);font-weight:600}
+.liste td.retard{color:var(--brique)}
+.liste td.solde{color:var(--doux)}
+.liste .jours{display:block;font-size:11.5px;font-weight:600;white-space:nowrap}
+.liste.docs .m{display:none}
+/* huit colonnes : un numéro, une date ou un montant ne se coupe jamais */
+.liste.docs .ref,.liste.docs td.num,.liste.docs td[data-lib="Date"],.liste.docs td[data-lib="Échéance"]{white-space:nowrap}
+.tri-m{display:none}
+.puces-filtre{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.puces-filtre button{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border:1px solid var(--ligne-forte);
+  border-radius:99px;background:var(--surface);color:var(--doux);font:inherit;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.puces-filtre button:hover{color:var(--encre)}
+.puces-filtre button[aria-pressed="true"]{background:var(--ivoire);border-color:var(--marque);color:var(--marque);font-weight:600}
+.puces-filtre .n{font-family:var(--mono);font-size:11.5px;color:var(--doux)}
+.puces-filtre button[aria-pressed="true"] .n{color:inherit}
+.puces-filtre button.alerte .n{color:var(--brique);font-weight:700}
+.menu-actions.vers-bas .liste-menu{top:calc(100% + 6px);bottom:auto;left:auto;right:0}
+.nouveau > summary{cursor:pointer}
+.nouveau[open] > summary .ic{transform:rotate(180deg)}
+.lien-det{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left;
+  text-decoration:underline;text-decoration-color:var(--ligne-forte);text-underline-offset:3px}
+.lien-det:hover{color:var(--encre);text-decoration-color:currentColor}
 
 /* ---------- téléphone ---------- */
 @media (max-width:640px){
@@ -871,8 +897,27 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
   .liste.clients td.act{grid-column:2;grid-row:2;margin:0;text-align:right}
   .liste.clients td[data-lib="IFU"],.liste.clients td[data-lib="Documents"]{display:none}
 }
+@media (max-width:860px){
+  /* une pièce à encaisser gagne une troisième ligne : reste, échéance, retard */
+  .liste.docs td[data-lib="Échéance"]{grid-column:1 / -1;grid-row:3;font-size:12.5px;color:var(--doux);white-space:normal}
+  .liste.docs td[data-lib="Échéance"].retard{color:var(--brique)}
+  .liste.docs td.sans,.liste.docs td[data-lib="Reste dû"]{display:none}
+  .liste.docs .m{display:inline}
+  .liste.docs .m b{font-weight:600}
+  .liste .jours{display:inline;font-size:inherit}
+  .liste .jours::before{content:" · "}
+  .tri-m{display:block}
+  .filtres.docs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .filtres.docs input[type="search"]{grid-column:1 / -1}
+  .puces-filtre{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .puces-filtre::-webkit-scrollbar{display:none}
+  .puces-filtre button{flex:none;min-height:38px}
+}
 @media (max-width:560px){
   /* les quatre chiffres en 2 × 2, les deux boutons côte à côte */
+  .nouveau{width:100%}
+  .nouveau > summary{width:100%;justify-content:center;min-height:44px}
+  .menu-actions.vers-bas .liste-menu{left:0;right:0}
   .chiffres{grid-template-columns:1fr 1fr;gap:10px}
   .chiffre{padding:12px 13px}
   .chiffre .val{font-size:18px}
@@ -1664,6 +1709,7 @@ dialog.feuille-plus::backdrop{background:rgba(0,0,0,.4)}
   <symbol id="i-plus4" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></symbol>
   <symbol id="i-catalogue" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></symbol>
   <symbol id="i-marches" viewBox="0 0 24 24"><path d="M3 21h18M5 21V10M19 21V10M9.5 21V10M14.5 21V10M2 10l10-7 10 7z"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
   <symbol id="i-reglages" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></symbol>
 </svg>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -4805,11 +4851,13 @@ function vueBord(){
     '<div class="chiffres">' +
       chiffre("Facturé ce mois", fcfa(facture), duMois.length + " facture" + (duMois.length > 1 ? "s" : ""), "") +
       chiffre("Encaissé ce mois", fcfa(encaisse), facture ? Math.round(encaisse/facture*100) + " % du facturé" : "—", "bien") +
-      chiffre("Reste à encaisser", fcfa(impayes), retard.length ? retard.length + " facture(s) en retard" : "aucun retard",
+      chiffre("Reste à encaisser", fcfa(impayes), retard.length ? '<button class="lien-det" data-filtre-docs="retard">' +
+                retard.length + " facture" + (retard.length > 1 ? "s" : "") + " en retard</button>" : "aucun retard",
               impayes > 0 ? "alerte" : "") +
-      chiffre("Devis en cours", String(devisOuverts), "à relancer ou convertir", "") +
+      chiffre("Devis en cours", String(devisOuverts), devisOuverts ?
+              '<button class="lien-det" data-filtre-docs="devis">à relancer ou convertir</button>' : "à relancer ou convertir", "") +
     "</div>" +
-    (retard.length ? '<div class="bloc"><h2>En retard de paiement</h2>' + tableauDocs(retard) + "</div>" : "") +
+    (retard.length ? '<div class="bloc"><h2>En retard de paiement</h2>' + tableauDocs(retard, {complet:true}) + "</div>" : "") +
     '<div class="bloc"><h2>Derniers documents<button class="btn discret" data-vue="documents">Tout voir</button></h2>' +
     (recents.length ? tableauDocs(recents) :
       '<div class="vide"><p>Aucun document pour l\'instant.</p><button class="btn principal" data-neuf="devis">Créer le premier devis</button></div>') +
@@ -4820,9 +4868,31 @@ function chiffre(lib, val, det, classe){
     String(val).replace(/ F CFA$/, '<small> F CFA</small>') +
     '</div><div class="det">' + det + "</div></div>";
 }
-function tableauDocs(docs){
-  return '<table class="liste docs"><thead><tr><th>Numéro</th><th>Type</th><th>Client</th><th>Date</th>' +
-    '<th class="num">Montant</th><th>Statut</th></tr></thead><tbody>' +
+/* Ce qui reste à encaisser : les factures émises, ni brouillon ni annulées,
+   pas encore soldées. La même règle que le tableau de bord. */
+function aEncaisser(d){
+  return d.type === "facture" && d.statut !== "annule" && d.statut !== "brouillon" && resteDu(d) > 0;
+}
+function joursDeRetard(d){
+  if(!aEncaisser(d) || !d.echeance) return 0;
+  var j = Math.round((Date.parse(auj()) - Date.parse(d.echeance)) / 864e5);
+  return j > 0 ? j : 0;
+}
+function tableauDocs(docs, o){
+  o = o || {};
+  /* o.complet : colonnes Échéance et Reste dû ; o.tri : en-têtes cliquables */
+  function th(cle, lib, num){
+    var cl = num ? ' class="num"' : "";
+    if(!o.tri || !cle) return "<th" + cl + ">" + lib + "</th>";
+    var actif = triDocs.cle === cle;
+    return "<th" + cl + (actif ? ' aria-sort="' + (triDocs.sens > 0 ? "ascending" : "descending") + '"' : "") + ">" +
+      '<button class="tri' + (actif ? " actif" : "") + '" data-tri="' + cle + '">' + lib +
+      (actif ? '<span aria-hidden="true">' + (triDocs.sens > 0 ? " ↑" : " ↓") + "</span>" : "") + "</button></th>";
+  }
+  return '<table class="liste docs"><thead><tr>' + th("", "Numéro") + th("", "Type") + th("client", "Client") +
+    th("date", "Date") + th("montant", "Montant", true) +
+    (o.complet ? th("echeance", "Échéance") + th("reste", "Reste dû", true) : "") +
+    "<th>Statut</th></tr></thead><tbody>" +
     docs.map(function(d){
       var s = statutDoc(d), T = TYPES[d.type] || {court:"?"};
       return '<tr data-ouvrir="' + d.id + '"><td class="ref">' + echap(d.numero) + "</td>" +
@@ -4831,17 +4901,62 @@ function tableauDocs(docs){
           '<span class="date-m"> · ' + dateFr(d.date) + "</span></td>" +
         '<td data-lib="Date">' + dateFr(d.date) + "</td>" +
         '<td class="num" data-lib="Montant">' + (!T.prix ? "—" : sansTotal(d) ? "grille" : nombre(netAPayer(d))) + "</td>" +
+        (o.complet ? celluleEcheance(d) + '<td class="num" data-lib="Reste dû">' +
+          (aEncaisser(d) ? '<b class="du">' + nombre(resteDu(d)) + "</b>" : "—") + "</td>" : "") +
         '<td data-lib="Statut"><span class="puce ' + s.cle + '">' + s.libelle + "</span></td></tr>";
     }).join("") + "</tbody></table>";
 }
+/* Au téléphone, cette cellule devient une troisième ligne : le reste à payer
+   et le retard, là où on les cherche. */
+function celluleEcheance(d){
+  var T = TYPES[d.type] || {};
+  if(!T.reglement || T.recu || !d.echeance) return '<td data-lib="Échéance" class="sans">—</td>';
+  var du = aEncaisser(d), j = joursDeRetard(d);
+  return '<td data-lib="Échéance" class="' + (!du ? "sans solde" : j ? "retard" : "") + '">' +
+    (du ? '<span class="m">reste <b>' + nombre(resteDu(d)) + "</b> · échéance </span>" : "") +
+    dateFr(d.echeance) + (j ? '<span class="jours">' + j + " j de retard</span>" : "") + "</td>";
+}
 
 /* ---------- documents ---------- */
-function vueDocuments(){
-  var docs = Store.tout("documents").slice().sort(function(a,b){
-    return (b.date||"").localeCompare(a.date||"") || (b.seq||0) - (a.seq||0);
+var triDocs = {cle:"date", sens:-1};
+/* Le premier clic trie dans le sens utile : les plus récents, les plus gros
+   montants, l'échéance la plus proche, les clients de A à Z. */
+var TRI_SENS = {date:-1, client:1, montant:-1, echeance:1, reste:-1};
+/* libellés courts : la liste tient dans une demi-largeur de téléphone */
+var TRIS_DOCS = [["date:-1","Plus récents"],["date:1","Plus anciens"],["echeance:1","Échéance proche"],
+                 ["reste:-1","Plus gros reste dû"],["montant:-1","Plus gros montant"],["client:1","Client, A → Z"]];
+var FILTRES_DOCS = [
+  ["", "Tous", function(){ return true; }],
+  ["aencaisser", "À encaisser", aEncaisser],
+  ["retard", "En retard", function(d){ return joursDeRetard(d) > 0; }],
+  ["devis", "Devis en cours", function(d){ return d.type === "devis" && d.statut !== "annule"; }],
+  ["brouillon", "Brouillons", function(d){ return d.statut === "brouillon"; }],
+  ["paye", "Payés", function(d){ return statutDoc(d).cle === "paye"; }]
+];
+function trierDocs(docs){
+  var c = triDocs.cle, s = triDocs.sens;
+  function recents(a, b){ return (b.date||"").localeCompare(a.date||"") || (b.seq||0) - (a.seq||0); }
+  function val(d){
+    var T = TYPES[d.type] || {};
+    if(c === "client")   return ((d.client && d.client.nom) || "").trim() || null;
+    if(c === "montant")  return T.prix && !sansTotal(d) ? netAPayer(d) : null;
+    if(c === "echeance") return aEncaisser(d) && d.echeance ? d.echeance : null;
+    if(c === "reste")    return aEncaisser(d) ? resteDu(d) : null;
+    return null;
+  }
+  return docs.slice().sort(function(a, b){
+    if(c === "date") return -s * recents(a, b);
+    var x = val(a), y = val(b);
+    /* ce qui n'a pas de valeur (un bon de livraison pour le montant, une
+       facture soldée pour l'échéance) va toujours à la fin */
+    if(x === null || y === null) return (x === null) - (y === null) || recents(a, b);
+    var r = typeof x === "string" ? x.localeCompare(y, "fr", {sensitivity:"base"}) : x - y;
+    return s * r || recents(a, b);
   });
-  if(filtre.type)   docs = docs.filter(function(d){ return d.type === filtre.type; });
-  if(filtre.statut) docs = docs.filter(function(d){ return statutDoc(d).cle === filtre.statut; });
+}
+function vueDocuments(){
+  var tous = Store.tout("documents"), docs = tous;
+  if(filtre.type) docs = docs.filter(function(d){ return d.type === filtre.type; });
   if(filtre.texte){
     var q = filtre.texte.toLowerCase();
     docs = docs.filter(function(d){
@@ -4850,26 +4965,43 @@ function vueDocuments(){
       return t.toLowerCase().indexOf(q) >= 0;
     });
   }
+  /* les puces comptent ce que laissent la recherche et le type */
+  var puce = FILTRES_DOCS.filter(function(f){ return f[0] === filtre.statut; })[0] || FILTRES_DOCS[0];
+  var puces = FILTRES_DOCS.map(function(f){
+    var n = docs.filter(f[2]).length;
+    return '<button data-filtre-docs="' + f[0] + '" aria-pressed="' + (f === puce) + '"' +
+      (f[0] === "retard" && n ? ' class="alerte"' : "") + ">" + f[1] + ' <span class="n">' + n + "</span></button>";
+  }).join("");
+  docs = trierDocs(docs.filter(puce[2]));
+  var triCourant = triDocs.cle + ":" + triDocs.sens;
+  var triConnu = TRIS_DOCS.some(function(t){ return t[0] === triCourant; });
   return '<div class="entete-vue"><div><h1>Documents</h1>' +
     '<p class="sous-titre">Devis, pro forma, factures, bons de livraison et reçus</p></div>' +
-    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-    Object.keys(TYPES).map(function(t){
-      return '<button class="btn' + (t === "facture" ? " principal" : "") + '" data-neuf="' + t + '">+ ' + TYPES[t].court + "</button>";
-    }).join("") + "</div></div>" +
-    '<div class="filtres">' +
+    /* Un seul bouton au lieu de sept : ils prenaient trois rangées au téléphone. */
+    '<details class="menu-actions vers-bas nouveau"><summary class="btn principal">+ Nouveau document' +
+      '<svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></summary><div class="liste-menu">' +
+      Object.keys(TYPES).map(function(t){
+        return '<button class="btn" data-neuf="' + t + '">' + TYPES[t].label + "</button>";
+      }).join("") + "</div></details></div>" +
+    '<div class="puces-filtre" role="group" aria-label="Filtrer les documents">' + puces + "</div>" +
+    '<div class="filtres docs">' +
     '<input type="search" id="f-texte" placeholder="Rechercher un numéro, un client, un article…" value="' + echap(filtre.texte) + '">' +
-    '<select id="f-type"><option value="">Tous les types</option>' +
+    '<select id="f-type" aria-label="Type de document"><option value="">Tous les types</option>' +
     Object.keys(TYPES).map(function(t){
       return '<option value="' + t + '"' + (filtre.type === t ? " selected" : "") + ">" + TYPES[t].label + "</option>";
     }).join("") + "</select>" +
-    '<select id="f-statut"><option value="">Tous les statuts</option>' +
-    [["impaye","Impayé"],["partiel","Partiel"],["paye","Payé"]].map(function(s){
-      return '<option value="' + s[0] + '"' + (filtre.statut === s[0] ? " selected" : "") + ">" + s[1] + "</option>";
+    /* au téléphone, les en-têtes de colonnes disparaissent : le tri passe ici */
+    '<select id="f-tri" class="tri-m" aria-label="Trier">' +
+    (triConnu ? "" : '<option value="" selected>Tri choisi dans les colonnes</option>') +
+    TRIS_DOCS.map(function(t){
+      return '<option value="' + t[0] + '"' + (t[0] === triCourant ? " selected" : "") + ">" + t[1] + "</option>";
     }).join("") + "</select>" +
-    '<span style="color:var(--doux);font-size:12px">' + docs.length + " document" + (docs.length > 1 ? "s" : "") + "</span>" +
     "</div>" +
     '<div class="bloc">' +
-    (docs.length ? tableauDocs(docs) : '<div class="vide"><p>Rien ne correspond à cette recherche.</p></div>') +
+    (docs.length ? tableauDocs(docs, {complet:true, tri:true}) :
+     tous.length ? '<div class="vide"><p>Aucun document ne correspond' + (puce[0] ? " dans « " + puce[1] + " »" : "") +
+       '.</p><button class="btn" data-tout-docs>Tout afficher</button></div>' :
+     '<div class="vide"><p>Aucun document pour l’instant.</p><button class="btn principal" data-neuf="devis">Créer le premier devis</button></div>') +
     "</div>";
 }
 
@@ -7618,6 +7750,18 @@ document.addEventListener("click", function(e){
   if((el = c("[data-vue]"))){ if(plus && plus.open) plus.close(); aller(el.dataset.vue); return; }
   if((el = c("[data-neuf]"))){ nouveauDoc(el.dataset.neuf); return; }
   if((el = c("[data-convertir]"))){ convertir(el.dataset.convertir); return; }
+  if((el = c("[data-tri]"))){
+    var cleTri = el.dataset.tri;
+    triDocs = triDocs.cle === cleTri ? {cle:cleTri, sens:-triDocs.sens} : {cle:cleTri, sens:TRI_SENS[cleTri] || 1};
+    rendre(true); return;
+  }
+  /* une puce de la liste, ou un lien du tableau de bord qui y mène */
+  if((el = c("[data-filtre-docs]"))){
+    filtre.statut = el.dataset.filtreDocs;
+    if(vue !== "documents"){ filtre.texte = ""; filtre.type = ""; aller("documents"); } else rendre(true);
+    return;
+  }
+  if(c("[data-tout-docs]")){ filtre = {texte:"", type:"", statut:""}; rendre(true); return; }
 
   if((el = c("[data-suppr]"))){
     e.stopPropagation();
@@ -7889,7 +8033,11 @@ document.addEventListener("input", function(e){
 
 document.addEventListener("change", function(e){
   if(e.target.id === "f-type"){ filtre.type = e.target.value; rendre(true); return; }
-  if(e.target.id === "f-statut"){ filtre.statut = e.target.value; rendre(true); return; }
+  if(e.target.id === "f-tri"){
+    var p = e.target.value.split(":");
+    if(p[0]){ triDocs = {cle:p[0], sens:Number(p[1]) || -1}; rendre(true); }
+    return;
+  }
   if(e.target.id === "c-source"){ filtreCat.source = e.target.value; rendre(true); return; }
   if(e.target.id === "c-famille"){ filtreCat.famille = e.target.value; rendre(true); return; }
   if(e.target.id === "ia-fichier"){ ajouterJointesIA(e.target.files); return; }
